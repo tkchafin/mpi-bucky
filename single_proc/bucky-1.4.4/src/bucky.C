@@ -2197,7 +2197,7 @@ int main(int argc, char *argv[])
   fout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
   fout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   int part = numBurn / 50;
-  for(int cycle=0;cycle<10000000;cycle++) {
+  for(int cycle=0;cycle<numBurn;cycle++) {
     if( (part > 0)  && (cycle % part == 0) ) {
       cout << "*" << flush;
       fout << "*" << flush;
@@ -2220,7 +2220,6 @@ int main(int argc, char *argv[])
   fout << "*" << endl;
   fout << " ....done." << endl << flush;
 
-/*
   cout << "Initializing summary tables..." << flush;
   fout << "Initializing summary tables..." << flush;
 
@@ -2324,7 +2323,7 @@ int main(int argc, char *argv[])
   writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
 	      newTable,clusterCount,splits,splitsGeneMatrix,
 	      pairCounts,genes,alphas,mcmcmcAccepts,mcmcmcProposals, translateTable);
-*/
+
   for(int i=0;i<numGenes;i++)
     delete genes[i];
 
