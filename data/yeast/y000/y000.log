@@ -1,0 +1,2442 @@
+
+
+                               MrBayes v3.1.2
+
+                      (Bayesian Analysis of Phylogeny)
+
+                                     by
+
+                  John P. Huelsenbeck and Fredrik Ronquist
+
+                 Section of Ecology, Behavior and Evolution
+                       Division of Biological Sciences
+                     University of California, San Diego
+                           johnh@biomail.ucsd.edu
+
+                       School of Computational Science
+                           Florida State University
+                            ronquist@csit.fsu.edu 
+
+              Distributed under the GNU General Public License
+
+               Type "help" or "help <command>" for information
+                     on the commands that are available.
+
+
+
+   Executing file "y000.nex"
+   UNIX line termination
+   Longest line length = 1706
+   Parsing file
+   Expecting NEXUS formatted file
+   Reading data block
+      Allocated matrix
+      Matrix has 8 taxa and 1701 characters
+      Data is Dna
+      Missing data coded as ?
+      Setting default partition (does not divide up characters).
+      Taxon 1 -> Scer
+      Taxon 2 -> Spar
+      Taxon 3 -> Smik
+      Taxon 4 -> Skud
+      Taxon 5 -> Sbay
+      Taxon 6 -> Scas
+      Taxon 7 -> Sklu
+      Taxon 8 -> Calb
+      Setting output file names to "y000.nex.run<i>.<p/t>"
+      Successfully read matrix
+   Exiting data block
+   Reading MrBayes block
+      Setting autoclose to yes
+      Setting nowarnings to yes
+      Setting Rates to Invgamma
+      Successfully set likelihood model parameters
+      Setting Nst to 6
+      Successfully set likelihood model parameters
+      Setting number of generations to 550000
+      Setting number of runs to 4
+      Setting number of chains to 4
+      Setting sample frequency to 100
+      Setting print frequency to 1000
+      Setting chain seed to 36277
+      Setting program to save branch length information
+      Setting chain output file names to "y000.<run<i>.p/run<i>.t>"
+      Running Markov chain
+      MCMC stamp = 9641802055
+      Seed = 36277
+      Swapseed = 1226363267
+      Model settings:
+
+            Datatype  = DNA
+            Nucmodel  = 4by4
+            Nst       = 6
+                        Substitution rates, expressed as proportions
+                        of the rate sum, have a Dirichlet prior
+                        (1.00,1.00,1.00,1.00,1.00,1.00)
+            Covarion  = No
+            # States  = 4
+                        State frequencies have a Dirichlet prior
+                        (1.00,1.00,1.00,1.00)
+            Rates     = Invgamma
+                        Gamma shape parameter is uniformly dist-
+                        ributed on the interval (0.00,200.00).
+                        Proportion of invariable sites is uniformly dist-
+                        ributed on the interval (0.00,1.00).
+                        Gamma distribution is approximated using 4 categories.
+
+      Active parameters: 
+
+         Parameters
+         ------------------
+         Revmat           1
+         Statefreq        2
+         Shape            3
+         Pinvar           4
+         Topology         5
+         Brlens           6
+         ------------------
+
+         1 --  Parameter  = Revmat
+               Prior      = Dirichlet(1.00,1.00,1.00,1.00,1.00,1.00)
+         2 --  Parameter  = Statefreq
+               Prior      = Dirichlet
+         3 --  Parameter  = Shape
+               Prior      = Uniform(0.00,200.00)
+         4 --  Parameter  = Pinvar
+               Prior      = Uniform(0.00,1.00)
+         5 --  Parameter  = Topology
+               Prior      = All topologies equally probable a priori
+         6 --  Parameter  = Brlens
+               Prior      = Branch lengths are Unconstrained:Exponential(10.0)
+
+      Number of taxa = 8
+      Number of characters = 1701
+      Compressing data matrix for division 1
+      Division 1 has 567 unique site patterns
+      The MCMC sampler will use the following moves:
+         With prob.  Chain will change
+            4.17 %   param. 1 (revmat) with Dirichlet proposal
+            4.17 %   param. 2 (state frequencies) with Dirichlet proposal
+            4.17 %   param. 3 (gamma shape) with multiplier
+            4.17 %   param. 4 (prop. invar. sites) with sliding window
+           62.50 %   param. 5 (topology and branch lengths) with extending TBR
+           20.83 %   param. 5 (topology and branch lengths) with LOCAL
+      Creating parsimony (bitset) matrix for division 1
+      Initializing conditional likelihoods for terminals
+      Initializing invariable-site conditional likelihoods
+      Initializing conditional likelihoods for internal nodes
+      Initial log likelihoods for run 1:
+         Chain 1 -- -10803.998573
+         Chain 2 -- -11116.151960
+         Chain 3 -- -10758.864187
+         Chain 4 -- -10929.906024
+      Initial log likelihoods for run 2:
+         Chain 1 -- -11130.419317
+         Chain 2 -- -10726.032592
+         Chain 3 -- -10976.887222
+         Chain 4 -- -10795.629480
+      Initial log likelihoods for run 3:
+         Chain 1 -- -10950.336582
+         Chain 2 -- -10776.124916
+         Chain 3 -- -11061.591259
+         Chain 4 -- -11152.970228
+      Initial log likelihoods for run 4:
+         Chain 1 -- -10959.527727
+         Chain 2 -- -11067.361719
+         Chain 3 -- -10987.159883
+         Chain 4 -- -10777.286013
+
+      Chain results:
+
+          1 -- [-10803.999] (-11116.152) (-10758.864) (-10910.253) * (-10783.592) [-10726.033] (-10976.887) (-10795.629) .. 
+       1000 -- [-9371.826] (-9463.148) (-9482.988) (-9396.097) * (-9401.288) (-9460.271) (-9393.968) [-9369.835] .. -- 2:35:33
+
+      Average standard deviation of split frequencies: 0.095355
+
+       2000 -- (-9363.129) [-9367.295] (-9370.491) (-9360.943) * (-9354.911) (-9356.182) (-9357.274) [-9353.295] .. -- 2:35:16
+
+      Average standard deviation of split frequencies: 0.047172
+
+       3000 -- (-9353.781) (-9361.318) [-9355.917] (-9356.218) * [-9356.328] (-9360.775) (-9356.756) (-9370.948) .. -- 2:31:56
+
+      Average standard deviation of split frequencies: 0.037005
+
+       4000 -- (-9362.268) (-9355.834) [-9355.074] (-9360.197) * (-9357.874) (-9353.436) (-9365.831) [-9354.314] .. -- 2:32:25
+
+      Average standard deviation of split frequencies: 0.031628
+
+       5000 -- (-9358.778) (-9357.342) (-9358.304) [-9355.282] * (-9354.614) (-9355.566) (-9357.151) [-9355.957] .. -- 2:32:36
+
+      Average standard deviation of split frequencies: 0.025727
+
+       6000 -- (-9359.223) [-9354.328] (-9368.877) (-9356.723) * (-9373.123) (-9357.313) (-9371.991) [-9351.217] .. -- 2:32:37
+
+      Average standard deviation of split frequencies: 0.016767
+
+       7000 -- [-9355.962] (-9353.163) (-9359.471) (-9361.172) * [-9362.841] (-9358.365) (-9367.973) (-9358.299) .. -- 2:31:15
+
+      Average standard deviation of split frequencies: 0.020598
+
+       8000 -- (-9359.970) [-9352.293] (-9353.376) (-9354.152) * [-9349.228] (-9357.079) (-9361.526) (-9370.057) .. -- 2:31:18
+
+      Average standard deviation of split frequencies: 0.018523
+
+       9000 -- (-9351.156) (-9373.644) [-9353.566] (-9355.699) * (-9359.856) (-9356.701) (-9368.390) [-9352.368] .. -- 2:31:16
+
+      Average standard deviation of split frequencies: 0.017506
+
+      10000 -- [-9353.987] (-9356.322) (-9362.456) (-9354.274) * (-9360.961) [-9349.826] (-9354.943) (-9355.009) .. -- 2:31:12
+
+      Average standard deviation of split frequencies: 0.017903
+
+      11000 -- (-9352.613) (-9356.434) [-9356.721] (-9361.443) * (-9356.252) [-9360.769] (-9361.193) (-9361.518) .. -- 2:30:16
+
+      Average standard deviation of split frequencies: 0.019811
+
+      12000 -- [-9355.054] (-9358.719) (-9359.346) (-9351.025) * (-9367.479) [-9351.632] (-9356.422) (-9365.168) .. -- 2:30:11
+
+      Average standard deviation of split frequencies: 0.022223
+
+      13000 -- (-9358.560) (-9359.778) (-9367.614) [-9356.719] * (-9363.112) (-9359.678) (-9350.248) [-9352.206] .. -- 2:30:05
+
+      Average standard deviation of split frequencies: 0.018697
+
+      14000 -- (-9379.442) (-9351.401) [-9353.068] (-9363.194) * [-9354.657] (-9349.801) (-9355.322) (-9369.430) .. -- 2:29:18
+
+      Average standard deviation of split frequencies: 0.018827
+
+      15000 -- [-9356.807] (-9365.981) (-9357.089) (-9353.219) * (-9357.297) [-9354.433] (-9352.521) (-9361.147) .. -- 2:29:12
+
+      Average standard deviation of split frequencies: 0.017618
+
+      16000 -- (-9362.064) (-9352.911) [-9350.368] (-9347.205) * [-9351.838] (-9358.178) (-9357.791) (-9360.193) .. -- 2:29:04
+
+      Average standard deviation of split frequencies: 0.015220
+
+      17000 -- (-9361.299) (-9353.132) [-9352.797] (-9363.355) * (-9367.346) (-9353.154) [-9351.191] (-9362.035) .. -- 2:28:24
+
+      Average standard deviation of split frequencies: 0.019068
+
+      18000 -- (-9360.973) (-9358.830) (-9356.008) [-9351.442] * (-9352.454) [-9349.719] (-9356.914) (-9357.329) .. -- 2:28:16
+
+      Average standard deviation of split frequencies: 0.016881
+
+      19000 -- [-9355.352] (-9365.485) (-9357.350) (-9369.093) * (-9366.652) [-9361.007] (-9352.288) (-9354.771) .. -- 2:28:07
+
+      Average standard deviation of split frequencies: 0.020822
+
+      20000 -- (-9356.885) [-9349.404] (-9355.374) (-9360.925) * (-9356.256) (-9363.212) [-9350.821] (-9352.004) .. -- 2:27:57
+
+      Average standard deviation of split frequencies: 0.020882
+
+      21000 -- [-9358.693] (-9373.409) (-9357.671) (-9356.950) * (-9360.243) (-9357.604) (-9360.559) [-9356.161] .. -- 2:27:21
+
+      Average standard deviation of split frequencies: 0.019348
+
+      22000 -- (-9360.333) [-9356.378] (-9364.286) (-9367.625) * (-9355.908) (-9345.833) [-9353.899] (-9355.919) .. -- 2:27:12
+
+      Average standard deviation of split frequencies: 0.019664
+
+      23000 -- (-9350.826) (-9358.213) (-9363.184) [-9353.848] * (-9353.442) (-9361.700) [-9354.444] (-9367.749) .. -- 2:26:38
+
+      Average standard deviation of split frequencies: 0.018615
+
+      24000 -- (-9357.646) (-9352.687) [-9359.308] (-9366.508) * (-9352.468) (-9362.009) (-9357.500) [-9358.096] .. -- 2:26:28
+
+      Average standard deviation of split frequencies: 0.018837
+
+      25000 -- (-9359.343) (-9354.552) [-9361.764] (-9361.653) * (-9356.388) (-9353.443) [-9354.193] (-9365.044) .. -- 2:26:18
+
+      Average standard deviation of split frequencies: 0.020269
+
+      26000 -- [-9356.652] (-9366.759) (-9353.505) (-9365.289) * (-9364.588) (-9355.977) [-9358.209] (-9359.279) .. -- 2:26:06
+
+      Average standard deviation of split frequencies: 0.021187
+
+      27000 -- (-9353.745) (-9353.072) [-9354.520] (-9361.363) * (-9354.144) (-9364.222) [-9348.698] (-9359.034) .. -- 2:25:36
+
+      Average standard deviation of split frequencies: 0.021747
+
+      28000 -- (-9365.488) [-9354.032] (-9367.683) (-9362.876) * (-9359.335) [-9356.842] (-9359.493) (-9364.378) .. -- 2:25:24
+
+      Average standard deviation of split frequencies: 0.018185
+
+      29000 -- [-9353.832] (-9365.906) (-9353.314) (-9361.781) * (-9359.228) (-9371.444) [-9350.609] (-9365.296) .. -- 2:25:13
+
+      Average standard deviation of split frequencies: 0.014593
+
+      30000 -- (-9356.594) (-9354.233) (-9356.567) [-9355.138] * [-9359.545] (-9357.627) (-9363.104) (-9354.484) .. -- 2:25:01
+
+      Average standard deviation of split frequencies: 0.013377
+
+      31000 -- (-9361.110) (-9367.122) [-9352.231] (-9352.475) * (-9368.189) (-9360.668) (-9361.454) [-9352.662] .. -- 2:24:49
+
+      Average standard deviation of split frequencies: 0.014795
+
+      32000 -- (-9359.628) (-9360.311) (-9365.827) [-9352.728] * (-9352.215) [-9353.067] (-9366.647) (-9368.135) .. -- 2:24:36
+
+      Average standard deviation of split frequencies: 0.016522
+
+      33000 -- (-9354.764) (-9363.224) (-9350.758) [-9353.365] * (-9359.110) (-9352.868) [-9350.618] (-9356.163) .. -- 2:24:08
+
+      Average standard deviation of split frequencies: 0.017032
+
+      34000 -- (-9363.197) [-9359.681] (-9362.028) (-9352.818) * [-9359.599] (-9354.776) (-9354.798) (-9362.624) .. -- 2:23:55
+
+      Average standard deviation of split frequencies: 0.017443
+
+      35000 -- (-9353.090) (-9358.967) (-9354.452) [-9352.581] * (-9353.816) [-9350.912] (-9350.379) (-9354.631) .. -- 2:23:42
+
+      Average standard deviation of split frequencies: 0.016528
+
+      36000 -- (-9370.993) (-9362.340) [-9362.943] (-9356.569) * (-9355.370) (-9358.336) (-9362.094) [-9355.330] .. -- 2:23:29
+
+      Average standard deviation of split frequencies: 0.014013
+
+      37000 -- (-9357.126) [-9354.597] (-9367.173) (-9364.687) * (-9353.527) (-9355.270) (-9350.659) [-9354.688] .. -- 2:23:16
+
+      Average standard deviation of split frequencies: 0.013494
+
+      38000 -- (-9356.634) [-9360.308] (-9358.073) (-9356.238) * (-9348.612) [-9356.069] (-9368.234) (-9361.063) .. -- 2:23:02
+
+      Average standard deviation of split frequencies: 0.014601
+
+      39000 -- (-9359.737) (-9361.732) (-9351.224) [-9353.064] * (-9353.173) [-9353.000] (-9364.563) (-9358.608) .. -- 2:22:49
+
+      Average standard deviation of split frequencies: 0.015174
+
+      40000 -- [-9350.720] (-9354.321) (-9350.851) (-9366.301) * [-9356.167] (-9352.261) (-9362.096) (-9355.699) .. -- 2:22:22
+
+      Average standard deviation of split frequencies: 0.016904
+
+      41000 -- (-9362.437) (-9350.108) [-9358.645] (-9362.032) * (-9355.592) (-9362.865) [-9354.705] (-9355.953) .. -- 2:22:08
+
+      Average standard deviation of split frequencies: 0.016454
+
+      42000 -- (-9353.156) [-9357.365] (-9357.173) (-9358.130) * (-9347.253) (-9359.717) [-9359.066] (-9358.392) .. -- 2:21:55
+
+      Average standard deviation of split frequencies: 0.015589
+
+      43000 -- [-9352.270] (-9365.004) (-9361.490) (-9354.454) * [-9359.218] (-9355.391) (-9356.730) (-9356.238) .. -- 2:21:41
+
+      Average standard deviation of split frequencies: 0.014634
+
+      44000 -- (-9353.777) [-9354.423] (-9359.665) (-9358.862) * (-9353.840) (-9368.703) (-9357.146) [-9353.798] .. -- 2:21:27
+
+      Average standard deviation of split frequencies: 0.016236
+
+      45000 -- (-9355.705) (-9356.165) (-9365.191) [-9353.709] * (-9357.977) (-9350.643) [-9351.157] (-9361.175) .. -- 2:21:12
+
+      Average standard deviation of split frequencies: 0.015700
+
+      46000 -- [-9363.504] (-9355.362) (-9353.999) (-9358.632) * (-9356.193) [-9362.538] (-9362.617) (-9360.027) .. -- 2:20:58
+
+      Average standard deviation of split frequencies: 0.014908
+
+      47000 -- (-9358.849) [-9354.419] (-9360.182) (-9359.204) * [-9357.026] (-9363.251) (-9355.517) (-9362.396) .. -- 2:20:33
+
+      Average standard deviation of split frequencies: 0.014038
+
+      48000 -- (-9356.063) [-9359.158] (-9357.640) (-9356.060) * (-9355.425) (-9358.793) [-9349.501] (-9357.045) .. -- 2:20:18
+
+      Average standard deviation of split frequencies: 0.013992
+
+      49000 -- [-9366.485] (-9367.654) (-9359.866) (-9359.268) * (-9355.976) (-9353.187) (-9354.586) [-9355.636] .. -- 2:20:04
+
+      Average standard deviation of split frequencies: 0.014243
+
+      50000 -- (-9359.156) (-9352.580) (-9353.987) [-9353.031] * (-9369.345) (-9357.293) (-9358.981) [-9354.589] .. -- 2:19:50
+
+      Average standard deviation of split frequencies: 0.012423
+
+      51000 -- (-9359.093) (-9357.356) (-9354.299) [-9355.552] * (-9353.580) (-9362.627) (-9356.374) [-9353.722] .. -- 2:19:25
+
+      Average standard deviation of split frequencies: 0.011694
+
+      52000 -- (-9356.425) [-9356.072] (-9353.278) (-9350.553) * (-9360.147) [-9352.171] (-9352.764) (-9350.351) .. -- 2:19:11
+
+      Average standard deviation of split frequencies: 0.012169
+
+      53000 -- (-9367.050) (-9362.238) (-9355.534) [-9353.922] * (-9351.218) [-9355.675] (-9357.406) (-9357.503) .. -- 2:18:56
+
+      Average standard deviation of split frequencies: 0.012590
+
+      54000 -- (-9366.311) (-9355.556) [-9355.066] (-9362.699) * [-9351.180] (-9351.837) (-9362.915) (-9350.588) .. -- 2:18:41
+
+      Average standard deviation of split frequencies: 0.013308
+
+      55000 -- (-9360.833) (-9354.879) (-9361.288) [-9358.288] * (-9359.807) [-9353.386] (-9356.362) (-9354.377) .. -- 2:18:27
+
+      Average standard deviation of split frequencies: 0.012745
+
+      56000 -- (-9368.702) (-9355.746) [-9351.265] (-9350.323) * [-9358.867] (-9361.886) (-9359.931) (-9354.099) .. -- 2:18:12
+
+      Average standard deviation of split frequencies: 0.011346
+
+      57000 -- (-9356.506) [-9354.287] (-9363.287) (-9350.413) * [-9360.319] (-9358.482) (-9359.663) (-9356.133) .. -- 2:17:48
+
+      Average standard deviation of split frequencies: 0.011289
+
+      58000 -- (-9363.789) [-9348.451] (-9353.231) (-9357.151) * (-9354.884) (-9357.610) (-9366.053) [-9348.152] .. -- 2:17:33
+
+      Average standard deviation of split frequencies: 0.011184
+
+      59000 -- (-9355.825) (-9353.601) (-9359.642) [-9353.638] * (-9354.626) [-9359.041] (-9356.022) (-9351.031) .. -- 2:17:18
+
+      Average standard deviation of split frequencies: 0.011254
+
+      60000 -- (-9368.185) (-9360.877) [-9356.088] (-9360.740) * (-9355.420) (-9359.134) (-9368.176) [-9362.931] .. -- 2:17:03
+
+      Average standard deviation of split frequencies: 0.011086
+
+      61000 -- (-9354.578) (-9363.632) (-9359.908) [-9351.888] * (-9352.236) (-9363.351) (-9360.491) [-9350.344] .. -- 2:16:48
+
+      Average standard deviation of split frequencies: 0.009874
+
+      62000 -- (-9362.140) (-9365.708) [-9352.586] (-9350.489) * [-9346.695] (-9356.851) (-9353.412) (-9355.169) .. -- 2:16:25
+
+      Average standard deviation of split frequencies: 0.009396
+
+      63000 -- [-9354.308] (-9358.521) (-9351.256) (-9359.181) * (-9355.184) [-9353.677] (-9354.906) (-9355.480) .. -- 2:16:10
+
+      Average standard deviation of split frequencies: 0.009204
+
+      64000 -- [-9349.903] (-9354.487) (-9359.254) (-9359.480) * (-9354.493) (-9359.507) [-9356.664] (-9355.186) .. -- 2:15:55
+
+      Average standard deviation of split frequencies: 0.009604
+
+      65000 -- (-9355.306) [-9351.703] (-9358.717) (-9358.775) * (-9361.485) (-9356.574) (-9358.040) [-9348.547] .. -- 2:15:40
+
+      Average standard deviation of split frequencies: 0.009335
+
+      66000 -- [-9352.958] (-9362.921) (-9356.073) (-9364.973) * (-9365.306) (-9357.314) [-9355.723] (-9362.127) .. -- 2:15:18
+
+      Average standard deviation of split frequencies: 0.009314
+
+      67000 -- (-9357.985) (-9365.454) [-9350.176] (-9356.259) * (-9359.670) (-9362.825) [-9351.153] (-9353.823) .. -- 2:15:02
+
+      Average standard deviation of split frequencies: 0.009749
+
+      68000 -- (-9362.451) (-9358.405) [-9355.030] (-9352.972) * (-9351.548) [-9353.807] (-9366.555) (-9370.691) .. -- 2:14:47
+
+      Average standard deviation of split frequencies: 0.009032
+
+      69000 -- [-9352.485] (-9353.205) (-9361.073) (-9359.551) * (-9350.312) [-9356.031] (-9359.795) (-9355.366) .. -- 2:14:32
+
+      Average standard deviation of split frequencies: 0.008918
+
+      70000 -- (-9364.001) (-9355.365) [-9351.457] (-9350.292) * (-9352.485) (-9357.545) (-9362.309) [-9355.473] .. -- 2:14:10
+
+      Average standard deviation of split frequencies: 0.008507
+
+      71000 -- (-9365.923) (-9351.800) (-9356.584) [-9352.150] * (-9362.428) [-9350.029] (-9353.270) (-9357.221) .. -- 2:13:55
+
+      Average standard deviation of split frequencies: 0.007841
+
+      72000 -- [-9352.294] (-9361.266) (-9363.935) (-9365.841) * (-9357.530) [-9355.979] (-9356.167) (-9356.935) .. -- 2:13:39
+
+      Average standard deviation of split frequencies: 0.007231
+
+      73000 -- [-9355.601] (-9350.811) (-9347.956) (-9352.679) * (-9363.213) (-9352.428) (-9359.214) [-9353.005] .. -- 2:13:24
+
+      Average standard deviation of split frequencies: 0.007519
+
+      74000 -- (-9353.515) (-9359.738) (-9358.605) [-9353.892] * (-9357.035) [-9353.441] (-9351.890) (-9358.121) .. -- 2:13:02
+
+      Average standard deviation of split frequencies: 0.007035
+
+      75000 -- (-9361.636) (-9372.679) (-9355.652) [-9351.495] * [-9362.556] (-9360.908) (-9357.517) (-9357.591) .. -- 2:12:47
+
+      Average standard deviation of split frequencies: 0.007620
+
+      76000 -- [-9357.750] (-9356.477) (-9351.523) (-9353.371) * (-9359.080) [-9356.408] (-9366.451) (-9369.272) .. -- 2:12:31
+
+      Average standard deviation of split frequencies: 0.007871
+
+      77000 -- (-9366.626) (-9352.802) [-9361.628] (-9359.721) * [-9355.206] (-9370.300) (-9360.036) (-9354.421) .. -- 2:12:16
+
+      Average standard deviation of split frequencies: 0.007535
+
+      78000 -- (-9354.769) (-9352.055) [-9353.824] (-9362.276) * [-9355.099] (-9363.529) (-9360.202) (-9357.061) .. -- 2:12:01
+
+      Average standard deviation of split frequencies: 0.006996
+
+      79000 -- (-9358.192) (-9361.392) [-9349.940] (-9357.334) * [-9350.192] (-9360.800) (-9359.019) (-9363.622) .. -- 2:11:39
+
+      Average standard deviation of split frequencies: 0.007193
+
+      80000 -- (-9361.319) [-9351.956] (-9372.275) (-9354.861) * (-9360.138) [-9353.562] (-9368.997) (-9358.565) .. -- 2:11:24
+
+      Average standard deviation of split frequencies: 0.006786
+
+      81000 -- (-9360.193) (-9359.290) (-9359.475) [-9360.103] * (-9356.491) [-9355.879] (-9372.316) (-9353.256) .. -- 2:11:08
+
+      Average standard deviation of split frequencies: 0.006134
+
+      82000 -- (-9363.189) (-9352.199) [-9356.711] (-9348.864) * (-9361.515) (-9356.588) [-9360.884] (-9357.408) .. -- 2:10:53
+
+      Average standard deviation of split frequencies: 0.005872
+
+      83000 -- [-9350.631] (-9351.995) (-9361.209) (-9360.802) * (-9359.404) [-9353.907] (-9356.931) (-9351.404) .. -- 2:10:32
+
+      Average standard deviation of split frequencies: 0.005224
+
+      84000 -- (-9360.414) [-9365.349] (-9349.181) (-9358.991) * [-9354.225] (-9356.473) (-9355.332) (-9355.091) .. -- 2:10:16
+
+      Average standard deviation of split frequencies: 0.005284
+
+      85000 -- (-9355.768) [-9350.534] (-9364.944) (-9362.402) * (-9358.018) [-9351.525] (-9367.424) (-9360.797) .. -- 2:10:01
+
+      Average standard deviation of split frequencies: 0.005820
+
+      86000 -- (-9353.673) (-9353.458) (-9369.865) [-9355.567] * (-9357.322) [-9350.901] (-9362.506) (-9359.385) .. -- 2:09:45
+
+      Average standard deviation of split frequencies: 0.005970
+
+      87000 -- (-9363.277) (-9362.587) [-9352.901] (-9356.052) * (-9357.743) (-9368.459) (-9349.136) [-9352.428] .. -- 2:09:29
+
+      Average standard deviation of split frequencies: 0.006377
+
+      88000 -- [-9353.790] (-9371.298) (-9360.452) (-9355.280) * (-9353.425) (-9353.495) (-9354.693) [-9357.828] .. -- 2:09:09
+
+      Average standard deviation of split frequencies: 0.006968
+
+      89000 -- (-9353.800) [-9356.652] (-9354.972) (-9362.290) * (-9364.232) (-9361.892) (-9367.477) [-9349.803] .. -- 2:08:53
+
+      Average standard deviation of split frequencies: 0.006117
+
+      90000 -- [-9354.900] (-9369.872) (-9354.976) (-9355.425) * [-9351.732] (-9357.202) (-9365.535) (-9353.308) .. -- 2:08:37
+
+      Average standard deviation of split frequencies: 0.007511
+
+      91000 -- (-9370.301) [-9354.843] (-9358.499) (-9367.925) * (-9353.290) [-9350.740] (-9355.325) (-9356.225) .. -- 2:08:22
+
+      Average standard deviation of split frequencies: 0.008311
+
+      92000 -- (-9365.065) (-9358.338) [-9354.938] (-9350.932) * (-9367.370) [-9352.646] (-9367.134) (-9353.364) .. -- 2:08:06
+
+      Average standard deviation of split frequencies: 0.008081
+
+      93000 -- (-9358.870) [-9354.646] (-9356.335) (-9356.075) * (-9362.957) [-9362.798] (-9363.656) (-9371.105) .. -- 2:07:45
+
+      Average standard deviation of split frequencies: 0.008044
+
+      94000 -- (-9363.397) (-9352.714) (-9360.376) [-9353.565] * (-9352.702) (-9361.793) (-9357.758) [-9357.758] .. -- 2:07:30
+
+      Average standard deviation of split frequencies: 0.008018
+
+      95000 -- (-9373.873) (-9354.438) (-9359.400) [-9350.291] * (-9358.116) (-9353.836) (-9354.196) [-9356.091] .. -- 2:07:09
+
+      Average standard deviation of split frequencies: 0.008109
+
+      96000 -- (-9355.995) [-9355.794] (-9356.708) (-9353.177) * [-9348.881] (-9362.409) (-9356.661) (-9358.575) .. -- 2:06:53
+
+      Average standard deviation of split frequencies: 0.007575
+
+      97000 -- (-9364.091) [-9354.224] (-9361.526) (-9360.635) * (-9358.615) (-9355.611) [-9354.081] (-9353.280) .. -- 2:06:38
+
+      Average standard deviation of split frequencies: 0.007868
+
+      98000 -- [-9355.539] (-9354.376) (-9364.161) (-9353.494) * (-9357.642) [-9350.258] (-9355.270) (-9363.106) .. -- 2:06:17
+
+      Average standard deviation of split frequencies: 0.007356
+
+      99000 -- [-9351.194] (-9362.650) (-9349.983) (-9360.271) * (-9369.603) (-9358.431) (-9361.668) [-9349.443] .. -- 2:06:02
+
+      Average standard deviation of split frequencies: 0.007341
+
+      100000 -- [-9350.657] (-9355.557) (-9355.123) (-9353.153) * (-9360.618) (-9365.048) (-9364.519) [-9357.842] .. -- 2:05:46
+
+      Average standard deviation of split frequencies: 0.007069
+
+      101000 -- [-9354.096] (-9350.182) (-9353.947) (-9353.482) * [-9356.461] (-9354.463) (-9362.734) (-9352.421) .. -- 2:05:30
+
+      Average standard deviation of split frequencies: 0.007299
+
+      102000 -- (-9358.974) (-9357.304) (-9354.464) [-9353.728] * [-9351.801] (-9355.439) (-9353.245) (-9351.491) .. -- 2:05:10
+
+      Average standard deviation of split frequencies: 0.007748
+
+      103000 -- (-9360.875) [-9348.101] (-9358.328) (-9357.593) * (-9353.555) [-9364.876] (-9359.079) (-9363.961) .. -- 2:04:54
+
+      Average standard deviation of split frequencies: 0.007797
+
+      104000 -- (-9366.965) [-9354.021] (-9362.929) (-9357.409) * (-9357.449) [-9353.324] (-9358.244) (-9363.484) .. -- 2:04:39
+
+      Average standard deviation of split frequencies: 0.007462
+
+      105000 -- (-9365.712) (-9360.692) [-9365.890] (-9355.447) * (-9352.708) (-9357.421) (-9357.193) [-9359.692] .. -- 2:04:23
+
+      Average standard deviation of split frequencies: 0.007987
+
+      106000 -- (-9359.584) (-9371.214) [-9358.237] (-9366.240) * (-9357.192) (-9355.659) [-9356.381] (-9369.760) .. -- 2:04:03
+
+      Average standard deviation of split frequencies: 0.007529
+
+      107000 -- (-9348.699) [-9357.997] (-9358.658) (-9358.598) * (-9353.260) (-9358.857) [-9354.819] (-9356.801) .. -- 2:03:47
+
+      Average standard deviation of split frequencies: 0.007399
+
+      108000 -- (-9355.087) (-9356.889) (-9358.858) [-9352.347] * [-9359.424] (-9372.711) (-9361.838) (-9353.170) .. -- 2:03:31
+
+      Average standard deviation of split frequencies: 0.007234
+
+      109000 -- (-9367.115) (-9364.591) (-9364.468) [-9357.987] * (-9362.206) (-9354.922) (-9372.143) [-9351.274] .. -- 2:03:15
+
+      Average standard deviation of split frequencies: 0.007536
+
+      110000 -- (-9358.420) (-9361.803) [-9356.272] (-9357.954) * (-9355.688) (-9361.857) [-9349.887] (-9361.275) .. -- 2:02:56
+
+      Average standard deviation of split frequencies: 0.007339
+
+      111000 -- (-9360.850) (-9357.477) (-9352.570) [-9352.423] * (-9352.443) (-9360.921) (-9362.264) [-9353.381] .. -- 2:02:40
+
+      Average standard deviation of split frequencies: 0.007601
+
+      112000 -- [-9354.243] (-9356.221) (-9365.989) (-9357.803) * (-9354.423) (-9356.288) (-9359.844) [-9354.193] .. -- 2:02:24
+
+      Average standard deviation of split frequencies: 0.007100
+
+      113000 -- [-9354.853] (-9359.981) (-9356.864) (-9358.814) * (-9352.284) (-9359.113) [-9355.579] (-9351.362) .. -- 2:02:08
+
+      Average standard deviation of split frequencies: 0.006981
+
+      114000 -- (-9360.683) [-9353.199] (-9349.475) (-9358.976) * (-9352.921) (-9357.364) (-9359.602) [-9355.694] .. -- 2:01:52
+
+      Average standard deviation of split frequencies: 0.007592
+
+      115000 -- [-9355.880] (-9355.248) (-9355.258) (-9358.902) * (-9363.254) (-9353.034) (-9355.312) [-9350.206] .. -- 2:01:36
+
+      Average standard deviation of split frequencies: 0.007410
+
+      116000 -- (-9357.879) (-9355.124) (-9357.231) [-9356.828] * [-9350.009] (-9358.052) (-9360.899) (-9360.950) .. -- 2:01:16
+
+      Average standard deviation of split frequencies: 0.007482
+
+      117000 -- (-9362.116) [-9355.948] (-9371.175) (-9356.681) * (-9359.176) (-9352.363) (-9363.276) [-9355.495] .. -- 2:01:01
+
+      Average standard deviation of split frequencies: 0.006738
+
+      118000 -- (-9357.907) (-9357.148) [-9357.106] (-9361.000) * (-9370.407) (-9361.968) (-9366.430) [-9350.526] .. -- 2:00:45
+
+      Average standard deviation of split frequencies: 0.006788
+
+      119000 -- [-9351.767] (-9354.025) (-9364.330) (-9363.700) * (-9360.065) (-9370.216) [-9356.946] (-9361.905) .. -- 2:00:29
+
+      Average standard deviation of split frequencies: 0.006666
+
+      120000 -- (-9350.791) (-9359.970) [-9352.981] (-9353.788) * (-9369.830) (-9362.335) [-9351.761] (-9357.483) .. -- 2:00:13
+
+      Average standard deviation of split frequencies: 0.006900
+
+      121000 -- [-9355.447] (-9365.064) (-9367.791) (-9354.129) * (-9355.265) (-9369.165) [-9355.393] (-9355.833) .. -- 1:59:53
+
+      Average standard deviation of split frequencies: 0.007029
+
+      122000 -- [-9351.416] (-9362.887) (-9357.364) (-9362.592) * (-9359.401) (-9365.742) (-9354.555) [-9351.080] .. -- 1:59:37
+
+      Average standard deviation of split frequencies: 0.006502
+
+      123000 -- (-9372.149) (-9365.188) [-9356.694] (-9361.924) * (-9364.658) (-9367.605) [-9362.012] (-9353.310) .. -- 1:59:21
+
+      Average standard deviation of split frequencies: 0.006549
+
+      124000 -- (-9355.508) (-9364.441) (-9366.650) [-9352.339] * (-9358.610) (-9352.698) (-9357.484) [-9353.383] .. -- 1:59:05
+
+      Average standard deviation of split frequencies: 0.006375
+
+      125000 -- (-9352.886) (-9354.725) [-9355.976] (-9361.842) * [-9359.887] (-9353.593) (-9365.196) (-9356.405) .. -- 1:58:49
+
+      Average standard deviation of split frequencies: 0.006766
+
+      126000 -- [-9348.705] (-9371.171) (-9368.535) (-9352.287) * (-9351.393) [-9355.179] (-9361.312) (-9353.018) .. -- 1:58:33
+
+      Average standard deviation of split frequencies: 0.007084
+
+      127000 -- (-9359.567) [-9349.598] (-9364.872) (-9357.361) * (-9365.747) [-9351.753] (-9370.117) (-9349.368) .. -- 1:58:17
+
+      Average standard deviation of split frequencies: 0.007593
+
+      128000 -- (-9358.035) (-9367.007) [-9348.834] (-9355.044) * (-9352.178) (-9360.217) (-9358.903) [-9355.490] .. -- 1:57:58
+
+      Average standard deviation of split frequencies: 0.008008
+
+      129000 -- (-9353.154) [-9352.384] (-9353.603) (-9361.432) * (-9356.024) (-9356.430) [-9357.540] (-9355.045) .. -- 1:57:42
+
+      Average standard deviation of split frequencies: 0.008402
+
+      130000 -- (-9357.261) (-9366.901) [-9350.855] (-9356.497) * (-9357.730) [-9351.997] (-9358.760) (-9355.749) .. -- 1:57:26
+
+      Average standard deviation of split frequencies: 0.008138
+
+      131000 -- (-9361.675) (-9358.293) (-9360.598) [-9354.613] * (-9365.681) [-9359.648] (-9357.685) (-9366.839) .. -- 1:57:10
+
+      Average standard deviation of split frequencies: 0.008421
+
+      132000 -- (-9360.032) (-9351.644) (-9353.785) [-9354.445] * (-9360.973) (-9364.290) [-9352.425] (-9350.071) .. -- 1:56:51
+
+      Average standard deviation of split frequencies: 0.008653
+
+      133000 -- (-9360.927) (-9359.567) (-9363.020) [-9354.510] * (-9370.256) (-9349.314) (-9356.812) [-9358.107] .. -- 1:56:34
+
+      Average standard deviation of split frequencies: 0.009132
+
+      134000 -- (-9356.791) (-9356.849) [-9360.098] (-9366.923) * (-9363.681) [-9357.787] (-9355.630) (-9351.839) .. -- 1:56:18
+
+      Average standard deviation of split frequencies: 0.009314
+
+      135000 -- (-9363.695) [-9353.047] (-9354.848) (-9354.023) * (-9351.453) (-9360.733) [-9349.136] (-9364.747) .. -- 1:56:02
+
+      Average standard deviation of split frequencies: 0.009653
+
+      136000 -- (-9363.160) [-9349.952] (-9358.738) (-9359.505) * (-9350.231) (-9355.864) [-9349.907] (-9369.352) .. -- 1:55:43
+
+      Average standard deviation of split frequencies: 0.009726
+
+      137000 -- (-9355.729) (-9359.311) (-9350.860) [-9354.273] * (-9362.505) (-9354.011) [-9360.172] (-9370.066) .. -- 1:55:27
+
+      Average standard deviation of split frequencies: 0.009521
+
+      138000 -- [-9350.022] (-9354.025) (-9354.431) (-9353.512) * [-9358.439] (-9355.273) (-9350.953) (-9362.909) .. -- 1:55:08
+
+      Average standard deviation of split frequencies: 0.009576
+
+      139000 -- (-9360.950) (-9367.988) (-9357.834) [-9351.172] * (-9355.208) (-9363.594) (-9352.292) [-9353.825] .. -- 1:54:52
+
+      Average standard deviation of split frequencies: 0.009515
+
+      140000 -- (-9352.665) (-9360.995) (-9363.301) [-9359.483] * [-9356.419] (-9360.948) (-9361.683) (-9363.457) .. -- 1:54:36
+
+      Average standard deviation of split frequencies: 0.009408
+
+      141000 -- (-9360.107) (-9356.273) (-9363.278) [-9358.101] * (-9353.781) (-9356.095) (-9367.595) [-9354.343] .. -- 1:54:20
+
+      Average standard deviation of split frequencies: 0.009346
+
+      142000 -- (-9354.014) [-9355.881] (-9349.467) (-9357.467) * (-9357.080) (-9366.469) [-9357.671] (-9374.457) .. -- 1:54:01
+
+      Average standard deviation of split frequencies: 0.008897
+
+      143000 -- [-9352.815] (-9361.682) (-9352.985) (-9351.227) * (-9349.934) [-9363.523] (-9356.340) (-9358.846) .. -- 1:53:45
+
+      Average standard deviation of split frequencies: 0.008996
+
+      144000 -- [-9360.959] (-9356.317) (-9362.348) (-9355.889) * (-9356.240) (-9357.669) [-9362.136] (-9355.030) .. -- 1:53:28
+
+      Average standard deviation of split frequencies: 0.008649
+
+      145000 -- (-9354.362) [-9352.612] (-9355.924) (-9358.282) * (-9354.374) [-9354.852] (-9357.758) (-9355.701) .. -- 1:53:12
+
+      Average standard deviation of split frequencies: 0.008452
+
+      146000 -- (-9358.971) [-9352.364] (-9354.349) (-9365.208) * [-9353.403] (-9353.104) (-9357.046) (-9367.032) .. -- 1:52:53
+
+      Average standard deviation of split frequencies: 0.008066
+
+      147000 -- (-9349.469) (-9360.449) [-9353.327] (-9356.149) * (-9354.594) (-9365.885) [-9359.434] (-9366.143) .. -- 1:52:37
+
+      Average standard deviation of split frequencies: 0.007875
+
+      148000 -- (-9351.545) (-9365.718) [-9356.616] (-9357.953) * (-9366.790) (-9350.941) (-9357.955) [-9356.030] .. -- 1:52:21
+
+      Average standard deviation of split frequencies: 0.007744
+
+      149000 -- (-9360.815) (-9367.553) [-9352.895] (-9359.156) * [-9358.861] (-9356.865) (-9359.501) (-9364.220) .. -- 1:52:05
+
+      Average standard deviation of split frequencies: 0.007498
+
+      150000 -- (-9357.870) (-9352.448) [-9352.336] (-9354.597) * (-9355.598) (-9351.665) [-9355.136] (-9365.492) .. -- 1:51:46
+
+      Average standard deviation of split frequencies: 0.007785
+
+      151000 -- [-9351.868] (-9366.045) (-9356.351) (-9361.776) * [-9350.490] (-9354.926) (-9361.620) (-9354.809) .. -- 1:51:30
+
+      Average standard deviation of split frequencies: 0.007693
+
+      152000 -- (-9355.782) (-9361.176) [-9351.611] (-9359.881) * [-9351.421] (-9353.159) (-9359.828) (-9363.283) .. -- 1:51:14
+
+      Average standard deviation of split frequencies: 0.008293
+
+      153000 -- [-9360.231] (-9356.158) (-9366.324) (-9355.823) * (-9351.319) [-9351.927] (-9374.013) (-9358.706) .. -- 1:50:58
+
+      Average standard deviation of split frequencies: 0.008256
+
+      154000 -- (-9363.540) [-9360.808] (-9360.293) (-9360.012) * [-9353.019] (-9351.499) (-9361.693) (-9365.330) .. -- 1:50:39
+
+      Average standard deviation of split frequencies: 0.008654
+
+      155000 -- [-9361.750] (-9367.377) (-9355.826) (-9352.801) * (-9360.452) (-9356.182) (-9357.769) [-9353.333] .. -- 1:50:23
+
+      Average standard deviation of split frequencies: 0.008903
+
+      156000 -- (-9363.410) (-9358.338) [-9355.041] (-9363.566) * (-9365.539) (-9359.096) (-9354.418) [-9360.350] .. -- 1:50:07
+
+      Average standard deviation of split frequencies: 0.008696
+
+      157000 -- (-9365.271) (-9357.713) [-9354.399] (-9352.892) * (-9353.702) [-9352.332] (-9354.038) (-9361.282) .. -- 1:49:48
+
+      Average standard deviation of split frequencies: 0.008680
+
+      158000 -- (-9357.205) (-9357.118) [-9355.839] (-9360.839) * (-9358.510) [-9355.929] (-9356.942) (-9352.381) .. -- 1:49:32
+
+      Average standard deviation of split frequencies: 0.009320
+
+      159000 -- (-9360.917) (-9353.030) (-9359.678) [-9352.722] * (-9357.625) [-9352.185] (-9354.468) (-9359.222) .. -- 1:49:16
+
+      Average standard deviation of split frequencies: 0.009222
+
+      160000 -- (-9361.432) [-9351.645] (-9351.451) (-9365.965) * (-9350.677) (-9358.980) (-9359.702) [-9357.093] .. -- 1:48:57
+
+      Average standard deviation of split frequencies: 0.008873
+
+      161000 -- (-9356.267) (-9362.253) (-9353.266) [-9348.053] * [-9349.762] (-9355.723) (-9359.804) (-9370.269) .. -- 1:48:41
+
+      Average standard deviation of split frequencies: 0.008530
+
+      162000 -- (-9364.226) [-9356.481] (-9358.446) (-9371.796) * (-9357.151) [-9355.307] (-9364.806) (-9351.676) .. -- 1:48:24
+
+      Average standard deviation of split frequencies: 0.008881
+
+      163000 -- (-9352.269) (-9355.106) [-9349.261] (-9362.072) * (-9355.344) (-9363.453) [-9352.818] (-9362.938) .. -- 1:48:08
+
+      Average standard deviation of split frequencies: 0.008952
+
+      164000 -- (-9355.253) (-9361.775) [-9359.795] (-9371.534) * [-9352.747] (-9361.559) (-9351.617) (-9354.314) .. -- 1:47:52
+
+      Average standard deviation of split frequencies: 0.009234
+
+      165000 -- (-9366.395) (-9360.513) (-9357.120) [-9352.948] * (-9357.734) (-9355.366) [-9359.827] (-9356.278) .. -- 1:47:34
+
+      Average standard deviation of split frequencies: 0.009297
+
+      166000 -- (-9362.583) [-9357.116] (-9354.920) (-9362.302) * (-9361.123) [-9355.447] (-9359.896) (-9350.897) .. -- 1:47:17
+
+      Average standard deviation of split frequencies: 0.009848
+
+      167000 -- (-9364.731) (-9360.537) [-9353.120] (-9352.891) * [-9359.055] (-9356.165) (-9358.067) (-9363.301) .. -- 1:47:01
+
+      Average standard deviation of split frequencies: 0.009638
+
+      168000 -- (-9357.829) [-9354.882] (-9356.823) (-9353.499) * (-9360.521) [-9353.305] (-9362.913) (-9368.473) .. -- 1:46:45
+
+      Average standard deviation of split frequencies: 0.009569
+
+      169000 -- (-9352.912) (-9362.845) (-9354.952) [-9356.385] * (-9368.186) [-9359.918] (-9362.342) (-9359.194) .. -- 1:46:26
+
+      Average standard deviation of split frequencies: 0.009459
+
+      170000 -- (-9360.452) [-9353.153] (-9360.499) (-9358.563) * (-9364.853) [-9350.534] (-9362.162) (-9360.478) .. -- 1:46:10
+
+      Average standard deviation of split frequencies: 0.009351
+
+      171000 -- (-9353.588) (-9354.272) [-9352.037] (-9358.503) * (-9366.762) (-9361.481) [-9352.867] (-9358.739) .. -- 1:45:54
+
+      Average standard deviation of split frequencies: 0.008803
+
+      172000 -- (-9360.752) [-9351.194] (-9353.825) (-9356.690) * (-9360.256) (-9356.919) [-9355.665] (-9357.097) .. -- 1:45:35
+
+      Average standard deviation of split frequencies: 0.008184
+
+      173000 -- (-9359.605) (-9355.453) (-9354.035) [-9360.801] * (-9362.076) (-9361.661) [-9356.180] (-9353.173) .. -- 1:45:19
+
+      Average standard deviation of split frequencies: 0.008266
+
+      174000 -- [-9353.990] (-9365.558) (-9353.314) (-9369.597) * [-9355.212] (-9361.197) (-9356.055) (-9358.757) .. -- 1:45:03
+
+      Average standard deviation of split frequencies: 0.008520
+
+      175000 -- (-9360.381) (-9367.013) [-9357.747] (-9360.593) * (-9368.896) (-9359.068) [-9361.133] (-9356.745) .. -- 1:44:47
+
+      Average standard deviation of split frequencies: 0.008426
+
+      176000 -- (-9353.985) (-9359.508) [-9358.386] (-9364.617) * (-9350.431) (-9362.371) [-9350.555] (-9363.126) .. -- 1:44:28
+
+      Average standard deviation of split frequencies: 0.008725
+
+      177000 -- (-9360.116) (-9349.881) [-9348.675] (-9365.580) * [-9354.371] (-9357.106) (-9355.910) (-9360.684) .. -- 1:44:12
+
+      Average standard deviation of split frequencies: 0.008894
+
+      178000 -- [-9358.050] (-9360.143) (-9358.386) (-9375.255) * (-9361.285) (-9358.435) (-9348.959) [-9360.049] .. -- 1:43:56
+
+      Average standard deviation of split frequencies: 0.008455
+
+      179000 -- (-9353.727) (-9366.296) [-9353.537] (-9359.180) * [-9353.472] (-9354.876) (-9360.456) (-9365.310) .. -- 1:43:39
+
+      Average standard deviation of split frequencies: 0.008350
+
+      180000 -- (-9357.272) (-9362.200) (-9364.606) [-9349.031] * (-9369.708) (-9359.506) (-9360.120) [-9353.794] .. -- 1:43:21
+
+      Average standard deviation of split frequencies: 0.008457
+
+      181000 -- (-9356.753) [-9353.031] (-9352.971) (-9361.178) * (-9369.179) (-9352.723) [-9361.387] (-9359.862) .. -- 1:43:05
+
+      Average standard deviation of split frequencies: 0.008204
+
+      182000 -- (-9361.794) [-9352.654] (-9354.999) (-9363.207) * (-9354.587) (-9370.202) [-9349.447] (-9363.497) .. -- 1:42:49
+
+      Average standard deviation of split frequencies: 0.008147
+
+      183000 -- [-9351.619] (-9358.110) (-9356.497) (-9353.017) * (-9357.003) (-9370.713) [-9361.303] (-9357.316) .. -- 1:42:32
+
+      Average standard deviation of split frequencies: 0.008211
+
+      184000 -- (-9357.757) (-9363.818) (-9351.646) [-9349.694] * (-9350.118) (-9369.797) (-9358.733) [-9355.546] .. -- 1:42:16
+
+      Average standard deviation of split frequencies: 0.008491
+
+      185000 -- (-9354.887) (-9353.261) (-9359.502) [-9355.326] * (-9366.226) (-9363.628) [-9348.609] (-9350.338) .. -- 1:41:58
+
+      Average standard deviation of split frequencies: 0.008617
+
+      186000 -- (-9364.541) [-9350.523] (-9360.673) (-9357.529) * (-9366.605) [-9357.702] (-9356.960) (-9356.081) .. -- 1:41:41
+
+      Average standard deviation of split frequencies: 0.008484
+
+      187000 -- (-9361.264) (-9350.900) (-9368.708) [-9354.489] * (-9369.908) [-9356.642] (-9367.156) (-9358.750) .. -- 1:41:25
+
+      Average standard deviation of split frequencies: 0.008261
+
+      188000 -- (-9364.563) (-9354.320) [-9353.189] (-9350.650) * (-9359.794) [-9348.648] (-9362.664) (-9363.223) .. -- 1:41:09
+
+      Average standard deviation of split frequencies: 0.008575
+
+      189000 -- (-9370.901) [-9352.721] (-9363.054) (-9359.544) * (-9364.518) [-9354.801] (-9358.999) (-9356.512) .. -- 1:40:52
+
+      Average standard deviation of split frequencies: 0.008755
+
+      190000 -- [-9358.033] (-9357.188) (-9358.131) (-9359.881) * (-9371.220) (-9355.727) (-9352.589) [-9347.189] .. -- 1:40:34
+
+      Average standard deviation of split frequencies: 0.008665
+
+      191000 -- (-9369.793) [-9352.142] (-9360.185) (-9366.142) * [-9350.376] (-9360.137) (-9356.430) (-9359.225) .. -- 1:40:18
+
+      Average standard deviation of split frequencies: 0.008237
+
+      192000 -- (-9356.887) (-9353.844) (-9356.159) [-9350.982] * (-9353.000) (-9353.752) (-9355.562) [-9356.908] .. -- 1:40:02
+
+      Average standard deviation of split frequencies: 0.008423
+
+      193000 -- (-9355.829) (-9353.224) [-9354.541] (-9351.411) * (-9354.750) (-9359.994) (-9365.625) [-9355.616] .. -- 1:39:45
+
+      Average standard deviation of split frequencies: 0.008876
+
+      194000 -- (-9355.661) [-9352.719] (-9358.768) (-9349.258) * (-9351.538) (-9356.017) [-9356.781] (-9367.765) .. -- 1:39:29
+
+      Average standard deviation of split frequencies: 0.009202
+
+      195000 -- [-9363.504] (-9350.509) (-9363.141) (-9358.330) * (-9363.131) (-9351.396) [-9351.389] (-9358.082) .. -- 1:39:13
+
+      Average standard deviation of split frequencies: 0.009086
+
+      196000 -- [-9356.213] (-9351.839) (-9363.417) (-9362.675) * (-9361.501) (-9354.672) (-9362.001) [-9363.169] .. -- 1:38:56
+
+      Average standard deviation of split frequencies: 0.009030
+
+      197000 -- (-9359.210) (-9360.453) (-9366.981) [-9359.317] * (-9360.558) [-9350.347] (-9359.993) (-9362.070) .. -- 1:38:40
+
+      Average standard deviation of split frequencies: 0.008842
+
+      198000 -- (-9353.434) [-9356.005] (-9352.902) (-9355.876) * (-9352.148) (-9354.106) [-9352.114] (-9367.742) .. -- 1:38:24
+
+      Average standard deviation of split frequencies: 0.008661
+
+      199000 -- (-9367.810) (-9352.761) [-9350.629] (-9375.429) * [-9356.238] (-9358.822) (-9361.071) (-9360.714) .. -- 1:38:05
+
+      Average standard deviation of split frequencies: 0.008384
+
+      200000 -- (-9363.936) (-9356.605) [-9355.298] (-9367.695) * (-9360.691) [-9354.681] (-9355.228) (-9363.791) .. -- 1:37:49
+
+      Average standard deviation of split frequencies: 0.008132
+
+      201000 -- [-9353.547] (-9353.868) (-9364.018) (-9355.499) * (-9355.829) (-9353.007) [-9358.066] (-9353.012) .. -- 1:37:33
+
+      Average standard deviation of split frequencies: 0.007744
+
+      202000 -- (-9359.833) (-9363.152) (-9363.297) [-9355.681] * (-9357.847) (-9351.709) (-9352.325) [-9359.321] .. -- 1:37:16
+
+      Average standard deviation of split frequencies: 0.007807
+
+      203000 -- (-9361.822) (-9352.459) (-9353.736) [-9356.736] * (-9360.651) [-9363.760] (-9355.568) (-9358.429) .. -- 1:37:00
+
+      Average standard deviation of split frequencies: 0.007600
+
+      204000 -- (-9362.789) (-9358.393) (-9354.043) [-9350.679] * (-9371.311) [-9352.386] (-9348.571) (-9368.394) .. -- 1:36:42
+
+      Average standard deviation of split frequencies: 0.007320
+
+      205000 -- [-9352.582] (-9350.908) (-9367.976) (-9365.391) * (-9348.702) (-9356.420) (-9368.333) [-9359.282] .. -- 1:36:25
+
+      Average standard deviation of split frequencies: 0.007035
+
+      206000 -- [-9350.366] (-9357.802) (-9365.411) (-9360.735) * [-9359.239] (-9363.794) (-9357.526) (-9357.622) .. -- 1:36:09
+
+      Average standard deviation of split frequencies: 0.007260
+
+      207000 -- [-9353.397] (-9354.255) (-9357.448) (-9369.224) * (-9349.673) [-9356.284] (-9357.092) (-9361.060) .. -- 1:35:53
+
+      Average standard deviation of split frequencies: 0.007012
+
+      208000 -- (-9359.474) (-9356.104) [-9349.683] (-9362.754) * [-9352.933] (-9363.817) (-9354.837) (-9360.441) .. -- 1:35:36
+
+      Average standard deviation of split frequencies: 0.006999
+
+      209000 -- [-9349.327] (-9356.501) (-9359.612) (-9359.314) * (-9360.720) [-9352.644] (-9367.961) (-9353.543) .. -- 1:35:20
+
+      Average standard deviation of split frequencies: 0.006867
+
+      210000 -- (-9355.688) (-9352.449) [-9358.047] (-9372.415) * (-9355.806) [-9351.364] (-9356.798) (-9361.962) .. -- 1:35:02
+
+      Average standard deviation of split frequencies: 0.006888
+
+      211000 -- (-9364.149) (-9361.235) [-9354.666] (-9355.331) * (-9358.655) [-9353.683] (-9351.612) (-9362.101) .. -- 1:34:45
+
+      Average standard deviation of split frequencies: 0.006740
+
+      212000 -- (-9357.682) (-9363.477) [-9353.760] (-9352.356) * [-9349.723] (-9362.386) (-9361.835) (-9350.859) .. -- 1:34:29
+
+      Average standard deviation of split frequencies: 0.006483
+
+      213000 -- (-9367.423) (-9355.100) (-9362.777) [-9351.149] * [-9361.414] (-9363.570) (-9359.864) (-9371.578) .. -- 1:34:11
+
+      Average standard deviation of split frequencies: 0.006253
+
+      214000 -- (-9358.019) [-9354.156] (-9362.845) (-9360.609) * (-9363.352) (-9353.708) [-9351.516] (-9356.547) .. -- 1:33:55
+
+      Average standard deviation of split frequencies: 0.005910
+
+      215000 -- (-9349.830) (-9361.676) (-9359.464) [-9359.414] * [-9346.775] (-9357.558) (-9354.938) (-9360.467) .. -- 1:33:38
+
+      Average standard deviation of split frequencies: 0.005935
+
+      216000 -- (-9355.185) (-9351.907) (-9350.609) [-9355.167] * (-9358.022) (-9368.322) (-9354.235) [-9358.914] .. -- 1:33:22
+
+      Average standard deviation of split frequencies: 0.005840
+
+      217000 -- (-9359.068) (-9362.622) [-9356.427] (-9354.245) * (-9359.496) (-9351.160) (-9358.410) [-9351.906] .. -- 1:33:04
+
+      Average standard deviation of split frequencies: 0.005799
+
+      218000 -- (-9355.549) (-9355.314) [-9358.064] (-9359.948) * (-9376.273) (-9355.309) (-9352.871) [-9349.692] .. -- 1:32:47
+
+      Average standard deviation of split frequencies: 0.005766
+
+      219000 -- (-9355.268) [-9357.596] (-9358.694) (-9354.190) * (-9359.831) [-9352.095] (-9360.657) (-9349.910) .. -- 1:32:31
+
+      Average standard deviation of split frequencies: 0.005695
+
+      220000 -- [-9358.798] (-9361.433) (-9357.228) (-9358.756) * (-9353.585) [-9351.655] (-9353.103) (-9362.084) .. -- 1:32:15
+
+      Average standard deviation of split frequencies: 0.005594
+
+      221000 -- (-9354.731) [-9349.448] (-9367.060) (-9352.149) * (-9357.432) (-9365.396) [-9351.941] (-9357.366) .. -- 1:31:58
+
+      Average standard deviation of split frequencies: 0.005784
+
+      222000 -- (-9356.174) (-9354.671) [-9353.398] (-9364.029) * (-9351.980) [-9361.314] (-9356.149) (-9355.361) .. -- 1:31:40
+
+      Average standard deviation of split frequencies: 0.005911
+
+      223000 -- (-9358.890) (-9358.081) [-9357.586] (-9356.986) * (-9354.119) [-9356.717] (-9352.849) (-9355.986) .. -- 1:31:24
+
+      Average standard deviation of split frequencies: 0.005653
+
+      224000 -- (-9350.815) [-9364.368] (-9372.641) (-9358.564) * (-9363.689) (-9351.890) (-9355.462) [-9361.433] .. -- 1:31:07
+
+      Average standard deviation of split frequencies: 0.005354
+
+      225000 -- [-9355.549] (-9352.201) (-9354.200) (-9357.130) * (-9355.815) [-9348.676] (-9351.080) (-9358.042) .. -- 1:30:51
+
+      Average standard deviation of split frequencies: 0.005187
+
+      226000 -- (-9356.301) (-9361.892) (-9352.326) [-9352.321] * (-9360.342) (-9358.033) (-9354.360) [-9348.133] .. -- 1:30:34
+
+      Average standard deviation of split frequencies: 0.005380
+
+      227000 -- [-9355.163] (-9356.431) (-9351.301) (-9359.469) * (-9356.981) (-9368.211) [-9354.618] (-9355.461) .. -- 1:30:18
+
+      Average standard deviation of split frequencies: 0.005460
+
+      228000 -- (-9360.311) [-9356.194] (-9361.646) (-9349.704) * (-9361.635) (-9360.147) [-9356.934] (-9356.826) .. -- 1:30:00
+
+      Average standard deviation of split frequencies: 0.005725
+
+      229000 -- (-9358.748) (-9356.961) [-9356.902] (-9360.916) * [-9358.825] (-9370.620) (-9353.109) (-9365.278) .. -- 1:29:44
+
+      Average standard deviation of split frequencies: 0.005541
+
+      230000 -- [-9356.723] (-9363.202) (-9351.625) (-9360.903) * [-9354.835] (-9369.526) (-9358.777) (-9357.965) .. -- 1:29:27
+
+      Average standard deviation of split frequencies: 0.005229
+
+      231000 -- (-9350.719) [-9356.959] (-9357.180) (-9363.037) * (-9361.193) [-9356.431] (-9357.606) (-9355.964) .. -- 1:29:11
+
+      Average standard deviation of split frequencies: 0.005058
+
+      232000 -- (-9367.964) [-9353.709] (-9361.049) (-9356.133) * (-9358.508) (-9358.373) [-9362.181] (-9365.424) .. -- 1:28:54
+
+      Average standard deviation of split frequencies: 0.004928
+
+      233000 -- (-9356.356) (-9349.878) (-9362.008) [-9356.750] * (-9359.404) [-9356.902] (-9352.625) (-9359.418) .. -- 1:28:38
+
+      Average standard deviation of split frequencies: 0.004922
+
+      234000 -- [-9352.400] (-9361.003) (-9355.060) (-9358.944) * (-9353.900) [-9355.317] (-9361.263) (-9351.834) .. -- 1:28:21
+
+      Average standard deviation of split frequencies: 0.004930
+
+      235000 -- (-9362.316) [-9352.949] (-9352.689) (-9359.831) * (-9363.810) (-9350.723) (-9365.432) [-9354.246] .. -- 1:28:05
+
+      Average standard deviation of split frequencies: 0.005064
+
+      236000 -- (-9358.279) [-9351.636] (-9351.240) (-9358.082) * (-9359.853) (-9351.335) [-9351.178] (-9359.734) .. -- 1:27:47
+
+      Average standard deviation of split frequencies: 0.005161
+
+      237000 -- (-9354.082) [-9350.533] (-9358.407) (-9353.999) * [-9352.797] (-9374.131) (-9358.725) (-9362.671) .. -- 1:27:31
+
+      Average standard deviation of split frequencies: 0.005493
+
+      238000 -- (-9352.930) (-9356.322) [-9353.746] (-9369.227) * (-9360.696) [-9354.555] (-9367.269) (-9361.093) .. -- 1:27:14
+
+      Average standard deviation of split frequencies: 0.005751
+
+      239000 -- (-9355.288) (-9363.143) (-9357.127) [-9357.504] * (-9352.037) (-9364.232) (-9370.065) [-9364.135] .. -- 1:26:58
+
+      Average standard deviation of split frequencies: 0.005774
+
+      240000 -- (-9355.132) (-9366.082) [-9358.197] (-9363.536) * [-9348.729] (-9367.114) (-9355.451) (-9361.318) .. -- 1:26:40
+
+      Average standard deviation of split frequencies: 0.005742
+
+      241000 -- (-9351.482) [-9357.065] (-9367.182) (-9346.724) * (-9364.277) [-9351.414] (-9359.980) (-9359.269) .. -- 1:26:23
+
+      Average standard deviation of split frequencies: 0.005891
+
+      242000 -- (-9355.593) (-9352.553) [-9355.422] (-9354.469) * (-9364.556) (-9356.556) (-9362.678) [-9349.584] .. -- 1:26:07
+
+      Average standard deviation of split frequencies: 0.005772
+
+      243000 -- (-9364.223) [-9356.166] (-9364.194) (-9350.664) * [-9358.249] (-9350.233) (-9360.257) (-9364.941) .. -- 1:25:49
+
+      Average standard deviation of split frequencies: 0.005394
+
+      244000 -- (-9359.264) (-9359.194) [-9350.494] (-9369.204) * (-9356.374) (-9368.945) [-9359.897] (-9355.929) .. -- 1:25:33
+
+      Average standard deviation of split frequencies: 0.005241
+
+      245000 -- [-9355.455] (-9358.898) (-9358.578) (-9357.472) * (-9351.197) (-9355.419) [-9354.776] (-9357.503) .. -- 1:25:16
+
+      Average standard deviation of split frequencies: 0.005337
+
+      246000 -- (-9354.955) (-9358.717) (-9353.274) [-9356.025] * (-9358.788) (-9352.066) (-9357.174) [-9358.170] .. -- 1:25:00
+
+      Average standard deviation of split frequencies: 0.005504
+
+      247000 -- (-9357.373) [-9352.513] (-9368.113) (-9358.005) * (-9370.944) (-9355.935) (-9364.873) [-9354.711] .. -- 1:24:42
+
+      Average standard deviation of split frequencies: 0.005307
+
+      248000 -- (-9359.116) [-9354.489] (-9359.857) (-9352.296) * (-9355.249) (-9359.171) (-9357.461) [-9355.861] .. -- 1:24:25
+
+      Average standard deviation of split frequencies: 0.004946
+
+      249000 -- (-9356.423) (-9368.314) [-9351.297] (-9368.190) * (-9357.329) [-9354.455] (-9358.376) (-9359.019) .. -- 1:24:09
+
+      Average standard deviation of split frequencies: 0.005165
+
+      250000 -- (-9359.238) (-9363.454) [-9352.025] (-9361.903) * (-9353.762) (-9355.724) [-9356.315] (-9365.617) .. -- 1:23:51
+
+      Average standard deviation of split frequencies: 0.005231
+
+      251000 -- (-9352.369) (-9356.140) (-9357.230) [-9350.549] * (-9360.087) [-9358.779] (-9359.244) (-9353.025) .. -- 1:23:35
+
+      Average standard deviation of split frequencies: 0.005141
+
+      252000 -- (-9353.566) [-9355.154] (-9352.560) (-9355.609) * (-9358.417) (-9365.871) [-9349.823] (-9352.210) .. -- 1:23:18
+
+      Average standard deviation of split frequencies: 0.004817
+
+      253000 -- [-9358.363] (-9364.037) (-9357.865) (-9356.853) * (-9366.701) (-9358.332) [-9346.993] (-9355.742) .. -- 1:23:02
+
+      Average standard deviation of split frequencies: 0.004825
+
+      254000 -- (-9350.342) (-9359.267) (-9371.056) [-9351.808] * (-9364.444) (-9362.705) [-9356.108] (-9358.441) .. -- 1:22:45
+
+      Average standard deviation of split frequencies: 0.004788
+
+      255000 -- (-9355.630) [-9356.631] (-9353.728) (-9360.289) * [-9357.949] (-9364.875) (-9356.410) (-9361.008) .. -- 1:22:27
+
+      Average standard deviation of split frequencies: 0.004968
+
+      256000 -- (-9361.446) (-9361.408) (-9357.549) [-9352.484] * [-9349.890] (-9363.450) (-9359.978) (-9359.913) .. -- 1:22:11
+
+      Average standard deviation of split frequencies: 0.005315
+
+      257000 -- (-9360.462) (-9369.522) [-9353.282] (-9370.609) * (-9351.474) [-9353.214] (-9365.989) (-9355.102) .. -- 1:21:54
+
+      Average standard deviation of split frequencies: 0.005641
+
+      258000 -- (-9358.398) (-9364.558) [-9351.513] (-9360.811) * (-9357.985) (-9357.582) (-9355.646) [-9353.845] .. -- 1:21:37
+
+      Average standard deviation of split frequencies: 0.005668
+
+      259000 -- (-9355.066) (-9357.948) [-9357.457] (-9362.342) * (-9353.840) (-9366.905) [-9355.184] (-9366.836) .. -- 1:21:20
+
+      Average standard deviation of split frequencies: 0.005502
+
+      260000 -- [-9353.859] (-9369.781) (-9358.350) (-9356.895) * (-9369.811) (-9360.242) [-9355.781] (-9358.867) .. -- 1:21:04
+
+      Average standard deviation of split frequencies: 0.005740
+
+      261000 -- (-9364.410) (-9357.240) (-9356.358) [-9350.255] * (-9354.402) (-9373.981) (-9356.263) [-9352.416] .. -- 1:20:47
+
+      Average standard deviation of split frequencies: 0.005581
+
+      262000 -- (-9358.418) (-9362.610) [-9358.933] (-9359.138) * (-9356.041) (-9358.649) (-9359.263) [-9354.914] .. -- 1:20:30
+
+      Average standard deviation of split frequencies: 0.005477
+
+      263000 -- (-9359.431) (-9358.082) [-9358.437] (-9355.696) * (-9363.696) (-9363.007) [-9354.102] (-9350.348) .. -- 1:20:13
+
+      Average standard deviation of split frequencies: 0.005758
+
+      264000 -- [-9350.690] (-9355.363) (-9356.076) (-9360.180) * (-9363.557) (-9364.121) (-9355.853) [-9351.409] .. -- 1:19:57
+
+      Average standard deviation of split frequencies: 0.005710
+
+      265000 -- (-9356.028) (-9359.603) (-9360.215) [-9354.852] * (-9352.397) (-9356.967) [-9351.932] (-9359.078) .. -- 1:19:40
+
+      Average standard deviation of split frequencies: 0.005557
+
+      266000 -- (-9358.767) (-9353.625) (-9355.666) [-9356.769] * [-9354.799] (-9353.739) (-9361.410) (-9357.460) .. -- 1:19:23
+
+      Average standard deviation of split frequencies: 0.005597
+
+      267000 -- (-9354.008) (-9354.752) (-9358.147) [-9361.256] * [-9355.329] (-9354.247) (-9351.823) (-9355.359) .. -- 1:19:07
+
+      Average standard deviation of split frequencies: 0.005491
+
+      268000 -- [-9351.283] (-9358.426) (-9362.561) (-9362.496) * (-9367.143) (-9357.738) [-9350.366] (-9359.646) .. -- 1:18:49
+
+      Average standard deviation of split frequencies: 0.005303
+
+      269000 -- (-9350.429) (-9359.273) (-9351.562) [-9357.553] * (-9369.184) (-9356.883) [-9356.458] (-9356.940) .. -- 1:18:33
+
+      Average standard deviation of split frequencies: 0.005271
+
+      270000 -- (-9351.954) (-9358.663) (-9355.705) [-9352.865] * (-9366.226) [-9353.813] (-9366.160) (-9356.818) .. -- 1:18:16
+
+      Average standard deviation of split frequencies: 0.005182
+
+      271000 -- (-9368.171) (-9359.646) [-9358.191] (-9368.722) * (-9357.875) [-9349.988] (-9360.862) (-9358.193) .. -- 1:18:00
+
+      Average standard deviation of split frequencies: 0.005039
+
+      272000 -- [-9357.383] (-9356.596) (-9350.538) (-9353.139) * (-9355.931) [-9352.851] (-9364.724) (-9358.740) .. -- 1:17:43
+
+      Average standard deviation of split frequencies: 0.005107
+
+      273000 -- (-9357.216) (-9360.016) [-9358.291] (-9358.247) * (-9362.207) (-9352.576) (-9365.131) [-9352.171] .. -- 1:17:27
+
+      Average standard deviation of split frequencies: 0.004926
+
+      274000 -- [-9354.635] (-9355.744) (-9352.471) (-9352.536) * (-9367.653) (-9362.555) (-9357.873) [-9354.095] .. -- 1:17:10
+
+      Average standard deviation of split frequencies: 0.005005
+
+      275000 -- [-9356.040] (-9357.070) (-9354.347) (-9356.561) * (-9359.675) [-9351.966] (-9351.938) (-9357.760) .. -- 1:16:54
+
+      Average standard deviation of split frequencies: 0.005109
+
+      276000 -- (-9353.172) [-9349.112] (-9356.915) (-9365.241) * (-9354.953) (-9359.448) (-9350.983) [-9353.826] .. -- 1:16:36
+
+      Average standard deviation of split frequencies: 0.004934
+
+      277000 -- (-9362.297) (-9350.412) (-9355.466) [-9354.904] * (-9368.427) (-9359.357) (-9353.084) [-9352.710] .. -- 1:16:19
+
+      Average standard deviation of split frequencies: 0.005019
+
+      278000 -- (-9350.899) (-9361.492) [-9352.163] (-9369.934) * (-9358.464) (-9352.989) [-9356.806] (-9364.121) .. -- 1:16:03
+
+      Average standard deviation of split frequencies: 0.005086
+
+      279000 -- (-9357.276) [-9360.152] (-9355.873) (-9352.204) * (-9358.190) (-9357.792) (-9354.475) [-9351.752] .. -- 1:15:46
+
+      Average standard deviation of split frequencies: 0.005038
+
+      280000 -- (-9363.881) (-9354.234) (-9365.212) [-9353.487] * (-9353.821) [-9352.221] (-9354.453) (-9361.477) .. -- 1:15:29
+
+      Average standard deviation of split frequencies: 0.004803
+
+      281000 -- (-9357.279) (-9356.938) [-9349.961] (-9356.145) * [-9353.816] (-9352.973) (-9357.172) (-9359.460) .. -- 1:15:12
+
+      Average standard deviation of split frequencies: 0.005141
+
+      282000 -- (-9360.426) (-9354.440) (-9362.453) [-9356.723] * (-9362.112) (-9352.649) (-9357.027) [-9357.186] .. -- 1:14:56
+
+      Average standard deviation of split frequencies: 0.005137
+
+      283000 -- (-9354.601) (-9351.505) [-9354.944] (-9355.759) * (-9356.921) [-9349.627] (-9354.073) (-9359.328) .. -- 1:14:39
+
+      Average standard deviation of split frequencies: 0.004958
+
+      284000 -- (-9350.281) [-9352.744] (-9363.636) (-9351.622) * (-9352.824) (-9354.952) (-9358.451) [-9352.751] .. -- 1:14:22
+
+      Average standard deviation of split frequencies: 0.004873
+
+      285000 -- (-9353.435) (-9361.965) [-9355.634] (-9357.912) * (-9358.644) (-9361.996) [-9357.499] (-9359.273) .. -- 1:14:05
+
+      Average standard deviation of split frequencies: 0.004990
+
+      286000 -- [-9358.654] (-9359.074) (-9350.399) (-9361.171) * (-9360.558) [-9355.365] (-9363.891) (-9368.445) .. -- 1:13:48
+
+      Average standard deviation of split frequencies: 0.004746
+
+      287000 -- (-9352.671) (-9357.996) [-9361.435] (-9362.719) * [-9357.701] (-9372.764) (-9354.322) (-9354.406) .. -- 1:13:32
+
+      Average standard deviation of split frequencies: 0.004806
+
+      288000 -- (-9366.744) (-9356.612) [-9352.911] (-9355.356) * [-9359.524] (-9354.818) (-9360.990) (-9361.646) .. -- 1:13:15
+
+      Average standard deviation of split frequencies: 0.004843
+
+      289000 -- (-9356.996) [-9356.668] (-9358.262) (-9365.692) * (-9363.646) [-9356.128] (-9361.465) (-9365.106) .. -- 1:12:59
+
+      Average standard deviation of split frequencies: 0.005101
+
+      290000 -- [-9350.087] (-9359.902) (-9360.187) (-9366.047) * (-9358.706) (-9357.883) [-9360.652] (-9360.647) .. -- 1:12:41
+
+      Average standard deviation of split frequencies: 0.005185
+
+      291000 -- (-9354.692) [-9358.625] (-9363.482) (-9360.927) * (-9352.132) [-9361.173] (-9365.623) (-9358.095) .. -- 1:12:25
+
+      Average standard deviation of split frequencies: 0.005146
+
+      292000 -- (-9357.366) (-9371.125) [-9351.160] (-9363.127) * (-9358.621) [-9355.508] (-9359.496) (-9360.194) .. -- 1:12:08
+
+      Average standard deviation of split frequencies: 0.005342
+
+      293000 -- (-9366.545) (-9359.851) [-9356.792] (-9359.835) * (-9357.844) (-9356.724) (-9355.188) [-9354.943] .. -- 1:11:51
+
+      Average standard deviation of split frequencies: 0.005288
+
+      294000 -- (-9355.176) [-9355.402] (-9354.332) (-9357.275) * (-9355.282) [-9355.708] (-9354.948) (-9368.607) .. -- 1:11:34
+
+      Average standard deviation of split frequencies: 0.005038
+
+      295000 -- (-9361.000) [-9356.628] (-9365.914) (-9358.957) * (-9366.801) [-9349.961] (-9360.139) (-9355.506) .. -- 1:11:17
+
+      Average standard deviation of split frequencies: 0.005312
+
+      296000 -- [-9363.037] (-9366.132) (-9354.406) (-9354.685) * (-9359.906) (-9357.161) (-9363.824) [-9352.857] .. -- 1:11:01
+
+      Average standard deviation of split frequencies: 0.005287
+
+      297000 -- (-9358.242) (-9355.510) [-9353.951] (-9350.016) * (-9355.943) [-9357.700] (-9373.872) (-9360.119) .. -- 1:10:43
+
+      Average standard deviation of split frequencies: 0.005468
+
+      298000 -- (-9361.706) (-9361.194) [-9351.831] (-9379.418) * (-9361.874) [-9357.064] (-9359.139) (-9355.411) .. -- 1:10:27
+
+      Average standard deviation of split frequencies: 0.005452
+
+      299000 -- (-9361.748) [-9359.234] (-9354.023) (-9362.964) * [-9352.450] (-9356.594) (-9368.942) (-9351.755) .. -- 1:10:10
+
+      Average standard deviation of split frequencies: 0.005234
+
+      300000 -- (-9371.991) (-9355.547) (-9353.755) [-9353.583] * (-9352.487) (-9355.077) (-9360.227) [-9351.524] .. -- 1:09:54
+
+      Average standard deviation of split frequencies: 0.005368
+
+      301000 -- (-9373.681) (-9357.892) (-9352.015) [-9352.558] * (-9363.477) (-9355.928) [-9359.045] (-9355.088) .. -- 1:09:36
+
+      Average standard deviation of split frequencies: 0.005579
+
+      302000 -- (-9353.276) (-9361.140) (-9356.725) [-9355.909] * (-9366.638) (-9356.583) (-9369.517) [-9352.380] .. -- 1:09:20
+
+      Average standard deviation of split frequencies: 0.005532
+
+      303000 -- (-9358.206) (-9351.013) (-9355.061) [-9357.387] * [-9352.195] (-9354.162) (-9360.814) (-9352.656) .. -- 1:09:03
+
+      Average standard deviation of split frequencies: 0.005453
+
+      304000 -- (-9353.892) (-9359.300) [-9354.411] (-9357.027) * [-9354.506] (-9360.509) (-9361.111) (-9364.557) .. -- 1:08:46
+
+      Average standard deviation of split frequencies: 0.005579
+
+      305000 -- [-9351.733] (-9350.952) (-9354.326) (-9358.178) * [-9353.660] (-9354.245) (-9362.118) (-9357.185) .. -- 1:08:30
+
+      Average standard deviation of split frequencies: 0.005821
+
+      306000 -- (-9355.422) (-9355.679) (-9361.440) [-9353.876] * [-9360.188] (-9353.032) (-9362.424) (-9366.647) .. -- 1:08:12
+
+      Average standard deviation of split frequencies: 0.005760
+
+      307000 -- [-9350.724] (-9355.802) (-9372.863) (-9360.415) * (-9354.573) [-9351.713] (-9362.766) (-9355.156) .. -- 1:07:56
+
+      Average standard deviation of split frequencies: 0.005455
+
+      308000 -- [-9354.472] (-9357.924) (-9356.451) (-9363.976) * (-9367.877) (-9356.637) [-9349.474] (-9356.344) .. -- 1:07:39
+
+      Average standard deviation of split frequencies: 0.005728
+
+      309000 -- [-9358.852] (-9358.092) (-9356.204) (-9354.504) * (-9360.876) [-9355.946] (-9356.538) (-9353.564) .. -- 1:07:23
+
+      Average standard deviation of split frequencies: 0.006005
+
+      310000 -- (-9363.157) (-9360.708) (-9349.457) [-9357.233] * (-9359.829) (-9355.864) (-9353.450) [-9352.547] .. -- 1:07:05
+
+      Average standard deviation of split frequencies: 0.005857
+
+      311000 -- (-9351.956) [-9354.324] (-9357.343) (-9356.908) * [-9355.286] (-9363.236) (-9346.978) (-9359.235) .. -- 1:06:49
+
+      Average standard deviation of split frequencies: 0.006157
+
+      312000 -- (-9366.668) (-9362.681) (-9353.261) [-9352.880] * (-9358.656) (-9357.782) (-9357.118) [-9361.069] .. -- 1:06:32
+
+      Average standard deviation of split frequencies: 0.005882
+
+      313000 -- (-9358.508) (-9354.487) (-9355.453) [-9352.315] * (-9358.524) (-9360.454) [-9349.941] (-9359.257) .. -- 1:06:15
+
+      Average standard deviation of split frequencies: 0.005591
+
+      314000 -- (-9360.682) (-9352.818) [-9357.474] (-9363.922) * (-9361.285) (-9368.696) (-9367.193) [-9356.593] .. -- 1:05:59
+
+      Average standard deviation of split frequencies: 0.005454
+
+      315000 -- (-9359.702) (-9351.909) [-9351.497] (-9358.326) * [-9353.291] (-9359.875) (-9360.526) (-9350.244) .. -- 1:05:42
+
+      Average standard deviation of split frequencies: 0.005492
+
+      316000 -- [-9358.407] (-9375.794) (-9357.032) (-9363.213) * (-9356.388) (-9360.964) [-9355.250] (-9359.540) .. -- 1:05:26
+
+      Average standard deviation of split frequencies: 0.005488
+
+      317000 -- [-9349.056] (-9363.226) (-9360.103) (-9349.619) * (-9366.946) [-9354.679] (-9359.878) (-9361.318) .. -- 1:05:08
+
+      Average standard deviation of split frequencies: 0.005576
+
+      318000 -- (-9357.998) [-9353.299] (-9363.491) (-9355.591) * [-9352.959] (-9364.339) (-9364.170) (-9357.083) .. -- 1:04:52
+
+      Average standard deviation of split frequencies: 0.005579
+
+      319000 -- (-9360.117) (-9359.800) [-9358.708] (-9352.799) * [-9358.842] (-9370.528) (-9358.667) (-9356.432) .. -- 1:04:35
+
+      Average standard deviation of split frequencies: 0.005470
+
+      320000 -- (-9358.559) (-9353.848) (-9358.809) [-9353.515] * (-9358.050) [-9355.325] (-9359.687) (-9357.727) .. -- 1:04:18
+
+      Average standard deviation of split frequencies: 0.005485
+
+      321000 -- [-9349.800] (-9357.440) (-9357.280) (-9354.514) * (-9350.349) [-9349.839] (-9360.610) (-9359.072) .. -- 1:04:02
+
+      Average standard deviation of split frequencies: 0.005261
+
+      322000 -- (-9359.501) (-9358.638) [-9356.053] (-9358.949) * [-9352.427] (-9357.173) (-9348.293) (-9367.063) .. -- 1:03:45
+
+      Average standard deviation of split frequencies: 0.005188
+
+      323000 -- (-9357.396) [-9357.827] (-9365.970) (-9359.704) * (-9350.153) (-9367.457) [-9361.619] (-9350.633) .. -- 1:03:29
+
+      Average standard deviation of split frequencies: 0.005436
+
+      324000 -- [-9360.524] (-9359.723) (-9351.173) (-9365.610) * (-9355.431) (-9364.597) (-9358.340) [-9362.939] .. -- 1:03:12
+
+      Average standard deviation of split frequencies: 0.005415
+
+      325000 -- (-9360.898) [-9361.492] (-9353.274) (-9353.489) * (-9371.744) (-9357.041) (-9357.337) [-9359.491] .. -- 1:02:55
+
+      Average standard deviation of split frequencies: 0.005300
+
+      326000 -- (-9360.562) [-9357.727] (-9357.214) (-9352.413) * (-9357.760) (-9355.478) (-9364.177) [-9354.807] .. -- 1:02:38
+
+      Average standard deviation of split frequencies: 0.005343
+
+      327000 -- (-9379.607) (-9356.207) [-9361.541] (-9359.934) * [-9355.154] (-9364.608) (-9359.825) (-9363.888) .. -- 1:02:21
+
+      Average standard deviation of split frequencies: 0.005302
+
+      328000 -- (-9353.502) [-9349.679] (-9364.883) (-9361.367) * [-9350.443] (-9367.850) (-9367.564) (-9367.877) .. -- 1:02:05
+
+      Average standard deviation of split frequencies: 0.005201
+
+      329000 -- (-9357.385) (-9362.629) [-9360.325] (-9366.224) * (-9352.520) (-9353.584) (-9353.623) [-9356.179] .. -- 1:01:48
+
+      Average standard deviation of split frequencies: 0.005411
+
+      330000 -- (-9354.682) (-9357.517) [-9352.389] (-9352.965) * (-9356.850) (-9356.899) (-9371.176) [-9356.036] .. -- 1:01:31
+
+      Average standard deviation of split frequencies: 0.005336
+
+      331000 -- (-9357.984) [-9351.581] (-9353.396) (-9349.253) * [-9355.430] (-9359.396) (-9360.385) (-9356.008) .. -- 1:01:14
+
+      Average standard deviation of split frequencies: 0.005218
+
+      332000 -- (-9356.824) (-9362.677) [-9356.992] (-9357.501) * [-9350.631] (-9375.788) (-9353.578) (-9358.386) .. -- 1:00:58
+
+      Average standard deviation of split frequencies: 0.005410
+
+      333000 -- (-9363.708) (-9356.622) (-9354.724) [-9346.944] * (-9357.504) (-9357.854) (-9351.710) [-9352.767] .. -- 1:00:41
+
+      Average standard deviation of split frequencies: 0.005340
+
+      334000 -- (-9360.015) [-9359.658] (-9357.414) (-9358.910) * [-9356.480] (-9355.394) (-9357.662) (-9356.412) .. -- 1:00:24
+
+      Average standard deviation of split frequencies: 0.005236
+
+      335000 -- [-9348.825] (-9367.547) (-9373.494) (-9357.308) * (-9355.772) (-9351.121) (-9358.396) [-9358.506] .. -- 1:00:07
+
+      Average standard deviation of split frequencies: 0.005405
+
+      336000 -- (-9353.407) [-9363.433] (-9359.803) (-9352.825) * [-9349.838] (-9360.954) (-9352.735) (-9366.268) .. -- 0:59:50
+
+      Average standard deviation of split frequencies: 0.005482
+
+      337000 -- [-9356.410] (-9356.355) (-9359.607) (-9360.703) * (-9351.545) [-9354.823] (-9359.952) (-9367.548) .. -- 0:59:34
+
+      Average standard deviation of split frequencies: 0.005426
+
+      338000 -- [-9357.773] (-9361.270) (-9367.368) (-9360.414) * [-9356.761] (-9369.569) (-9356.829) (-9356.149) .. -- 0:59:17
+
+      Average standard deviation of split frequencies: 0.005362
+
+      339000 -- (-9357.154) [-9355.669] (-9352.767) (-9358.249) * (-9353.679) [-9355.167] (-9353.626) (-9356.783) .. -- 0:59:00
+
+      Average standard deviation of split frequencies: 0.005324
+
+      340000 -- (-9354.149) (-9359.833) [-9351.980] (-9353.393) * [-9361.232] (-9355.592) (-9360.016) (-9363.671) .. -- 0:58:44
+
+      Average standard deviation of split frequencies: 0.005419
+
+      341000 -- (-9363.185) [-9351.238] (-9353.027) (-9357.193) * (-9362.626) (-9354.600) [-9353.019] (-9358.689) .. -- 0:58:27
+
+      Average standard deviation of split frequencies: 0.005255
+
+      342000 -- [-9350.862] (-9358.408) (-9352.457) (-9356.741) * [-9354.879] (-9360.330) (-9357.685) (-9358.031) .. -- 0:58:10
+
+      Average standard deviation of split frequencies: 0.005141
+
+      343000 -- [-9353.565] (-9361.581) (-9359.280) (-9357.951) * (-9359.362) (-9368.538) (-9355.275) [-9355.838] .. -- 0:57:53
+
+      Average standard deviation of split frequencies: 0.005089
+
+      344000 -- (-9353.264) (-9368.469) [-9352.029] (-9351.062) * (-9355.168) (-9360.326) (-9356.785) [-9351.585] .. -- 0:57:37
+
+      Average standard deviation of split frequencies: 0.005388
+
+      345000 -- (-9356.203) (-9365.335) (-9358.778) [-9352.848] * (-9358.987) (-9371.191) (-9358.329) [-9366.162] .. -- 0:57:20
+
+      Average standard deviation of split frequencies: 0.005390
+
+      346000 -- (-9359.101) (-9353.773) [-9355.324] (-9352.247) * (-9363.877) (-9366.673) [-9359.888] (-9359.607) .. -- 0:57:03
+
+      Average standard deviation of split frequencies: 0.005268
+
+      347000 -- (-9351.777) [-9354.865] (-9365.689) (-9358.617) * (-9350.219) [-9359.422] (-9360.544) (-9360.531) .. -- 0:56:47
+
+      Average standard deviation of split frequencies: 0.005373
+
+      348000 -- (-9355.189) [-9352.753] (-9375.024) (-9353.832) * (-9360.890) [-9354.240] (-9358.533) (-9360.071) .. -- 0:56:30
+
+      Average standard deviation of split frequencies: 0.005434
+
+      349000 -- (-9349.885) (-9364.166) (-9352.973) [-9348.697] * (-9352.527) (-9370.108) (-9359.460) [-9356.279] .. -- 0:56:13
+
+      Average standard deviation of split frequencies: 0.005406
+
+      350000 -- (-9357.062) (-9360.375) (-9355.512) [-9349.464] * (-9370.896) (-9348.839) (-9356.599) [-9358.483] .. -- 0:55:56
+
+      Average standard deviation of split frequencies: 0.005444
+
+      351000 -- (-9349.550) (-9353.697) [-9351.815] (-9363.243) * [-9357.312] (-9359.501) (-9368.464) (-9368.707) .. -- 0:55:39
+
+      Average standard deviation of split frequencies: 0.005479
+
+      352000 -- (-9365.976) (-9353.962) (-9347.367) [-9355.974] * (-9355.576) (-9359.185) [-9352.381] (-9355.723) .. -- 0:55:23
+
+      Average standard deviation of split frequencies: 0.005505
+
+      353000 -- (-9350.686) [-9361.259] (-9353.401) (-9368.197) * (-9355.077) (-9350.267) [-9347.487] (-9366.469) .. -- 0:55:06
+
+      Average standard deviation of split frequencies: 0.005484
+
+      354000 -- (-9364.826) [-9358.939] (-9352.550) (-9360.182) * [-9350.283] (-9361.143) (-9364.406) (-9365.624) .. -- 0:54:49
+
+      Average standard deviation of split frequencies: 0.005595
+
+      355000 -- (-9363.320) [-9356.361] (-9356.203) (-9360.721) * (-9363.337) (-9362.474) [-9352.725] (-9356.880) .. -- 0:54:32
+
+      Average standard deviation of split frequencies: 0.005560
+
+      356000 -- (-9359.373) (-9359.919) [-9350.937] (-9357.796) * (-9363.502) (-9361.102) [-9358.591] (-9356.579) .. -- 0:54:16
+
+      Average standard deviation of split frequencies: 0.005290
+
+      357000 -- (-9355.185) (-9357.195) [-9352.668] (-9348.362) * (-9352.842) (-9359.266) (-9355.348) [-9351.949] .. -- 0:53:59
+
+      Average standard deviation of split frequencies: 0.005123
+
+      358000 -- (-9350.221) [-9354.838] (-9355.765) (-9359.102) * (-9356.116) (-9354.984) [-9355.223] (-9358.783) .. -- 0:53:42
+
+      Average standard deviation of split frequencies: 0.005032
+
+      359000 -- (-9354.756) (-9364.415) [-9358.680] (-9365.871) * (-9363.470) [-9354.504] (-9354.640) (-9352.902) .. -- 0:53:26
+
+      Average standard deviation of split frequencies: 0.005044
+
+      360000 -- (-9360.898) (-9354.561) [-9355.935] (-9361.140) * (-9348.989) [-9352.499] (-9358.486) (-9362.120) .. -- 0:53:09
+
+      Average standard deviation of split frequencies: 0.005035
+
+      361000 -- [-9348.230] (-9350.400) (-9350.498) (-9358.124) * (-9360.908) [-9353.643] (-9367.965) (-9362.973) .. -- 0:52:52
+
+      Average standard deviation of split frequencies: 0.005198
+
+      362000 -- (-9355.188) (-9356.120) (-9367.396) [-9355.010] * (-9362.090) [-9355.128] (-9353.006) (-9359.394) .. -- 0:52:36
+
+      Average standard deviation of split frequencies: 0.005376
+
+      363000 -- (-9348.095) [-9351.698] (-9364.652) (-9360.459) * [-9355.111] (-9357.009) (-9361.152) (-9367.488) .. -- 0:52:19
+
+      Average standard deviation of split frequencies: 0.005260
+
+      364000 -- (-9372.873) [-9358.489] (-9357.457) (-9355.334) * (-9358.059) [-9359.115] (-9354.081) (-9355.981) .. -- 0:52:02
+
+      Average standard deviation of split frequencies: 0.005287
+
+      365000 -- (-9350.596) [-9354.388] (-9355.613) (-9356.442) * [-9349.959] (-9358.991) (-9352.021) (-9354.885) .. -- 0:51:45
+
+      Average standard deviation of split frequencies: 0.005082
+
+      366000 -- (-9358.252) [-9352.118] (-9357.448) (-9353.606) * (-9360.710) (-9360.470) [-9354.083] (-9371.292) .. -- 0:51:29
+
+      Average standard deviation of split frequencies: 0.005153
+
+      367000 -- [-9353.509] (-9367.247) (-9358.545) (-9355.192) * (-9366.384) (-9353.453) [-9363.037] (-9359.968) .. -- 0:51:12
+
+      Average standard deviation of split frequencies: 0.005311
+
+      368000 -- [-9353.521] (-9355.250) (-9352.711) (-9374.869) * (-9359.185) (-9362.100) [-9358.705] (-9355.192) .. -- 0:50:55
+
+      Average standard deviation of split frequencies: 0.005396
+
+      369000 -- (-9354.548) (-9361.019) [-9345.470] (-9365.472) * [-9356.973] (-9356.077) (-9357.931) (-9366.322) .. -- 0:50:38
+
+      Average standard deviation of split frequencies: 0.005365
+
+      370000 -- (-9353.553) [-9362.792] (-9355.174) (-9362.858) * [-9355.873] (-9369.493) (-9362.373) (-9361.341) .. -- 0:50:22
+
+      Average standard deviation of split frequencies: 0.005369
+
+      371000 -- [-9352.443] (-9352.002) (-9378.527) (-9357.109) * (-9352.346) (-9359.362) (-9349.840) [-9359.352] .. -- 0:50:05
+
+      Average standard deviation of split frequencies: 0.005404
+
+      372000 -- (-9358.113) [-9356.305] (-9358.785) (-9362.345) * (-9355.135) (-9352.028) (-9358.347) [-9350.537] .. -- 0:49:48
+
+      Average standard deviation of split frequencies: 0.005426
+
+      373000 -- (-9355.191) (-9348.630) [-9352.528] (-9358.723) * (-9360.931) (-9364.973) (-9356.772) [-9360.807] .. -- 0:49:31
+
+      Average standard deviation of split frequencies: 0.005572
+
+      374000 -- (-9355.677) [-9351.210] (-9355.404) (-9359.542) * (-9364.929) [-9350.769] (-9361.737) (-9360.178) .. -- 0:49:15
+
+      Average standard deviation of split frequencies: 0.005365
+
+      375000 -- (-9366.700) (-9366.846) (-9364.517) [-9359.122] * (-9358.708) (-9367.337) (-9356.609) [-9349.267] .. -- 0:48:58
+
+      Average standard deviation of split frequencies: 0.005236
+
+      376000 -- (-9353.541) (-9356.172) [-9352.205] (-9360.379) * (-9364.035) (-9350.876) [-9352.441] (-9357.533) .. -- 0:48:41
+
+      Average standard deviation of split frequencies: 0.005212
+
+      377000 -- (-9350.620) (-9355.526) (-9352.690) [-9362.138] * [-9356.107] (-9356.613) (-9361.452) (-9367.735) .. -- 0:48:25
+
+      Average standard deviation of split frequencies: 0.005270
+
+      378000 -- [-9350.813] (-9367.644) (-9365.787) (-9367.101) * (-9357.754) (-9357.419) [-9357.411] (-9356.062) .. -- 0:48:08
+
+      Average standard deviation of split frequencies: 0.005243
+
+      379000 -- (-9359.148) [-9349.383] (-9364.925) (-9360.736) * (-9357.187) (-9360.092) [-9350.137] (-9355.507) .. -- 0:47:51
+
+      Average standard deviation of split frequencies: 0.005044
+
+      380000 -- (-9362.516) (-9353.254) [-9354.404] (-9370.259) * (-9358.437) (-9354.841) (-9355.673) [-9356.306] .. -- 0:47:34
+
+      Average standard deviation of split frequencies: 0.004944
+
+      381000 -- [-9353.500] (-9358.229) (-9353.583) (-9362.475) * (-9357.495) (-9369.579) [-9358.512] (-9351.927) .. -- 0:47:17
+
+      Average standard deviation of split frequencies: 0.004978
+
+      382000 -- [-9350.640] (-9360.420) (-9358.375) (-9352.738) * (-9368.907) [-9350.720] (-9360.445) (-9354.140) .. -- 0:47:01
+
+      Average standard deviation of split frequencies: 0.004983
+
+      383000 -- (-9359.747) [-9352.616] (-9354.511) (-9355.289) * [-9358.520] (-9374.869) (-9357.601) (-9356.439) .. -- 0:46:44
+
+      Average standard deviation of split frequencies: 0.004919
+
+      384000 -- (-9351.994) [-9356.223] (-9351.272) (-9355.882) * [-9367.170] (-9361.185) (-9358.235) (-9358.938) .. -- 0:46:27
+
+      Average standard deviation of split frequencies: 0.004858
+
+      385000 -- (-9360.342) (-9361.482) [-9359.464] (-9354.959) * (-9358.282) (-9361.240) [-9356.811] (-9359.056) .. -- 0:46:11
+
+      Average standard deviation of split frequencies: 0.004887
+
+      386000 -- (-9356.088) (-9360.490) [-9351.636] (-9356.436) * [-9353.895] (-9364.259) (-9356.445) (-9353.660) .. -- 0:45:54
+
+      Average standard deviation of split frequencies: 0.004932
+
+      387000 -- (-9358.955) [-9351.042] (-9362.200) (-9369.792) * (-9360.562) [-9350.892] (-9358.747) (-9357.434) .. -- 0:45:37
+
+      Average standard deviation of split frequencies: 0.004937
+
+      388000 -- [-9351.785] (-9363.359) (-9348.963) (-9361.501) * (-9352.233) [-9352.773] (-9355.823) (-9357.778) .. -- 0:45:20
+
+      Average standard deviation of split frequencies: 0.005197
+
+      389000 -- (-9364.745) (-9369.065) (-9352.655) [-9352.017] * [-9352.245] (-9367.228) (-9360.622) (-9359.089) .. -- 0:45:03
+
+      Average standard deviation of split frequencies: 0.005168
+
+      390000 -- [-9364.589] (-9356.548) (-9357.611) (-9355.422) * (-9360.115) (-9353.548) (-9352.578) [-9346.745] .. -- 0:44:47
+
+      Average standard deviation of split frequencies: 0.005000
+
+      391000 -- (-9355.858) [-9356.632] (-9352.194) (-9354.267) * [-9354.735] (-9364.033) (-9365.685) (-9358.473) .. -- 0:44:30
+
+      Average standard deviation of split frequencies: 0.004958
+
+      392000 -- (-9363.123) (-9358.889) (-9365.151) [-9353.343] * [-9352.748] (-9363.612) (-9361.286) (-9361.603) .. -- 0:44:13
+
+      Average standard deviation of split frequencies: 0.004877
+
+      393000 -- (-9356.309) [-9358.153] (-9359.421) (-9354.978) * (-9356.865) (-9354.188) [-9359.135] (-9367.505) .. -- 0:43:57
+
+      Average standard deviation of split frequencies: 0.004905
+
+      394000 -- [-9349.318] (-9352.283) (-9358.777) (-9361.920) * [-9360.427] (-9375.034) (-9363.227) (-9362.985) .. -- 0:43:40
+
+      Average standard deviation of split frequencies: 0.005078
+
+      395000 -- (-9358.945) (-9361.199) [-9360.770] (-9358.302) * [-9353.768] (-9363.157) (-9351.258) (-9355.128) .. -- 0:43:23
+
+      Average standard deviation of split frequencies: 0.004977
+
+      396000 -- (-9366.630) (-9371.561) [-9359.074] (-9351.841) * (-9353.919) (-9363.297) (-9357.908) [-9358.285] .. -- 0:43:06
+
+      Average standard deviation of split frequencies: 0.004958
+
+      397000 -- (-9364.116) (-9361.648) [-9352.356] (-9358.187) * (-9360.382) (-9362.704) (-9359.869) [-9359.811] .. -- 0:42:50
+
+      Average standard deviation of split frequencies: 0.004899
+
+      398000 -- (-9354.027) [-9355.643] (-9361.348) (-9357.932) * (-9351.264) (-9354.499) [-9361.636] (-9357.169) .. -- 0:42:33
+
+      Average standard deviation of split frequencies: 0.004843
+
+      399000 -- (-9357.606) [-9356.946] (-9358.300) (-9374.096) * [-9350.978] (-9354.017) (-9357.587) (-9366.300) .. -- 0:42:16
+
+      Average standard deviation of split frequencies: 0.004910
+
+      400000 -- [-9352.250] (-9354.231) (-9354.674) (-9366.720) * (-9359.031) (-9361.850) [-9361.294] (-9364.033) .. -- 0:41:59
+
+      Average standard deviation of split frequencies: 0.004871
+
+      401000 -- (-9360.122) (-9353.993) (-9353.971) [-9350.071] * (-9358.450) (-9359.414) [-9357.182] (-9352.078) .. -- 0:41:42
+
+      Average standard deviation of split frequencies: 0.004818
+
+      402000 -- (-9354.798) (-9353.684) [-9353.555] (-9355.106) * (-9359.083) [-9357.187] (-9351.920) (-9363.203) .. -- 0:41:26
+
+      Average standard deviation of split frequencies: 0.004760
+
+      403000 -- (-9372.202) [-9360.790] (-9355.370) (-9357.286) * (-9359.568) (-9354.086) [-9351.931] (-9355.691) .. -- 0:41:09
+
+      Average standard deviation of split frequencies: 0.004771
+
+      404000 -- (-9361.979) [-9352.552] (-9354.615) (-9358.392) * [-9353.602] (-9352.275) (-9356.869) (-9359.432) .. -- 0:40:52
+
+      Average standard deviation of split frequencies: 0.004852
+
+      405000 -- (-9350.105) (-9357.597) [-9353.979] (-9363.211) * (-9354.475) [-9357.163] (-9357.367) (-9355.503) .. -- 0:40:36
+
+      Average standard deviation of split frequencies: 0.004788
+
+      406000 -- [-9351.451] (-9359.590) (-9358.733) (-9364.713) * (-9356.951) (-9368.822) [-9355.808] (-9353.889) .. -- 0:40:19
+
+      Average standard deviation of split frequencies: 0.004767
+
+      407000 -- (-9359.119) [-9350.456] (-9368.451) (-9353.352) * (-9365.377) (-9366.252) (-9357.650) [-9363.123] .. -- 0:40:02
+
+      Average standard deviation of split frequencies: 0.004679
+
+      408000 -- (-9358.709) (-9356.600) (-9355.555) [-9358.060] * (-9358.389) [-9348.450] (-9365.683) (-9361.819) .. -- 0:39:45
+
+      Average standard deviation of split frequencies: 0.004793
+
+      409000 -- (-9356.197) [-9348.917] (-9356.320) (-9366.908) * [-9358.533] (-9361.051) (-9352.346) (-9362.766) .. -- 0:39:28
+
+      Average standard deviation of split frequencies: 0.004796
+
+      410000 -- [-9358.427] (-9352.078) (-9353.464) (-9358.176) * (-9357.564) [-9354.653] (-9354.845) (-9355.862) .. -- 0:39:12
+
+      Average standard deviation of split frequencies: 0.004641
+
+      411000 -- (-9359.705) [-9356.434] (-9363.495) (-9355.042) * (-9359.440) (-9354.195) (-9355.900) [-9353.384] .. -- 0:38:55
+
+      Average standard deviation of split frequencies: 0.004585
+
+      412000 -- [-9354.664] (-9354.441) (-9368.592) (-9356.954) * (-9352.354) (-9352.474) (-9364.113) [-9358.578] .. -- 0:38:38
+
+      Average standard deviation of split frequencies: 0.004605
+
+      413000 -- [-9361.142] (-9360.163) (-9360.428) (-9359.501) * [-9353.111] (-9364.843) (-9361.123) (-9354.731) .. -- 0:38:21
+
+      Average standard deviation of split frequencies: 0.004477
+
+      414000 -- [-9355.997] (-9354.410) (-9357.465) (-9363.113) * (-9354.651) (-9358.381) [-9360.365] (-9359.771) .. -- 0:38:05
+
+      Average standard deviation of split frequencies: 0.004406
+
+      415000 -- (-9360.618) (-9352.012) [-9358.670] (-9357.378) * (-9357.267) (-9353.494) [-9351.620] (-9354.429) .. -- 0:37:48
+
+      Average standard deviation of split frequencies: 0.004308
+
+      416000 -- (-9359.686) (-9354.372) [-9348.664] (-9364.935) * [-9350.884] (-9357.693) (-9353.107) (-9358.031) .. -- 0:37:31
+
+      Average standard deviation of split frequencies: 0.004159
+
+      417000 -- [-9354.756] (-9354.855) (-9367.489) (-9363.289) * (-9367.381) (-9355.216) (-9349.334) [-9353.212] .. -- 0:37:14
+
+      Average standard deviation of split frequencies: 0.004163
+
+      418000 -- [-9358.728] (-9368.474) (-9367.124) (-9360.204) * [-9357.809] (-9364.294) (-9354.220) (-9355.428) .. -- 0:36:57
+
+      Average standard deviation of split frequencies: 0.004244
+
+      419000 -- [-9358.335] (-9361.003) (-9357.463) (-9356.984) * (-9355.326) (-9364.198) (-9354.947) [-9354.541] .. -- 0:36:41
+
+      Average standard deviation of split frequencies: 0.004319
+
+      420000 -- (-9363.721) (-9360.188) [-9357.645] (-9355.366) * [-9352.518] (-9359.248) (-9358.578) (-9356.504) .. -- 0:36:24
+
+      Average standard deviation of split frequencies: 0.004387
+
+      421000 -- (-9355.548) (-9359.637) (-9356.066) [-9354.714] * (-9367.628) (-9356.174) (-9350.706) [-9353.955] .. -- 0:36:07
+
+      Average standard deviation of split frequencies: 0.004385
+
+      422000 -- (-9360.143) (-9359.149) [-9357.876] (-9369.245) * (-9356.041) (-9368.615) (-9355.832) [-9347.972] .. -- 0:35:50
+
+      Average standard deviation of split frequencies: 0.004543
+
+      423000 -- [-9356.497] (-9355.772) (-9358.145) (-9353.578) * [-9352.616] (-9360.562) (-9357.722) (-9355.347) .. -- 0:35:34
+
+      Average standard deviation of split frequencies: 0.004598
+
+      424000 -- [-9360.453] (-9354.577) (-9357.277) (-9359.402) * (-9358.716) [-9355.563] (-9361.954) (-9358.604) .. -- 0:35:17
+
+      Average standard deviation of split frequencies: 0.004441
+
+      425000 -- (-9356.548) (-9360.453) (-9362.827) [-9357.973] * [-9362.621] (-9353.461) (-9364.338) (-9354.295) .. -- 0:35:00
+
+      Average standard deviation of split frequencies: 0.004513
+
+      426000 -- (-9357.207) (-9356.853) (-9357.128) [-9350.335] * (-9355.704) (-9351.690) [-9355.962] (-9355.397) .. -- 0:34:43
+
+      Average standard deviation of split frequencies: 0.004544
+
+      427000 -- (-9352.879) [-9354.253] (-9363.199) (-9352.948) * (-9360.837) (-9358.871) (-9360.651) [-9350.635] .. -- 0:34:26
+
+      Average standard deviation of split frequencies: 0.004322
+
+      428000 -- (-9354.034) (-9362.859) (-9355.892) [-9352.693] * (-9364.611) (-9359.934) (-9350.166) [-9358.179] .. -- 0:34:10
+
+      Average standard deviation of split frequencies: 0.004270
+
+      429000 -- (-9355.374) (-9357.375) (-9358.095) [-9354.995] * (-9358.897) (-9355.701) (-9356.105) [-9356.140] .. -- 0:33:53
+
+      Average standard deviation of split frequencies: 0.004158
+
+      430000 -- (-9358.192) (-9360.786) [-9354.800] (-9370.466) * (-9360.297) [-9358.490] (-9353.928) (-9359.089) .. -- 0:33:36
+
+      Average standard deviation of split frequencies: 0.004078
+
+      431000 -- (-9357.213) (-9353.852) (-9363.644) [-9358.917] * (-9354.062) (-9360.830) [-9352.081] (-9359.376) .. -- 0:33:19
+
+      Average standard deviation of split frequencies: 0.003954
+
+      432000 -- (-9363.508) (-9358.366) (-9357.202) [-9358.590] * (-9355.860) (-9356.408) (-9359.005) [-9354.574] .. -- 0:33:02
+
+      Average standard deviation of split frequencies: 0.003947
+
+      433000 -- [-9352.652] (-9364.842) (-9355.558) (-9360.658) * (-9359.890) (-9363.641) [-9350.872] (-9353.050) .. -- 0:32:46
+
+      Average standard deviation of split frequencies: 0.003941
+
+      434000 -- (-9358.128) (-9359.224) [-9353.535] (-9357.408) * (-9359.548) (-9374.394) [-9353.580] (-9350.824) .. -- 0:32:29
+
+      Average standard deviation of split frequencies: 0.003977
+
+      435000 -- (-9357.358) (-9357.876) [-9351.580] (-9361.399) * (-9364.979) (-9352.472) [-9358.268] (-9359.149) .. -- 0:32:12
+
+      Average standard deviation of split frequencies: 0.003944
+
+      436000 -- (-9352.280) (-9352.623) (-9361.977) [-9354.587] * (-9358.910) (-9353.902) (-9377.593) [-9352.226] .. -- 0:31:55
+
+      Average standard deviation of split frequencies: 0.004170
+
+      437000 -- (-9355.335) (-9352.920) (-9366.482) [-9354.748] * (-9358.340) (-9357.384) (-9359.309) [-9357.295] .. -- 0:31:39
+
+      Average standard deviation of split frequencies: 0.004203
+
+      438000 -- (-9357.247) (-9363.510) [-9359.236] (-9361.793) * (-9356.241) (-9355.159) (-9364.104) [-9356.264] .. -- 0:31:22
+
+      Average standard deviation of split frequencies: 0.004199
+
+      439000 -- (-9355.527) (-9357.856) [-9354.675] (-9356.710) * [-9355.533] (-9364.227) (-9368.361) (-9351.679) .. -- 0:31:05
+
+      Average standard deviation of split frequencies: 0.004118
+
+      440000 -- [-9353.505] (-9356.860) (-9355.856) (-9358.242) * (-9356.680) (-9352.549) (-9376.909) [-9351.643] .. -- 0:30:48
+
+      Average standard deviation of split frequencies: 0.004058
+
+      441000 -- (-9359.863) [-9351.199] (-9360.832) (-9369.791) * (-9377.328) [-9353.014] (-9365.636) (-9354.711) .. -- 0:30:31
+
+      Average standard deviation of split frequencies: 0.004044
+
+      442000 -- [-9355.751] (-9357.051) (-9357.387) (-9355.476) * (-9364.903) (-9354.895) [-9359.428] (-9369.566) .. -- 0:30:14
+
+      Average standard deviation of split frequencies: 0.004154
+
+      443000 -- (-9365.566) (-9354.219) (-9361.298) [-9357.370] * [-9352.849] (-9370.300) (-9353.839) (-9353.168) .. -- 0:29:58
+
+      Average standard deviation of split frequencies: 0.004259
+
+      444000 -- [-9360.224] (-9362.358) (-9365.885) (-9357.477) * (-9355.154) (-9360.287) (-9352.674) [-9351.208] .. -- 0:29:41
+
+      Average standard deviation of split frequencies: 0.004166
+
+      445000 -- (-9358.236) (-9351.549) (-9348.629) [-9350.709] * (-9360.739) (-9360.919) (-9355.916) [-9356.120] .. -- 0:29:24
+
+      Average standard deviation of split frequencies: 0.004221
+
+      446000 -- [-9348.335] (-9360.085) (-9350.808) (-9363.089) * (-9361.289) (-9356.599) (-9360.778) [-9353.966] .. -- 0:29:07
+
+      Average standard deviation of split frequencies: 0.004222
+
+      447000 -- (-9350.428) [-9363.257] (-9356.513) (-9364.583) * [-9354.451] (-9355.752) (-9359.334) (-9358.459) .. -- 0:28:50
+
+      Average standard deviation of split frequencies: 0.004368
+
+      448000 -- (-9355.501) (-9360.246) (-9363.662) [-9355.977] * (-9353.992) (-9357.350) [-9351.455] (-9361.795) .. -- 0:28:34
+
+      Average standard deviation of split frequencies: 0.004429
+
+      449000 -- [-9352.862] (-9357.592) (-9353.998) (-9353.850) * (-9358.824) (-9364.697) [-9368.026] (-9360.066) .. -- 0:28:17
+
+      Average standard deviation of split frequencies: 0.004417
+
+      450000 -- (-9362.735) [-9357.010] (-9363.485) (-9359.477) * (-9359.904) (-9350.819) (-9359.792) [-9359.281] .. -- 0:28:00
+
+      Average standard deviation of split frequencies: 0.004416
+
+      451000 -- (-9363.412) (-9352.839) [-9352.884] (-9362.176) * (-9354.748) (-9370.267) (-9362.122) [-9359.867] .. -- 0:27:43
+
+      Average standard deviation of split frequencies: 0.004409
+
+      452000 -- [-9355.556] (-9348.899) (-9361.614) (-9367.295) * (-9355.482) (-9352.901) (-9362.319) [-9356.669] .. -- 0:27:26
+
+      Average standard deviation of split frequencies: 0.004321
+
+      453000 -- (-9355.210) [-9349.900] (-9362.682) (-9361.821) * [-9351.784] (-9354.215) (-9359.134) (-9366.547) .. -- 0:27:10
+
+      Average standard deviation of split frequencies: 0.004355
+
+      454000 -- (-9361.556) (-9362.663) (-9352.895) [-9363.138] * (-9355.910) (-9354.883) [-9357.535] (-9356.354) .. -- 0:26:53
+
+      Average standard deviation of split frequencies: 0.004404
+
+      455000 -- (-9367.204) (-9355.258) (-9357.779) [-9350.416] * (-9361.498) [-9356.394] (-9356.419) (-9353.714) .. -- 0:26:36
+
+      Average standard deviation of split frequencies: 0.004488
+
+      456000 -- (-9349.666) [-9356.647] (-9364.223) (-9353.324) * (-9353.922) [-9353.969] (-9356.748) (-9355.879) .. -- 0:26:19
+
+      Average standard deviation of split frequencies: 0.004554
+
+      457000 -- (-9375.715) [-9360.109] (-9362.130) (-9353.809) * (-9366.394) [-9355.909] (-9357.229) (-9350.102) .. -- 0:26:03
+
+      Average standard deviation of split frequencies: 0.004655
+
+      458000 -- (-9357.029) (-9356.781) [-9354.339] (-9362.123) * (-9363.815) [-9357.664] (-9360.044) (-9364.242) .. -- 0:25:46
+
+      Average standard deviation of split frequencies: 0.004472
+
+      459000 -- (-9364.616) [-9357.077] (-9356.379) (-9350.859) * (-9366.762) [-9355.608] (-9363.994) (-9359.621) .. -- 0:25:29
+
+      Average standard deviation of split frequencies: 0.004333
+
+      460000 -- (-9356.876) (-9358.075) [-9354.050] (-9358.773) * (-9367.730) (-9354.266) (-9362.880) [-9353.703] .. -- 0:25:12
+
+      Average standard deviation of split frequencies: 0.004335
+
+      461000 -- (-9360.144) [-9358.402] (-9360.475) (-9357.760) * [-9351.578] (-9365.489) (-9362.978) (-9359.008) .. -- 0:24:55
+
+      Average standard deviation of split frequencies: 0.004241
+
+      462000 -- (-9360.402) [-9356.727] (-9359.521) (-9358.948) * [-9358.908] (-9359.887) (-9359.608) (-9351.911) .. -- 0:24:39
+
+      Average standard deviation of split frequencies: 0.004143
+
+      463000 -- (-9354.122) (-9364.673) [-9349.319] (-9357.409) * (-9357.231) [-9350.605] (-9365.886) (-9363.762) .. -- 0:24:22
+
+      Average standard deviation of split frequencies: 0.004095
+
+      464000 -- (-9357.101) [-9361.870] (-9351.265) (-9357.335) * [-9358.638] (-9364.334) (-9378.534) (-9349.570) .. -- 0:24:05
+
+      Average standard deviation of split frequencies: 0.004051
+
+      465000 -- [-9349.497] (-9362.893) (-9356.723) (-9358.010) * (-9353.385) (-9357.014) (-9357.931) [-9360.639] .. -- 0:23:48
+
+      Average standard deviation of split frequencies: 0.004070
+
+      466000 -- (-9358.252) (-9357.191) (-9358.670) [-9359.300] * (-9353.188) (-9362.483) [-9352.653] (-9368.795) .. -- 0:23:31
+
+      Average standard deviation of split frequencies: 0.004002
+
+      467000 -- (-9352.764) [-9355.083] (-9359.116) (-9361.609) * (-9361.299) (-9358.415) [-9355.250] (-9360.377) .. -- 0:23:15
+
+      Average standard deviation of split frequencies: 0.004003
+
+      468000 -- (-9360.308) (-9352.746) (-9362.951) [-9354.881] * [-9353.174] (-9358.983) (-9355.191) (-9353.720) .. -- 0:22:58
+
+      Average standard deviation of split frequencies: 0.003900
+
+      469000 -- (-9355.178) [-9356.189] (-9368.569) (-9353.584) * (-9360.619) (-9361.561) [-9363.920] (-9371.781) .. -- 0:22:41
+
+      Average standard deviation of split frequencies: 0.003948
+
+      470000 -- (-9359.322) (-9358.834) (-9354.089) [-9356.113] * (-9359.778) (-9358.362) [-9350.016] (-9357.833) .. -- 0:22:24
+
+      Average standard deviation of split frequencies: 0.003876
+
+      471000 -- (-9361.961) [-9360.575] (-9360.788) (-9356.462) * (-9355.807) [-9354.355] (-9357.031) (-9372.219) .. -- 0:22:07
+
+      Average standard deviation of split frequencies: 0.003755
+
+      472000 -- (-9360.906) (-9351.533) [-9363.185] (-9356.272) * (-9349.642) [-9361.109] (-9363.239) (-9361.758) .. -- 0:21:51
+
+      Average standard deviation of split frequencies: 0.003815
+
+      473000 -- [-9354.702] (-9358.041) (-9352.928) (-9355.674) * (-9361.565) [-9352.367] (-9357.776) (-9362.656) .. -- 0:21:34
+
+      Average standard deviation of split frequencies: 0.003916
+
+      474000 -- (-9364.952) (-9356.241) (-9356.363) [-9355.579] * [-9351.898] (-9356.521) (-9357.617) (-9354.075) .. -- 0:21:17
+
+      Average standard deviation of split frequencies: 0.004007
+
+      475000 -- (-9362.931) (-9353.778) [-9359.859] (-9357.553) * [-9351.025] (-9354.327) (-9353.266) (-9356.537) .. -- 0:21:00
+
+      Average standard deviation of split frequencies: 0.003989
+
+      476000 -- (-9358.429) (-9357.224) (-9368.304) [-9357.433] * (-9356.550) [-9348.307] (-9353.162) (-9354.661) .. -- 0:20:44
+
+      Average standard deviation of split frequencies: 0.004017
+
+      477000 -- (-9355.277) (-9363.499) [-9357.903] (-9352.792) * [-9352.525] (-9366.343) (-9359.147) (-9360.359) .. -- 0:20:27
+
+      Average standard deviation of split frequencies: 0.003959
+
+      478000 -- [-9354.694] (-9362.371) (-9361.248) (-9351.076) * (-9356.108) (-9377.267) [-9350.425] (-9358.482) .. -- 0:20:10
+
+      Average standard deviation of split frequencies: 0.003926
+
+      479000 -- (-9358.184) [-9359.048] (-9355.070) (-9360.597) * (-9359.000) [-9357.863] (-9353.639) (-9358.839) .. -- 0:19:53
+
+      Average standard deviation of split frequencies: 0.003944
+
+      480000 -- [-9352.751] (-9358.109) (-9356.690) (-9364.072) * (-9352.812) [-9355.606] (-9352.927) (-9361.710) .. -- 0:19:36
+
+      Average standard deviation of split frequencies: 0.003961
+
+      481000 -- (-9356.209) (-9351.798) [-9354.394] (-9365.523) * (-9358.360) (-9364.830) [-9351.698] (-9352.781) .. -- 0:19:19
+
+      Average standard deviation of split frequencies: 0.003997
+
+      482000 -- [-9350.651] (-9354.944) (-9352.663) (-9360.810) * (-9358.817) (-9353.892) (-9355.842) [-9353.689] .. -- 0:19:03
+
+      Average standard deviation of split frequencies: 0.003891
+
+      483000 -- (-9358.706) [-9349.615] (-9360.629) (-9355.198) * (-9361.100) [-9353.065] (-9368.973) (-9367.446) .. -- 0:18:46
+
+      Average standard deviation of split frequencies: 0.003874
+
+      484000 -- (-9366.682) (-9356.543) (-9355.984) [-9351.999] * (-9351.631) (-9358.570) [-9350.891] (-9362.825) .. -- 0:18:29
+
+      Average standard deviation of split frequencies: 0.003897
+
+      485000 -- [-9355.229] (-9358.251) (-9362.770) (-9358.392) * [-9359.611] (-9366.653) (-9361.650) (-9358.019) .. -- 0:18:12
+
+      Average standard deviation of split frequencies: 0.003800
+
+      486000 -- (-9358.435) (-9358.002) (-9356.293) [-9358.907] * (-9361.502) (-9349.940) [-9356.784] (-9357.407) .. -- 0:17:56
+
+      Average standard deviation of split frequencies: 0.003916
+
+      487000 -- (-9358.313) (-9361.639) [-9356.593] (-9353.429) * [-9361.820] (-9352.753) (-9355.009) (-9357.979) .. -- 0:17:39
+
+      Average standard deviation of split frequencies: 0.003862
+
+      488000 -- (-9354.499) (-9357.423) [-9355.138] (-9360.874) * (-9373.083) [-9361.654] (-9362.779) (-9361.661) .. -- 0:17:22
+
+      Average standard deviation of split frequencies: 0.003869
+
+      489000 -- (-9352.664) (-9356.365) (-9359.275) [-9354.707] * (-9357.069) (-9358.013) [-9354.703] (-9355.802) .. -- 0:17:05
+
+      Average standard deviation of split frequencies: 0.003868
+
+      490000 -- [-9353.844] (-9372.618) (-9357.342) (-9357.806) * (-9355.862) [-9354.432] (-9357.086) (-9356.539) .. -- 0:16:48
+
+      Average standard deviation of split frequencies: 0.004019
+
+      491000 -- (-9360.114) (-9358.920) [-9353.943] (-9356.922) * [-9355.232] (-9352.656) (-9352.820) (-9355.449) .. -- 0:16:31
+
+      Average standard deviation of split frequencies: 0.004091
+
+      492000 -- (-9352.828) (-9357.929) [-9355.873] (-9364.009) * [-9351.292] (-9363.309) (-9354.866) (-9360.616) .. -- 0:16:15
+
+      Average standard deviation of split frequencies: 0.004181
+
+      493000 -- (-9366.542) (-9355.005) [-9353.969] (-9356.424) * (-9355.939) (-9367.158) [-9349.356] (-9352.081) .. -- 0:15:58
+
+      Average standard deviation of split frequencies: 0.004049
+
+      494000 -- (-9356.838) [-9352.645] (-9355.255) (-9363.131) * [-9350.610] (-9362.604) (-9358.361) (-9355.953) .. -- 0:15:41
+
+      Average standard deviation of split frequencies: 0.003899
+
+      495000 -- (-9351.132) (-9354.119) [-9356.552] (-9352.988) * (-9357.226) (-9358.612) (-9359.007) [-9355.601] .. -- 0:15:24
+
+      Average standard deviation of split frequencies: 0.003673
+
+      496000 -- (-9365.853) (-9359.576) [-9356.606] (-9350.450) * (-9367.650) (-9355.385) (-9366.688) [-9356.885] .. -- 0:15:07
+
+      Average standard deviation of split frequencies: 0.003576
+
+      497000 -- (-9367.792) [-9351.212] (-9357.770) (-9362.985) * [-9354.989] (-9361.142) (-9358.467) (-9353.837) .. -- 0:14:51
+
+      Average standard deviation of split frequencies: 0.003538
+
+      498000 -- (-9364.409) (-9355.201) [-9352.305] (-9362.726) * (-9361.877) (-9356.161) (-9364.266) [-9351.793] .. -- 0:14:34
+
+      Average standard deviation of split frequencies: 0.003479
+
+      499000 -- (-9356.311) [-9347.629] (-9356.924) (-9359.902) * [-9357.578] (-9355.868) (-9355.374) (-9356.108) .. -- 0:14:17
+
+      Average standard deviation of split frequencies: 0.003455
+
+      500000 -- (-9358.135) (-9351.575) (-9363.875) [-9362.297] * (-9357.502) (-9357.344) (-9365.127) [-9353.749] .. -- 0:14:00
+
+      Average standard deviation of split frequencies: 0.003425
+
+      501000 -- (-9356.628) (-9358.352) [-9356.003] (-9364.281) * (-9356.792) [-9354.507] (-9352.344) (-9360.338) .. -- 0:13:43
+
+      Average standard deviation of split frequencies: 0.003334
+
+      502000 -- (-9357.633) (-9373.292) (-9360.334) [-9354.565] * (-9351.509) [-9360.384] (-9361.288) (-9361.684) .. -- 0:13:27
+
+      Average standard deviation of split frequencies: 0.003427
+
+      503000 -- [-9354.361] (-9350.985) (-9364.028) (-9354.137) * (-9363.816) (-9356.018) [-9351.427] (-9351.989) .. -- 0:13:10
+
+      Average standard deviation of split frequencies: 0.003515
+
+      504000 -- (-9354.727) [-9359.218] (-9358.985) (-9355.064) * (-9366.027) [-9353.031] (-9352.951) (-9351.929) .. -- 0:12:53
+
+      Average standard deviation of split frequencies: 0.003472
+
+      505000 -- (-9355.848) [-9352.575] (-9365.975) (-9356.967) * (-9364.494) (-9352.538) [-9357.117] (-9359.848) .. -- 0:12:36
+
+      Average standard deviation of split frequencies: 0.003581
+
+      506000 -- (-9357.904) (-9354.004) [-9352.013] (-9363.722) * [-9355.565] (-9380.922) (-9354.223) (-9365.844) .. -- 0:12:19
+
+      Average standard deviation of split frequencies: 0.003749
+
+      507000 -- [-9361.154] (-9364.878) (-9360.406) (-9359.476) * (-9364.804) (-9351.919) [-9350.790] (-9363.065) .. -- 0:12:03
+
+      Average standard deviation of split frequencies: 0.003925
+
+      508000 -- (-9356.655) (-9361.491) (-9357.203) [-9356.428] * [-9359.273] (-9360.993) (-9353.098) (-9364.567) .. -- 0:11:46
+
+      Average standard deviation of split frequencies: 0.003850
+
+      509000 -- (-9364.479) (-9357.458) [-9356.717] (-9352.162) * [-9360.960] (-9354.604) (-9350.700) (-9354.702) .. -- 0:11:29
+
+      Average standard deviation of split frequencies: 0.003769
+
+      510000 -- (-9353.608) [-9352.715] (-9361.152) (-9354.890) * (-9369.217) (-9352.334) (-9357.050) [-9355.876] .. -- 0:11:12
+
+      Average standard deviation of split frequencies: 0.003716
+
+      511000 -- [-9354.202] (-9358.211) (-9359.505) (-9375.300) * (-9357.484) (-9350.453) (-9363.391) [-9360.696] .. -- 0:10:55
+
+      Average standard deviation of split frequencies: 0.003664
+
+      512000 -- (-9354.304) (-9360.624) [-9356.337] (-9356.868) * [-9350.751] (-9359.828) (-9352.220) (-9354.799) .. -- 0:10:38
+
+      Average standard deviation of split frequencies: 0.003599
+
+      513000 -- (-9355.931) (-9361.548) (-9354.693) [-9359.542] * (-9357.251) (-9359.414) [-9358.475] (-9358.574) .. -- 0:10:22
+
+      Average standard deviation of split frequencies: 0.003734
+
+      514000 -- (-9356.924) [-9356.135] (-9359.383) (-9357.591) * (-9365.056) [-9355.516] (-9357.432) (-9361.114) .. -- 0:10:05
+
+      Average standard deviation of split frequencies: 0.003620
+
+      515000 -- [-9354.896] (-9357.939) (-9357.750) (-9361.928) * (-9359.397) (-9366.480) (-9354.330) [-9355.464] .. -- 0:09:48
+
+      Average standard deviation of split frequencies: 0.003757
+
+      516000 -- (-9357.254) (-9352.625) [-9350.932] (-9352.505) * (-9359.126) (-9367.589) [-9355.160] (-9356.555) .. -- 0:09:31
+
+      Average standard deviation of split frequencies: 0.003880
+
+      517000 -- (-9358.708) (-9365.532) (-9364.672) [-9349.331] * (-9361.992) (-9352.067) (-9361.972) [-9352.253] .. -- 0:09:14
+
+      Average standard deviation of split frequencies: 0.003880
+
+      518000 -- (-9357.253) (-9357.196) (-9361.832) [-9351.804] * [-9354.558] (-9355.410) (-9361.278) (-9364.670) .. -- 0:08:58
+
+      Average standard deviation of split frequencies: 0.003884
+
+      519000 -- (-9359.794) (-9354.455) [-9355.608] (-9358.943) * (-9358.097) (-9362.223) (-9359.397) [-9350.071] .. -- 0:08:41
+
+      Average standard deviation of split frequencies: 0.003886
+
+      520000 -- (-9361.955) [-9353.764] (-9359.327) (-9362.231) * (-9357.843) (-9362.448) [-9357.250] (-9369.974) .. -- 0:08:24
+
+      Average standard deviation of split frequencies: 0.003984
+
+      521000 -- (-9358.276) [-9352.420] (-9351.267) (-9354.572) * (-9367.407) (-9372.585) [-9353.818] (-9368.352) .. -- 0:08:07
+
+      Average standard deviation of split frequencies: 0.003929
+
+      522000 -- (-9362.658) (-9354.875) [-9350.969] (-9355.506) * [-9357.733] (-9356.912) (-9358.807) (-9361.162) .. -- 0:07:50
+
+      Average standard deviation of split frequencies: 0.003927
+
+      523000 -- [-9355.202] (-9360.283) (-9366.363) (-9350.954) * (-9365.959) (-9359.365) (-9362.580) [-9355.254] .. -- 0:07:33
+
+      Average standard deviation of split frequencies: 0.003838
+
+      524000 -- [-9358.924] (-9352.167) (-9357.339) (-9361.215) * (-9351.680) (-9367.263) (-9353.461) [-9354.874] .. -- 0:07:17
+
+      Average standard deviation of split frequencies: 0.003699
+
+      525000 -- (-9375.179) (-9359.263) (-9348.430) [-9354.212] * [-9356.898] (-9365.120) (-9356.049) (-9355.273) .. -- 0:07:00
+
+      Average standard deviation of split frequencies: 0.003529
+
+      526000 -- (-9352.793) [-9357.475] (-9351.815) (-9355.531) * (-9356.247) [-9357.151] (-9360.200) (-9362.705) .. -- 0:06:43
+
+      Average standard deviation of split frequencies: 0.003445
+
+      527000 -- [-9349.942] (-9361.124) (-9369.473) (-9348.834) * (-9362.661) (-9360.929) (-9351.527) [-9353.138] .. -- 0:06:26
+
+      Average standard deviation of split frequencies: 0.003445
+
+      528000 -- (-9353.578) [-9356.524] (-9355.014) (-9357.913) * (-9355.590) [-9352.547] (-9360.344) (-9356.598) .. -- 0:06:09
+
+      Average standard deviation of split frequencies: 0.003466
+
+      529000 -- (-9355.846) [-9354.839] (-9363.081) (-9356.439) * [-9354.386] (-9369.416) (-9359.743) (-9356.085) .. -- 0:05:53
+
+      Average standard deviation of split frequencies: 0.003380
+
+      530000 -- (-9357.655) (-9359.736) (-9358.590) [-9364.223] * [-9352.708] (-9353.188) (-9356.937) (-9357.195) .. -- 0:05:36
+
+      Average standard deviation of split frequencies: 0.003399
+
+      531000 -- [-9357.976] (-9357.602) (-9356.835) (-9368.243) * [-9356.217] (-9365.828) (-9362.153) (-9366.380) .. -- 0:05:19
+
+      Average standard deviation of split frequencies: 0.003447
+
+      532000 -- (-9364.082) [-9353.770] (-9355.567) (-9354.452) * (-9360.456) (-9363.158) [-9352.206] (-9359.340) .. -- 0:05:02
+
+      Average standard deviation of split frequencies: 0.003448
+
+      533000 -- (-9355.894) (-9351.452) [-9353.186] (-9361.307) * (-9348.899) (-9359.519) [-9352.348] (-9363.166) .. -- 0:04:45
+
+      Average standard deviation of split frequencies: 0.003364
+
+      534000 -- [-9352.890] (-9355.115) (-9362.880) (-9354.139) * (-9355.889) (-9360.049) (-9367.031) [-9356.365] .. -- 0:04:29
+
+      Average standard deviation of split frequencies: 0.003501
+
+      535000 -- (-9358.202) [-9354.735] (-9368.855) (-9368.583) * [-9348.388] (-9359.899) (-9352.325) (-9359.738) .. -- 0:04:12
+
+      Average standard deviation of split frequencies: 0.003469
+
+      536000 -- (-9363.427) (-9371.736) [-9350.067] (-9362.736) * (-9357.005) [-9351.721] (-9355.280) (-9365.795) .. -- 0:03:55
+
+      Average standard deviation of split frequencies: 0.003418
+
+      537000 -- [-9352.509] (-9356.336) (-9356.511) (-9350.893) * (-9356.989) (-9352.471) (-9359.589) [-9355.824] .. -- 0:03:38
+
+      Average standard deviation of split frequencies: 0.003414
+
+      538000 -- [-9352.642] (-9362.009) (-9352.132) (-9357.950) * (-9362.056) (-9360.967) (-9355.442) [-9350.602] .. -- 0:03:21
+
+      Average standard deviation of split frequencies: 0.003469
+
+      539000 -- (-9361.129) (-9353.120) [-9357.157] (-9350.240) * (-9359.965) [-9349.169] (-9353.502) (-9356.250) .. -- 0:03:05
+
+      Average standard deviation of split frequencies: 0.003447
+
+      540000 -- (-9367.047) [-9362.675] (-9351.587) (-9351.858) * (-9358.475) (-9360.991) [-9356.980] (-9356.020) .. -- 0:02:48
+
+      Average standard deviation of split frequencies: 0.003502
+
+      541000 -- (-9356.916) (-9364.075) [-9352.243] (-9360.586) * (-9360.562) (-9359.346) (-9354.612) [-9350.667] .. -- 0:02:31
+
+      Average standard deviation of split frequencies: 0.003513
+
+      542000 -- (-9357.586) [-9350.911] (-9359.199) (-9369.728) * (-9354.917) [-9352.874] (-9357.325) (-9369.148) .. -- 0:02:14
+
+      Average standard deviation of split frequencies: 0.003429
+
+      543000 -- (-9359.481) (-9359.230) [-9353.323] (-9358.153) * (-9372.757) (-9351.761) (-9356.606) [-9351.864] .. -- 0:01:57
+
+      Average standard deviation of split frequencies: 0.003417
+
+      544000 -- (-9348.974) (-9353.791) [-9358.735] (-9353.235) * (-9360.443) (-9351.822) (-9353.812) [-9348.713] .. -- 0:01:40
+
+      Average standard deviation of split frequencies: 0.003429
+
+      545000 -- (-9355.602) (-9354.470) [-9352.268] (-9351.178) * (-9357.591) (-9358.500) [-9355.622] (-9357.218) .. -- 0:01:24
+
+      Average standard deviation of split frequencies: 0.003538
+
+      546000 -- (-9364.463) [-9349.343] (-9350.450) (-9357.085) * [-9352.774] (-9361.509) (-9361.989) (-9361.754) .. -- 0:01:07
+
+      Average standard deviation of split frequencies: 0.003542
+
+      547000 -- (-9359.816) (-9355.909) [-9353.691] (-9357.786) * (-9360.205) (-9361.498) (-9355.005) [-9356.378] .. -- 0:00:50
+
+      Average standard deviation of split frequencies: 0.003594
+
+      548000 -- (-9353.538) (-9361.239) [-9359.681] (-9361.486) * [-9352.780] (-9356.799) (-9361.816) (-9360.634) .. -- 0:00:33
+
+      Average standard deviation of split frequencies: 0.003593
+
+      549000 -- (-9368.223) (-9354.432) [-9350.810] (-9364.159) * (-9358.666) (-9359.550) (-9355.317) [-9351.099] .. -- 0:00:16
+
+      Average standard deviation of split frequencies: 0.003576
+      550000 -- (-9350.583) (-9367.726) [-9353.656] (-9362.719) * (-9356.719) [-9352.841] (-9353.167) (-9365.594) .. -- 0:00:00
+
+      Average standard deviation of split frequencies: 0.003531
+
+      Analysis completed in 9252 seconds
+      Analysis used 9251.39 seconds of CPU time
+      Likelihood of best state for "cold" chain of run 1 was -9344.63
+      Likelihood of best state for "cold" chain of run 2 was -9344.95
+      Likelihood of best state for "cold" chain of run 3 was -9345.07
+      Likelihood of best state for "cold" chain of run 4 was -9345.49
+      Acceptance rates for the moves in the "cold" chain of run 1:
+         With prob.  Chain accepted changes to
+           23.26 %   param. 1 (revmat) with Dirichlet proposal
+            5.35 %   param. 2 (state frequencies) with Dirichlet proposal
+           37.49 %   param. 3 (gamma shape) with multiplier
+           51.19 %   param. 4 (prop. invar. sites) with sliding window
+            7.74 %   param. 5 (topology and branch lengths) with extending TBR
+           11.38 %   param. 5 (topology and branch lengths) with LOCAL
+      Acceptance rates for the moves in the "cold" chain of run 2:
+         With prob.  Chain accepted changes to
+           23.21 %   param. 1 (revmat) with Dirichlet proposal
+            5.56 %   param. 2 (state frequencies) with Dirichlet proposal
+           37.82 %   param. 3 (gamma shape) with multiplier
+           51.76 %   param. 4 (prop. invar. sites) with sliding window
+            7.77 %   param. 5 (topology and branch lengths) with extending TBR
+           11.35 %   param. 5 (topology and branch lengths) with LOCAL
+      Acceptance rates for the moves in the "cold" chain of run 3:
+         With prob.  Chain accepted changes to
+           23.11 %   param. 1 (revmat) with Dirichlet proposal
+            5.56 %   param. 2 (state frequencies) with Dirichlet proposal
+           38.08 %   param. 3 (gamma shape) with multiplier
+           51.64 %   param. 4 (prop. invar. sites) with sliding window
+            7.72 %   param. 5 (topology and branch lengths) with extending TBR
+           11.44 %   param. 5 (topology and branch lengths) with LOCAL
+      Acceptance rates for the moves in the "cold" chain of run 4:
+         With prob.  Chain accepted changes to
+           23.11 %   param. 1 (revmat) with Dirichlet proposal
+            5.38 %   param. 2 (state frequencies) with Dirichlet proposal
+           37.94 %   param. 3 (gamma shape) with multiplier
+           52.27 %   param. 4 (prop. invar. sites) with sliding window
+            7.81 %   param. 5 (topology and branch lengths) with extending TBR
+           11.50 %   param. 5 (topology and branch lengths) with LOCAL
+
+      Chain swap information for run 1:
+
+                  1      2      3      4 
+           ------------------------------
+         1 |          0.65   0.40   0.25 
+         2 |  91758          0.70   0.47 
+         3 |  91895  91627          0.74 
+         4 |  91498  91777  91445        
+
+      Chain swap information for run 2:
+
+                  1      2      3      4 
+           ------------------------------
+         1 |          0.65   0.40   0.24 
+         2 |  91307          0.70   0.47 
+         3 |  91533  91883          0.74 
+         4 |  91593  91960  91724        
+
+      Chain swap information for run 3:
+
+                  1      2      3      4 
+           ------------------------------
+         1 |          0.65   0.41   0.24 
+         2 |  91631          0.70   0.48 
+         3 |  91694  91570          0.74 
+         4 |  91764  91706  91635        
+
+      Chain swap information for run 4:
+
+                  1      2      3      4 
+           ------------------------------
+         1 |          0.65   0.40   0.24 
+         2 |  91457          0.70   0.47 
+         3 |  91714  91410          0.73 
+         4 |  92363  91337  91719        
+
+      Upper diagonal: Proportion of successful state exchanges between chains
+      Lower diagonal: Number of attempted state exchanges between chains
+
+      Chain information:
+
+        ID -- Heat 
+       -----------
+         1 -- 1.00  (cold chain)
+         2 -- 0.83 
+         3 -- 0.71 
+         4 -- 0.62 
+
+      Heat = 1 / (1 + T * (ID - 1))
+         (where T = 0.20 is the temperature and ID is the chain number)
+      Deleting matrix
+   Quitting program
+

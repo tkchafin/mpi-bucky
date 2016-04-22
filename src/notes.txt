@@ -1,0 +1,2 @@
+Planned changes to bucky: 
+1. ~line 2060 need to adda way for each slave to receive its own seed

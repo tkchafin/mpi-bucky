@@ -1,0 +1,19 @@
+This directory contains fake data that should be hard to update without groups.
+Each tree has 20 taxa, so tree space is large and T is huge
+There are 10 genes, each with only the same three tree topologies and equal weights.
+The posterior should be concentrated uniformly on the three GTMs with only one group.
+With single gene updates, it is hard to move from one good state to another
+as there needs to be a long traversal through low probability space.
+But the update groups can jump from one good state to another directly.
+
+Test example data with this command.  Default behavior is good.
+
+  bucky -o test1 ex*/ex*.in
+
+Look at test1.concordance to see that the three uncertain splits each have probability about 1/3.
+
+Compare .concordance results with this command.
+
+  bucky -o test2 -c 4 --do-not-use-update-groups ex*/ex*.in
+
+The file test2.concordance has the wrong posterior probability, and adding chains does not help.

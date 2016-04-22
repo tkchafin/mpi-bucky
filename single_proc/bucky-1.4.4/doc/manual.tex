@@ -1,0 +1,756 @@
+\documentclass[12pt,english,final,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+
+\usepackage{longtable}
+\usepackage{vmargin}
+\setpapersize{USletter}
+
+%\setmarginsrb{left}{top}{right}{bottom}{headheight}{headsep}{footheight}{footskip}
+\setmarginsrb{2.5cm}{2.5cm}{2.5cm}{2cm}{0cm}{0cm}{0.5cm}{1.5cm}
+
+% style and citations
+
+\usepackage{natbib}
+\usepackage{mbe}
+\bibliographystyle{mbe}
+
+\newcommand{\com}[1]{}
+\newcommand{\cf}{concordance factor}
+\newcommand{\gtm}{\textsc{gtm}}
+\newcommand{\prob}[1]{\mathsf{P}\left\{#1\right\}}
+\newcommand{\E}[1]{\mathsf{E}\left\{#1\right\}}
+\newcommand{\given}{\,|\,}
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\bu}{BUCKy}
+
+%\renewcommand{\textfraction}{0.0}
+
+\usepackage{babel}
+
+\begin{document}
+
+\begin{center}
+{\Large\bf BUCKy}
+
+{\bf Bayesian Untangling of Concordance Knots\\
+(applied to yeast and other organisms)}
+\bigskip
+
+Version 1.4.0, last updated 24 June 2010\\
+Copyright\copyright{} 2008 by Bret Larget\\
+\medskip
+
+{\small
+Departments of Statistics and of Botany\\ 
+University of Wisconsin - Madison\\ 
+Medical Sciences Center,\\ 
+1300 University Ave. Madison, WI 53706, USA.
+}
+\end{center}
+
+
+\section{Introduction}
+\bu{} is a program to analyze a multi-locus data sets with 
+Bayesian Concordance Analysis (BCA), as described in \cite{ane-etal-2007}
+and \cite{larget-etal-2010}.
+See \cite{baum-2007} for the concepts of concordance factors and
+concordance trees.
+BCA accounts for biological processes like hybridization, 
+incomplete lineage sorting or lateral gene transfer, which may result
+in different loci to have different genealogies. With BCA,
+each locus is assumed to have a unique genealogy, and different
+loci having different genealogies. The {\it a priori} level of 
+discordance among loci is controlled by one parameter $\alpha$.
+
+BCA works in two steps: First, each locus is to be analyzed 
+separately, with MrBayes for instance. Second, all these separate
+analyses are brought together to inform each other. \bu{} will
+perform this second step.
+\bu{} comes into two separate programs: {\tt mbsum} and {\tt bucky}.
+The first program {\tt mbsum} summarizes the output produced by MrBayes
+from the analysis of an individual locus. The latter, {\tt bucky}, 
+takes the summaries produced by {\tt mbsum} and performs the second step
+of BCA. These two programs were kept separate because {\tt mbsum}
+is typically run just once, while {\tt bucky} might be run several
+times  independently, with or without the same parameters, with
+a subset of taxa or a subset of genes, etc.
+
+\section{Installation and Compilation}
+\bu{} is a command-line controlled program written is C$++$.
+It should be easily compiled and run on any Linux system or Mac OSX.
+Executable files compiled under various platforms are available
+at \verb+www.stat.wisc.edu/~ane/bucky/+ .
+
+
+\paragraph{Installation from source code.}
+Pick a directory where you want the \bu{} code to be. This directory 
+will be called \verb+$BUCKY_HOME+ in this documentation.
+Download the {\tt bucky-1.4.4.tgz} file and put it in \verb+$BUCKY_HOME+.
+To open the compressed tar file with the \bu{} source code 
+and example data, do these commands:
+\begin{verbatim}
+cd $BUCKY_HOME
+tar -xzvf bucky-1.4.4.tgz
+\end{verbatim}              %$
+This creates a directory named {\tt bucky} with subdirectories
+{\tt bucky/data} and {\tt bucky/src}.
+
+\paragraph{Compilation.} If you have gcc installed, compile
+the software with these commands.
+\begin{verbatim}
+cd $BUCKY_HOME/bucky/src
+make
+\end{verbatim}   %$
+This will compile programs {\tt mbsum} and {\tt bucky}.
+It is suggested that copies of {\tt mbsum} and {\tt bucky}
+be put in \verb+~/bin+ if this directory is in your path.
+If you do not have gcc installed and the executable provided
+is not working on your system, you need to find the installer
+for gcc. On a Macintosh (version 10.3.9 or before), it may be in 
+Applications/Installers/Developer~Tools.
+
+\section{Running mbsum}
+Type this for a brief help message
+\begin{verbatim}
+mbsum --help
+mbsum -h
+\end{verbatim}
+
+\paragraph{Purpose and Output.}
+It is advised to have one directory containing the MrBayes output 
+of all individual locus analyses. Typically, in this directory
+each file of the form {\tt *.t} is a MrBayes output file from one 
+single locus.  Use {\tt mbsum} to summarize all files from the
+same locus. You want {\tt mbsum} to create a file 
+\verb+<filename>.in+ for each locus. 
+The extension \verb+.in+
+just means input (for later analysis by {\tt bucky}). 
+Output files {\tt *.in} from {\tt mbsum} will typically look like the following,
+containing a list of tree topologies and a tally representing the trees' posterior
+probabilities from a given locus (as obtained in the first step of BCA).
+{\small
+\begin{verbatim}
+translate
+       1 Scer,
+       2 Spar,
+       3 Smik,
+       4 Skud,
+       5 Sbay,
+       6 Scas,
+       7 Sklu,
+       8 Calb;
+(1,(2,(3,(4,(5,((6,7),8)))))); 24239
+(1,(2,(3,(4,(5,(6,(7,8))))))); 15000
+(1,(2,(3,(4,(5,((6,8),7)))))); 2983
+(1,(2,(3,((4,5),((6,7),8))))); 2590
+(1,(2,((3,((6,7),8)),(4,5)))); 2537
+(1,(2,((3,(6,(7,8))),(4,5)))); 1097
+(1,(2,(3,((4,5),(6,(7,8)))))); 995
+(1,(2,(3,((4,5),((6,8),7))))); 163
+(1,(2,(3,((4,((6,7),8)),5)))); 145
+(1,(2,((3,((6,8),7)),(4,5)))); 96
+(1,(2,((3,(4,5)),((6,7),8)))); 66
+(1,(2,(3,((4,(6,(7,8))),5)))); 51
+(1,(2,((3,(4,5)),(6,(7,8))))); 22
+(1,(2,(3,((4,((6,8),7)),5)))); 15
+(1,(2,((3,(4,5)),((6,8),7)))); 1
+\end{verbatim}}
+ 
+\paragraph{Syntax and Options.}
+To run {\tt mbsum} for a single data file, type:
+\begin{verbatim}
+mbsum [-h] [--help] [-n #] [-o filename] [--version] <inputfilename(s)> 
+\end{verbatim}
+For example, let's say an alignment \texttt{mygene.nex} was 
+analyzed with MrBayes with two runs, and sampled trees are in files
+\texttt{mygene.run1.t} and \texttt{mygene.run2.t}. These two
+sample files include, say, 5000 burnin trees each. To summarize 
+these 2 runs  use
+\begin{verbatim}
+mbsum -n 5000 -o mygene mygene.run1.t mygene.run2.t
+\end{verbatim}
+or more generally
+\begin{verbatim}
+mbsum -n 5000 -o mygene mygene.run?.t
+\end{verbatim}
+\com{
+ Note: the older version of \texttt{mbsum} could only take a single
+ file. It was then necessary to have a single file for each locus, 
+ and to combine all independent MrBayes runs from the same locus
+ into a single file. This is no longer necessary. 
+ With version 1.2b of \texttt{mbsum}, there can be several 
+ input files, such as several parallel runs from MrBayes.
+}
+Here is a description of the available options.
+\begin{center}
+\begin{tabular}{p{1.59in}|p{4.7in}}
+{\tt -h} or \verb+[--help]+& prints a help message describing the options
+then quits.\\
+{\tt -n \#} or \verb+[--skip #]+& This option allows the user to 
+skips lines of trees before actually starting the tally tree 
+topologies. The default is 0, i.e {\em no} tree is skipped. 
+The same number of trees will be skipped in each input file.\\
+{\tt -o filename} or \verb+--out filename+& sets the output file name. A single output
+file will be created even if there are multiple input files.
+The tally combines all trees (except skipped trees) found in all 
+files. \\
+\verb+--version+& prints the program's name and version then quits.
+\end{tabular}\end{center}
+\com{ fixit:
+ Since {\tt mbsum} needs to be run on all tree files {\tt *.t}, we provide
+ here a way to do so very efficiently. 
+ \begin{verbatim}
+ for X in *.t; do mbsum -n 1000 $X; done
+ \end{verbatim} %$ (doesn't work with version 1.2)
+}
+
+\noindent
+Example: the raw data and output from MrBayes are provided for the
+very first gene in the set analyzed in \cite{ane-etal-2008}.
+They are located in \verb+$BUCKY_HOME/bucky/data/yeast/y000/+. 
+The tree files from MrBayes, named \verb+y000.run1.t+ through
+\verb+y000.run4.t+, each contain 5501 trees. 
+They can be summarized with:
+\begin{verbatim}
+mbsum -n 501 -o y000.in    $BUCKY_HOME/bucky/data/yeast/y000/y000.run?.t
+\end{verbatim}
+
+\paragraph{Warnings.}  
+{\tt mbsum} will overwrite a file named \verb+filename+
+if such a file exists.
+%
+Only the first file is used to obtain the translate information,
+in case several runs are combined for a given gene. 
+{\tt mbsum} assumes an identical translate table in all separate runs.
+Translate tables are allowed by version 1.3.0 and required by version 1.3.2 and up.
+
+From version 1.4.0, {\tt bucky} and {\tt mbsum} no longer assume 
+that the same taxon is used to root all the trees across all runs and loci. 
+Note also that MrBayes and \bu{} infer unrooted trees. 
+Rooting is only used when writing trees in parenthetical format.
+
+\section{Running bucky}
+%\paragraph{Syntax.}
+After input files created by {\tt mbsum} are ready, the names of these
+files can either be given as arguments to {\tt bucky}, or the file 
+names can be written into a file, which in turn can be given to
+{\tt bucky}. To run {\tt bucky}, use either way:
+\begin{verbatim}
+bucky [-options] <summary_files> 
+bucky [-options]
+\end{verbatim}
+With the second command, one of the options must be 
+{\tt -i filename}, where {\tt filename} is the name of a file
+containing the list of all the input files (one input file per gene).
+For example, after creating all {\tt .in} files with {\tt mbsum} in the same 
+directory, you can run bucky with the default parameters by typing this:
+\begin{verbatim}
+bucky *.in
+\end{verbatim}
+
+\paragraph{Options.} \hspace{1cm}
+
+\bigskip
+
+\noindent
+\hspace*{-.2in}
+\begin{tabular}{l|p{4.6in}}
+{\tt -i inputfilelist-file}&To give the list of files created by {\tt mbsum} 
+from a file.\\
+{\tt -o output-file-root}&This option sets the names of output 
+files. Default is {\tt run1}.\\
+{\tt -a alpha}&$\alpha$ is the {\it a priori} level of discordance among 
+loci. Default $\alpha$ is 1.\\
+{\tt -n number-generations}&Use this option to increase the number of 
+updates (default: 100,000). An extra number of updates will actually be 
+performed for burnin. This number will be 10\% of the desired number {\tt n} 
+of post-burning updates. The default, then, is to perform 10,000 updates for 
+burnin, which will be discarded, and then 100,000 more updates.\\
+{\tt -h} or \verb+--help+&Prints a help message describing options,
+then quits.\\
+{\tt -k number-runs}&Runs $k$ independent analyses. Default is 2.\\
+{\tt -c number-chains}&Use this option to run Metropolis coupled MCMC (or MCMCMC), 
+whereby hot chains are run in addition to the standard (cold) chain. 
+These chains occasionally swap states, so as to improve their mixing. 
+The option sets the total number of chains, including the cold one. 
+Default is 1, i.e. no heated chains.\\
+{\tt -r MCMCMC-rate}&When Metropolis coupled MCMC is used, this option
+controls the rate $r$ with which chains try to swap states: a swap
+is proposed once every $r$ updates. Default is 100.\\
+{\tt -m alpha-multiplier}&Warm and hot chains, in MCMCMC, use higher values 
+of $\alpha$ than does the cold chain. The cold chain uses the $\alpha$ value 
+given by the option {\tt -a}. Warmer chains will use parameters 
+$m\alpha, m^2\alpha,\dots, m^{c-1}\alpha$. Default $m$ is 10.
+The independence prior corresponds to $\alpha=\infty$ so MCMCMC is not used
+with this prior.
+\end{tabular}
+
+\noindent
+\hspace*{-.3in}
+\begin{tabular}{l|p{4.4in}}
+{\tt -s subsample-rate}&Use this option for thinning the sample. All post-burnin samples
+will be used for summarizing the posterior distribution of gene-to-tree maps, 
+but you may choose to save just a subsample of these gene-to-tree maps. One sample
+will be saved every $s$ updates. This option will have an effect only if option
+\verb+--create-sample-file+ is chosen. Default is 1: no thinning.\\
+{\tt -s1 seed1}&Default is 1234. %Two seeds are used by the random number generator.
+\\
+{\tt -s2 seed2}&Default is 5678.\\
+{\tt -cf cutoff}&All splits with estimated sample-wide CF above this cutoff 
+will be included in the list to have their summary information and their genome-wide CF
+displayed. Default is $0.05$.\\
+{\tt -p file-with-prune table}& Default is to only consider taxa common to all genes, and prune all other taxa from the trees. This option allows the user to indicate which taxa should be retained in the analysis. These taxa are specified in a standard translate table, in a separate input file.\\
+{\tt -sg}& Use this option to skip processing genes that do not have all taxa of interest.
+Use {\tt -p} to specify the taxa of interest. \\
+\verb+--calculate-pairs+&Use this option to calculate the 
+posterior probability that pairs of loci share the same tree. Default is 
+to {\sc not} use this option.\\
+\verb+--create-sample-file+&Use this option for saving samples of gene-to-tree maps.
+Default is to {\sc not} use this option: samples are not saved. Saving all samples can slow down the program.\\
+\verb+--create-joint-file+&This option creates a {\tt .joint} file. 
+{\sc not} created by default.\\
+\verb+--create-single-file+&This option creates a {\tt .single} file. 
+{\sc not} created by default. \\
+\verb+--use-independence-prior+&Use this option to assume {\it a priori}
+that loci choose their trees independently of each other. This is equivalent
+to setting $\alpha=\infty$. Default is to {\sc not} use this option.\\
+\verb+--use-update-groups+&Use this option to permit all loci 
+in a group to be updated to another tree. Default is to use this option,
+because it improves mixing.\\
+\verb+--do-not-use-update-groups+&Use this option to disable the update that 
+changes the tree of all loci in a group in a single update. Default is to 
+{\sc not} use this option. If both options \verb+--use-update-groups+ and 
+\verb+--do-not-use-update-groups+ are used, only the last one is applied. 
+No warning is given, but the file {\tt .out} indicates
+whether group updates were enabled or disabled.\\
+\verb+--opt-space+&This option accommodates large data sets that require large 
+memory (many genes each with many unique trees), with space optimization. 
+This option allows very large data sets to be analyzed, but increases the 
+program running time.\\
+\verb+--genomewide-grid-size+&Number of grid points to estimate the 
+genome-wide concordance factors. Default to 1000. Is automatically increased
+(with a message) to make sure it is greater than the number of sampled genes.
+\end{tabular}
+
+
+\paragraph{Output.}
+Running {\tt bucky} will create various output files. With defaults 
+parameters, these output files will have names of the form {\tt run1.*}, 
+but you can choose you own root file name.
+The following output files describe the input data, input parameters, and
+progress history.
+\bigskip
+
+%\hspace*{-1in}
+%\begin{tabular}{l|p{6in}}
+\noindent
+\begin{tabular}{l|p{5.7in}}
+{\tt .out}& Gives the date, version, input file names, 
+parameters used, running time and progress history. If MCMCMC is used, 
+this file will also indicate the acceptance history of swaps between chains.\\
+{\tt .input}& Gives the list of input files. There should be one file 
+per locus.\\
+{\tt .single}& Gives a table with tree topologies in rows and loci in 
+columns. The entries in the table are posterior probabilities of trees from the
+separate locus analyses. It is a one-file summary of the first step of BCA.\\
+\end{tabular}
+
+\bigskip\bigskip
+\bigskip
+
+The following files give the full results as well as various result summaries.
+The goal of BCA this is to estimate the primary
+concordance tree. This tree is formed by all clades with concordance 
+factors ({\sc cf}) greater than 50\%, and possibly other clades. 
+The {\sc cf} of a clade is the proportion of loci that have 
+the clade. Sample-wide refers to loci in the sample and genome-wide 
+refers to loci in the entire genome.
+
+\bigskip
+
+%\hspace*{-1in}
+%\begin{tabular}{l|p{5.5in}}
+\noindent
+\begin{longtable}{l|p{5.1in}}
+{\tt .concordance}&Main output: 
+this file first gives the primary concordance tree topology in parenthetical 
+format and again the same tree with the posterior means of 
+sample-wide {\sc cf}s as edge lengths.
+A estimated population tree is also provided, inferred from the
+set of quartets with highest {\sc CF}s.
+The list of clades in the primary concordance tree follows, with 
+information on their sample-wide and genome-wide {\sc cf}s: 
+posterior mean and 95\% credibility intervals. Inference on 
+genome-wide {\sc cf}s assumes that loci were sampled at random
+from an infinite genome.
+Finally, the file gives the posterior distribution of sample-wide
+{\sc cf}s of all clades, sorted by their mean {\sc cf}. 
+In this list, {\sc cf}s are expressed in number of loci 
+instead of proportions. \\
+{\tt .cluster}&Gives the posterior distribution of the number of 
+clusters, as well as credibility intervals. A cluster is a group of loci 
+sharing the same tree topology. Loci in different clusters have different 
+tree topologies.\\
+{\tt .pairs}&Gives an $l$ by $l$ similarity matrix, $l$ being the number 
+of loci. Entries are the posterior probability that two given loci share 
+the same tree.\\
+{\tt .gene}& For each locus, gives the list of all topologies 
+supported by the locus (index and parenthetical description). For each
+topology is indicated the posterior probability that the locus has this
+tree given the locus's data (`single' column) and given all loci's
+data (`joint' column).\\
+{\tt .sample}& Gives the list of gene-to-tree maps sampled by 
+{\tt bucky}. With $n$ post-burnin updates and subsampling every $s$ steps, 
+this file contains $n/s$ lines, one for each saved sample. Each line contains 
+the number of accepted updates (to be compared to the number of genes * 
+sub-sampling rate), 
+the number of clusters in the gene-to-tree map (loci mapped to the same 
+tree topology are in the same cluster), 
+the log-posterior probability of the gene-to-tree map 
+up to an additive constant
+\com{fixit: NOT sure at all. Bret: please check!}
+followed by the gene-to-tree map. If there are $l$ loci, this map is just 
+a list of $l$ trees. Trees are given by their indices. The correspondence
+between tree index and tree parenthetical description can be found in the
+{\tt .gene} or {\tt .single} file.\\
+%\end{tabular}
+%
+%\hspace*{-1in}
+%\begin{tabular}{l|p{5.5in}}
+{\tt .joint}&Gives a table with topologies in rows and loci in columns,
+similar to file {\tt .single} file. Topologies are 
+named by their indices as well as by their parenthetical descriptions. 
+Entries are posterior probabilities (averaged across all runs) 
+that each locus was mapped to each topology.\\ 
+\end{longtable}
+
+\section{Examples}
+
+The example data provided with the program is organized as follows:
+directory\\ \verb+$BUCKY_HOME/bucky/data/example1/+ %$
+contains 10 folders named {\tt ex0} to {\tt ex9}, one for each locus. 
+These 10 folders contain a single file each, named {\tt ex.in}, which was 
+created by  {\tt mbsum}.
+For analyzing these data, one
+can use the default parameters and type
+\begin{verbatim}
+bucky $BUCKY_HOME/bucky/data/example1/ex?/ex.in
+\end{verbatim}%$
+The question mark will match any character (any digit 0 to 9 in
+particular), so that all 10 locus files will be used for the analysis.
+The following command will run {\tt bucky} with 
+$\alpha=5$, no MCMCMC, group updates disabled, 2 independent runs (default), 
+one million updates and user-defined seeds (keep this command on a single line).
+
+\begin{verbatim}
+bucky -n 100000 -a 5 -s1 7452 -s2 9054 --do-not-use-update-groups 
+                                    $BUCKY_HOME/bucky/data/example1/ex?/ex.in
+\end{verbatim}
+
+A look at the file {\tt run1.concordance} shows that the clades (19,20) and
+(18,19) both have an estimated {\sc cf} of 0.50 but that this estimate differed
+greatly between runs because its standard deviation is 0.707. Scrolling down
+the file indicates that the first run gave a 100\% concordance factor to clade
+(19,20) all the time while the second run gave it a 0\% concordance factor 
+all the time. 
+So the two runs are in very strong disagreement. 
+These results could vary with different seeds.
+This poor mixing is fixed by using the option
+\verb+--use-update-groups+ (or by not using the 
+\verb+--do-not-use-update-groups+ option!).
+\medskip
+
+The yeast data analyzed in \cite{ane-etal-2007} is provided with the program
+and organized as follows. The directory
+\verb+$BUCKY_HOME/bucky/data/yeast/+ %$ 
+contains 106 folders named {\tt y000} to {\tt y105}, one for each gene. 
+In each of these folders, a file created by {\tt mbsum} and named 
+{\tt run2.nex.in} contains the data from one gene.
+The list of all these input files is also provided, in 
+\verb+$BUCKY_HOME/bucky/data/yeast/yeast_inputfilelist+ .
+For analyzing these data with $\alpha=2.5$, 
+$n=150,000$ updates, $k=4$ independent runs, $c=4$ chains 
+(one cold and 3 hot chains),
+saving samples once every $1000$ updates, and for keeping a similarity 
+matrix among genes, one would type (on a single line)
+\begin{verbatim}
+bucky -a 2.5 -n 150000 -k 4 -c 4 --create-sample-file --calculate-pairs
+                -s 1000   $BUCKY_HOME/bucky/data/yeast/y???/run2.nex.in
+\end{verbatim}%$
+or alternatively, if \verb+$BUCKY_HOME/bucky/+ is the current directory:%$
+\begin{verbatim}
+bucky -a 2.5 -n 150000 -k 4 -c 4 --create-sample-file --calculate-pairs
+                -s 1000 -i data/yeast/yeast_inputfilelist
+\end{verbatim}
+
+To prune the analysis to a specific set of taxa, the option {\tt -p} 
+can be used with a file containing the taxon list like this:
+\begin{verbatim}
+bucky -n 150000 -p data/yeast/shortTaxonList -i data/yeast/yeast_inputfilelist
+\end{verbatim}
+The above command aborts with an error message if some genes do not have all 
+taxa of interest. To skip such genes and analyze the remaining genes only, 
+{\tt -sg} can be used. Example:
+\begin{verbatim}
+bucky -n 150000 -p data/yeast/shortTaxonList -sg -i data/yeast/yeast_inputfilelist
+\end{verbatim}
+\section{General notes}
+
+\paragraph{First step of BCA: Analysis of individual loci in MrBayes.}
+Any model of sequence evolution can be selected for any locus: there need 
+not be one model common to all loci. Some loci can be protein alignments,
+others DNA alignments, some can combine DNA and coded gap characters.
+Morphological characters could technically be included as one locus, 
+but then the resulting concordance factors may not have an
+easy interpretation.
+
+If hundreds of genes are to be analyzed, the analysis of these
+genes needs to be automated, and ideally run in parallel. One way 
+to proceed is to have all the alignments in a single nexus file. 
+In the first step, MrBayes can be told to ignore all but a single 
+locus, and this would be repeated for each locus. 
+Alternatively, MrBayes can be told to analyse all loci at once 
+by unlinking \emph{topologies, branch lengths} and other parameters 
+assumed to be independent. The downside of this single analysis 
+is the difficulty to use multiple processors in parallel to speed
+up the analysis.
+
+\paragraph{Choosing the {\it a priori} level of discordance $\alpha$.}
+To select a value based on biological relevance, the number of taxa and 
+number of genes need to be considered. For example, the user might have an 
+{\it a priori} for the proportion of loci sharing the same genealogy. One 
+can turn this information into a value of $\alpha$ since the probability that 
+two randomly chosen loci share the same tree is about $1/(1+\alpha)$ if 
+$\alpha$ is small compared to the total number of possible tree topologies. 
+Also, the value of $\alpha$ sets the prior distribution on the number of 
+distinct locus genealogies in the sample. 
+Go to \verb+www.stat.wisc.edu/~ane/bucky/prior.html+ for instructions to 
+visualize this distribution, as a tool for the choice of $\alpha$. 
+
+\paragraph{Concordance tree and Population tree.}
+The estimated primary concordance tree is currently provided as a fully resolved
+tree, possibly including clades that are in less than 50\% of gene trees. 
+The user might want to unresolve some of these clades, in case other 
+conflicting clades have lower but similar concordance factors. Information
+on the credibility intervals of {\sc CF}s can be used to decide if a clade
+in the concordance tree has a significantly higher {\sc CF} than 
+that of a conflicting clade.
+
+The estimated population tree is inferred from quartet \cf{}s. 
+For each set of 4 taxa, there are 3 possible quartets. The quartet with
+the greatest {\sc CF} is retained, and a tree is built from this set of 
+quartets using the quartet-joining algorithm \cite{xin_etal-2007}.
+If \cf{}s are estimated without error, then this quartet-based method is 
+guaranteed to recover the true species tree if all discordance is due to
+the coalescent process along this tree. \cite{degnan_etal-2009}. 
+On each branch in this tree, the {\sc cf}s of all quartets in agreement 
+with the 4-way partition defined by the branch are averaged together
+($\bar{\mathrm{CF}}$)
+An estimated branch length $u$ is calculated in coalescent units, using the
+formula $$u = -\log((1-\bar{\mathrm{CF}})*3/2)\,.$$ 
+On branches with perfect agreement ($\bar{\mathrm{CF}}=1$) such as
+external branches, $u$ is set to a maximum value of $10$.
+This tree should be used with caution, for several reasons. 
+It has yet to be tested in simulation and empirical studies.
+Uncertainty in estimated coalescent units of estimated average quartet
+{\sc CF}s is not available, and this tree has yet to be refined in cases 
+with more than one individual per population.
+
+\paragraph{Missing sequences.}
+If some loci have missing sequences, i.e. missing taxa, then
+rows of missing data (????) need to be inserted in place of the missing 
+taxon's sequence. A more efficient way to deal with missing 
+sequences will be implemented in a future version of {\tt bucky}.
+
+\paragraph{Visualization of output.}
+Online tools are provided here to aid in the visualization of BUCKy output:
+\verb+http://ane-www.cs.wisc.edu/buckytools/buckytools.php+.
+This includes visualization of the
+primary concordance tree, and of alternate trees that display alternate
+splits, chosen by the user. The user can also compare the credibitity intervals of 
+conflicting splits to see if they are overlapping or not. 
+The estimated population tree can also be visualized, among other things.
+    
+\section{Version history}
+\paragraph{version 1.4.4}
+Fixes a bug with the estimation of genome-wide CFs, which caused a segmentation fault after 
+the MCMC had finished, during the generation of the .concordance file. This bug occurred 
+when the number of sampled genes was large ($>1000$) and when the {\tt -cf} option was
+used to get genome-wide information on splits with very low CFs.
+
+\paragraph{version 1.4.3}
+Compiles under Mavericks (OS X 10.9). Option {\tt --no-population-tree}
+turns off the population tree building, to save time and memory with large numbers of taxa. 
+
+\paragraph{version 1.4.2}
+{\tt mbsum} can read in a wider range of tree file formats, 
+including that produced by MrBayes 3.2.1. 
+
+\paragraph{version 1.4.0}
+A population tree is inferred, based on quartet concordance factors. 
+The data reading time and the MCMC running time have been optimized. 
+Option {\tt -sg} was added, to easily ignore genes that do not have all
+taxa specified in the input taxon file.
+Option {\tt --opt-space} was added to allow the analysis of very large data sets.
+
+All trees are re-formatted internally using the last taxon as a root,
+to waive the requirement that all input files use the same root in their
+tree format. Note that this requirement is usually met if tree files are 
+generated by MrBayes {\it and} if the same taxon appears first for all genes, 
+because MrBayes uses the first taxon by default to root the trees. 
+{\tt bucky} and {\tt mbsum} can parse rooted trees, but treat them as unrooted.
+
+\paragraph{version 1.3.2}
+Option {\tt -p} was added, to easily run analyses on
+subsets of taxa. Input files with different taxon sets are allowed, 
+with the analysis reduced to their common taxa. Translate tables are 
+required in all input files.
+
+\smallskip
+An important bug was fixed in the group update algorithm, to get correct
+sampling probabilities.
+
+\smallskip Concordance factors appear as proportions, not as numbers of genes,
+in the parenthetical description of the concordance tree.
+
+\paragraph{version 1.3.1}
+Option {\tt -cf} was added.
+{\tt mbsum} recognizes Mac-style line breaks as well as
+Unix-style line breaks. A bug was fixed in {\tt mbsum}, 
+so that taxon numbers no longer need to range from 1 through Ntax.
+
+\smallskip The maximum number of tips is no longer limited to 32.
+The bug that occurred with exactly 32 taxa in assembling clades with 
+high \cf{}s into a concordance tree was fixed.
+
+\paragraph{version 1.2b}
+Independent runs are implemented, with information on the standard deviation
+of clade's {\sc cf} across runs. A bug was fixed with the group update.
+The {\tt -i} option was added, which can be particularly useful when
+thousands of genes are to be analyzed. Translate tables are used,
+so that taxa may appear in a different order for different genes (but the 
+same taxon has to be serve as an outgroup consistently across genes).
+{\tt bucky} uses the translate information if provided 
+by the files created by {\tt mbsum}, and makes some necessary checks and
+warnings.
+
+\paragraph{version 1.2}
+The main output file ({\tt .concordance}) contains the primary concordance
+tree in parenthetical format. It also displays a more detailed summary
+for all splits with mean concordance factor above $0.10$. 
+A bug was fixed in the list of splits belonging to the
+primary concordance tree. Inference on genome-wide concordance factors is
+included.
+The help message is improved with a better display of available options and
+default parameter values.
+
+\smallskip
+
+The following output files, deemed unnecessary, are no longer produced:
+{\tt .gene}, {\tt .top}, {\tt .topologies} and {\tt .splits}. 
+Output file named {\tt .genepost} in version 1.1 is now named 
+{\tt .gene} in version 1.2. 
+Output files {\tt .joint} and {\tt .single} are not produced unless
+requested by the user.
+
+\com{ Not needed anymore for the splits in the concordance tree. 
+\paragraph{Genome-wide concordance factors.}
+The output file {\tt run1.concordance} provides the posterior
+distribution of the {\em sample-wide} concordance factor for each clade. For
+example, the information pertaining to clade $\{1,2,3\}$ might look like this:
+\begin{verbatim}
+{1,2,3|4,5,6,7,8}
+#Genes      count probability cumulative
+    90          2    0.000002   0.000002
+    91         11    0.000011   0.000013
+    92         96    0.000096   0.000109
+    93        883    0.000883   0.000992
+    94       4354    0.004354   0.005346
+    95      17375    0.017375   0.022721
+    96      52301    0.052301   0.075022
+    97     124923    0.124923   0.199945
+    98     211516    0.211516   0.411461
+    99     260611    0.260611   0.672072
+   100     204057    0.204057   0.876129
+   101     100355    0.100355   0.976484
+   102      22995    0.022995   0.999479
+   103        521    0.000521   1.000000
+
+mean CF = 98.760
+99% CI for CF = (94,102)
+95% CI for CF = (96,101)
+90% CI for CF = (96,101)
+\end{verbatim}
+However, the sample contained 106 loci only and there is extra uncertainty
+on the genome-wide number of loci having clade $\{1,2,3\}$. The 95\%
+credibility interval for the genome-wide concordance factor of this clade
+must be wider than $(96/106, 101/106)$. \cite{ane-etal-2007} describe how
+one can get the genome-wide posterior distribution from the sample-wide
+posterior distribution. For now, this is implemented in a separate program,
+(a set of R functions). 
+In the later version of {\tt bucky}, these programs will be unified.
+
+Download the file {\tt concordance\_genomewide.r}.
+%(from \verb+www.stat.wisc.edu/~larget/bucky.html+). 
+Open an R session (to download R, go to 
+\verb+http://cran.us.r-project.org+) and set R's working directory to the
+directory where you have {\tt concordance\_genomewide.r}. Have
+R read the file with
+\begin{verbatim}
+> source("concordance_genomewide.r")
+\end{verbatim}
+You are now ready to use the program. The first thing to do is to read
+the results from {\tt bucky} regarding sample-wide concordance factors.
+In the example above, clade {\tt 123|45678} is considered. 
+Results can be read from a file or just given to R with
+\begin{verbatim}
+> sampleCF = c(0.000002,0.000011,0.000096,0.000883,0.004354,0.017375,0.052301,
++              0.124923,0.211516,0.260611,0.204057,0.100355,0.022995,0.000521)
+\end{verbatim}
+Since these posterior probabilities correspond to concordance factors of
+90 genes out of 106 through 103 genes out of 106, probabilities of 0 need
+to be added. A plot is suggested for checking.
+\begin{verbatim}
+> sampleCF = c(rep(0,90), sampleCF, 0,0,0)
+> plot(sampleCF, type="h")
+\end{verbatim}
+To get credibility intervals for the genome-wide concordance factor, use
+\begin{verbatim}
+> genomewide(sampleCF,alpha=2.5,N=6000,n=106,Ntax=8,Nclade=3)
+> genomewide(sampleCF,alpha=2.5,N=6000,n=106,Ntax=8,Nclade=3,conf.level=.99)
+\end{verbatim}
+Parameters: The level of discordance
+$\alpha$ was set to 2.5 because it was the value used in {\tt bucky}.
+There were {\tt n=}106 genes in the sample, and it is thought that there are a 
+total of about {\tt N=}6,000 genes in the yeast genome.
+The bipartition has {\tt Nclade=}3 taxa on one side and 5 on the other side 
+for a total of {\tt Ntax=}8 taxa.
+The function {\tt genomewide} may take some time (here a couple seconds). 
+If you want to use this function many times for many different bipartitions,
+it is suggested to use a 2-step procedure, which we now explain.
+The posterior distribution of the genome-wide CF 
+is obtained by multiplying the posterior distribution of the sample-wide 
+CF (named {\tt sampleCF} in the example) with some matrix.
+This matrix depends on the size of the bipartition, but all bipartitions 
+with the same size will use the same matrix, which can then be re-used. 
+The function {\tt dpPosteriorWeights} will calculate this matrix.
+In the example above use
+\begin{verbatim}
+> mat = dpPosteriorWeights(alpha=2.5,N=6000,n=106,Ntax=8,Nclade=3)
+\end{verbatim}
+and finally get the posterior distribution of the genome-wide CF for this
+clade, or for any clade with separates the 8 taxa into a group of 3 and 
+a group of 5 taxa.
+\begin{verbatim}
+> genomeCF = mat %*% sampleCF
+> distribution.summary(genomeCF)
+\end{verbatim}
+}
+
+\bibliography{manual}
+\end{document}

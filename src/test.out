@@ -1,0 +1,53 @@
+0   10   20   30   40   50   60   70   80   90   100
++----+----+----+----+----+----+----+----+----+----+
+******************************************************
+done.
+Number of genes sequenced for each taxon:
+   1 Scer    107
+   2 Spar    107
+   3 Smik    107
+   4 Skud    107
+   5 Sbay    107
+   6 Scas    107
+   7 Sklu    107
+   8 Calb    107
+Read 107 genes with a total of 465 different sampled tree topologies
+Writing input file names to file test.input....done.
+Sorting trees by average posterior probability....done.
+Initializing random number generator....done.
+Initializing gene information....
+Initializing splits counts (found 80 distinct splits)....done.
+Setting initial MCMC state....Program ended at Mon Sep  7 06:33:24 2015
+
+
+Elapsed time: 2 seconds.
+n ../data/yeast/y010/run2.nex.in ../data/yeast/y011/run2.nex.in ../data/yeast/y012/run2.nex.in ../data/yeast/y013/run2.nex.in ../data/yeast/y014/run2.nex.in ../data/yeast/y015/run2.nex.in ../data/yeast/y016/run2.nex.in ../data/yeast/y017/run2.nex.in ../data/yeast/y018/run2.nex.in ../data/yeast/y019/run2.nex.in ../data/yeast/y020/run2.nex.in ../data/yeast/y021/run2.nex.in ../data/yeast/y022/run2.nex.in ../data/yeast/y023/run2.nex.in ../data/yeast/y024/run2.nex.in ../data/yeast/y025/run2.nex.in ../data/yeast/y026/run2.nex.in ../data/yeast/y027/run2.nex.in ../data/yeast/y028/run2.nex.in ../data/yeast/y029/run2.nex.in ../data/yeast/y030/run2.nex.in ../data/yeast/y031/run2.nex.in ../data/yeast/y032/run2.nex.in ../data/yeast/y033/run2.nex.in ../data/yeast/y034/run2.nex.in ../data/yeast/y035/run2.nex.in ../data/yeast/y036/run2.nex.in ../data/yeast/y037/run2.nex.in ../data/yeast/y038/run2.nex.in ../data/yeast/y039/run2.nex.in ../data/yeast/y040/run2.nex.in ../data/yeast/y041/run2.nex.in ../data/yeast/y042/run2.nex.in ../data/yeast/y043/run2.nex.in ../data/yeast/y044/run2.nex.in ../data/yeast/y045/run2.nex.in ../data/yeast/y046/run2.nex.in ../data/yeast/y047/run2.nex.in ../data/yeast/y048/run2.nex.in ../data/yeast/y049/run2.nex.in ../data/yeast/y050/run2.nex.in ../data/yeast/y051/run2.nex.in ../data/yeast/y052/run2.nex.in ../data/yeast/y053/run2.nex.in ../data/yeast/y054/run2.nex.in ../data/yeast/y055/run2.nex.in ../data/yeast/y056/run2.nex.in ../data/yeast/y057/run2.nex.in ../data/yeast/y058/run2.nex.in ../data/yeast/y059/run2.nex.in ../data/yeast/y060/run2.nex.in ../data/yeast/y061/run2.nex.in ../data/yeast/y062/run2.nex.in ../data/yeast/y063/run2.nex.in ../data/yeast/y064/run2.nex.in ../data/yeast/y065/run2.nex.in ../data/yeast/y066/run2.nex.in ../data/yeast/y067/run2.nex.in ../data/yeast/y068/run2.nex.in ../data/yeast/y069/run2.nex.in ../data/yeast/y070/run2.nex.in ../data/yeast/y071/run2.nex.in ../data/yeast/y072/run2.nex.in ../data/yeast/y073/run2.nex.in ../data/yeast/y074/run2.nex.in ../data/yeast/y075/run2.nex.in ../data/yeast/y076/run2.nex.in ../data/yeast/y077/run2.nex.in ../data/yeast/y078/run2.nex.in ../data/yeast/y079/run2.nex.in ../data/yeast/y080/run2.nex.in ../data/yeast/y081/run2.nex.in ../data/yeast/y082/run2.nex.in ../data/yeast/y083/run2.nex.in ../data/yeast/y084/run2.nex.in ../data/yeast/y085/run2.nex.in ../data/yeast/y086/run2.nex.in ../data/yeast/y087/run2.nex.in ../data/yeast/y088/run2.nex.in ../data/yeast/y089/run2.nex.in ../data/yeast/y090/run2.nex.in ../data/yeast/y091/run2.nex.in ../data/yeast/y092/run2.nex.in ../data/yeast/y093/run2.nex.in ../data/yeast/y094/run2.nex.in ../data/yeast/y095/run2.nex.in ../data/yeast/y096/run2.nex.in ../data/yeast/y097/run2.nex.in ../data/yeast/y098/run2.nex.in ../data/yeast/y099/run2.nex.in ../data/yeast/y100/run2.nex.in ../data/yeast/y101/run2.nex.in ../data/yeast/y102/run2.nex.in ../data/yeast/y103/run2.nex.in ../data/yeast/y104/run2.nex.in ../data/yeast/y105/run2.nex.in
+
+  Parameter              | Usage                    | Default Value | Value Used
+  ------------------------------------------------------------------------------
+  alpha                  | -a number                | 1             | 1
+  # of runs              | -k integer               | 2             | 15
+  # of MCMC updates      | -n integer               | 100000        | 100000
+  # of chains            | -c integer               | 1             | 15
+  MCMCMC Rate            | -r integer               | 100           | 100
+  alpha multiplier       | -m number                | 10            | 10
+  subsample rate         | -s integer               | 1             | 1
+  output root file name  | -o name                  | run1          | test
+  input file list file   | -i filename              |               | 
+  random seed 1          | -s1 integer              | 1234          | 1234
+  random seed 2          | -s2 integer              | 5678          | 5678
+  CF cutoff for display  | -cf number               | 0.05          | 0.05
+  create sample file     | --create-sample-file     | false         | false
+  create joint file      | --create-joint-file      | false         | false
+  create single file     | --create-single-file     | false         | false
+  use independence prior | --use-independence-prior | false         | false
+  calculate pairs        | --calculate-pairs        | false         | false
+  use update groups      | --use-update-groups      | true          | true
+  File with prune list   | -p pruneFile             |               | 
+  skip genes             | -sg                      | false         | false
+  Space optimization     | --opt-space              | false         | false
+  no population tree?    | --no-population-tree     | false         | false
+  genomewide CF grid size| --genomewide-grid-size   | 1000          | 1000
+  ------------------------------------------------------------------------------
+
+Reading in summary files....

@@ -1,0 +1,63 @@
+# mpi-bucky
+BUCKy 1.2 README
+For higher versions, please refer to the user's manual.
+
+INSTALLATION
+Pick a directory where you want the BUCKy code to be.
+I will call this directory $BUCKY_HOME in this documentation.
+To open the compressed tar file with the BUCKy source code and example data,
+do these commands.
+
+  cd $BUCKY_HOME
+  tar zxf bucky-1.2.tgz
+
+This creates a directory named BUCKy-1.2 with subdirectories BUCKy-1.2/data and BUCKy-1.2/src .
+
+COMPILATION
+If you have gcc installed, compile the software with these commands.
+
+  cd $BUCKY_HOME/BUCKy-1.2/src
+  make
+
+This will compile programs mbsum and bucky.
+I suggest putting copies in ~/bin if this is in your path.
+
+If you do not have gcc installed, you need to find the installer.
+On a Macintosh, it may be in Applications/Installers/Developer Tools .
+
+HELP
+Type these commands for very brief help messages.
+
+  mbsum --help
+  bucky --help
+
+EXAMPLE
+Suppose that you have a directory where each file is of the form *.t and is a MrBayes output file.
+Use mbsum to summarize each file.  Remove the first 1000 trees of each for burnin.
+
+  for X in *.t; do mbsum -n 1000 $X; done
+
+This will create a file named <filename>.in for each file named <filename>.t .
+Warning!  It will overwrite files with the name <filename>.in if they exist.
+
+Next, to run bucky with default parameters, try this.
+
+  bucky *.in
+
+This will create a bunch of output files of the form run1.* .
+You can pick your own root file name.
+
+YEAST EXAMPLE
+To try the yeast example described in the Ane et-al MBE paper (with a much smaller number of updates),
+you can try the following.
+
+  cd $BUCKY_HOME/BUCKy-1.2/data/yeast
+  ../../src/bucky y???/*.in
+
+EXAMINING OUTPUT
+Mac users who want to use standard Mac applications to read the output can open any of the output files
+using TextEdit.
+
+Bret Larget and Cecile Ane
+17 January, 2007
+Madison, Wisconsin
