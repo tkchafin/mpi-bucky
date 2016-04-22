@@ -2139,15 +2139,15 @@ int main(int argc, char *argv[])
       cerr <<"\nError: Expecting " << translateTable.size() << " taxa."<<endl;
       cerr <<  "       File " << inputFiles[i] << " contains trees with the following " << taxid[i].size() << " taxa:" <<endl;
       for (int j=0; j<taxid[i].size(); j++){
-	cerr << setw(4) << j+1 << " " << setw(4) << taxid[i][j];
-	fout << setw(4) << j+1 << " " << setw(4) << taxid[i][j];
-	if (taxid[i][j] <= translateTable.size()){
-	  cerr << " " << translateTable[taxid[i][j]-1] << endl;
-	else {
-	  cerr << " " << "(outside range of translate table)" <<endl;
-      }
+		cerr << setw(4) << j+1 << " " << setw(4) << taxid[i][j];
+		if (taxid[i][j] <= translateTable.size()){
+		  cerr << " " << translateTable[taxid[i][j]-1] << endl;
+	    }else{
+		  cerr << " " << "(outside range of translate table)" <<endl;
+        }
       exit(1);
-    }
+	  }
+	}
   }
 
   // Find taxa sequenced in all genes
@@ -2349,7 +2349,6 @@ int main(int argc, char *argv[])
     cout << "Setting initial MCMC state...." << flush;
   }
 
-    
     //Allocate space for alphas
     vector<double> global_alphas(rp.getNumChains());
     global_alphas.resize(rp.getNumChains()*rp.getNumRuns());
@@ -2502,11 +2501,11 @@ int main(int argc, char *argv[])
       //Wait for all processes to hit exchange. 
       //MPI_Barrier(MPI_New_World);       
       //for (int k=0; k<my_chains; k++){
-      //    cout << "RANK "<<my_rank<<", RUN "<<irun<<", CHAIN "<<k<<" "; 
+       //   cout << "RANK "<<my_rank<<", RUN "<<irun<<", CHAIN "<<k<<" "; 
       //    local_states[irun][k]->testPrintState(); 
       //}
       
-      //MCMCMC - How to handle this?? 
+      //MCMCMC
       thisRun = global_runs[(irun+start)];
       MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
         local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
