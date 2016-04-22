@@ -1,13 +1,18 @@
 # mpi-bucky
 mpi-BUCKy (BUCKy 2.0) README
 
-#####
+Tyler K. Chafin - University of Arkansas
+tkchafin@uark.edu
+
+##-----------------------------------
+
 THIS VERSION OF BUCKY IS NOT CURRENTLY PUBLISHED NOR COMPLETELY FUNCTIONAL. THIS GIT REPOSITORY REPRESENTS A CURRENT WORK IN PROGRESS AND IS NOT READY FOR DISTRIBUTION NOR USE. 
 
 TO CONTRIBUTE OR FOR QUESTIONS, PLEASE CONTACT ME AT tkchafin@uark.edu
 
 More details on this multithreaded implementation to come soon... 
-#####
+
+##-----------------------------------
 
 MPI-BUCKy is a multi-threaded implementation of BUCKy using the OpenMPI message passing interface. BUCKy is an open-source program for species tree estimation using Bayesian concordance analysis of multiple genomic loci, free of assumptions regarding the source of discordance among gene trees. This
 
@@ -17,12 +22,12 @@ C. Ané, B. Larget, D.A. Baum, S.D. Smith, A. Rokas (2007). Bayesian estimation 
 
 B. Larget, S.K. Kotha, C.N. Dewey, C. Ané (2010). BUCKy: Gene tree / species tree reconciliation with the Bayesian concordance analysis. Bioinformatics 
 
-PREREQUISITES
+###PREREQUISITES
 You must have the following installed (this may be an incomplete list)
 g++ compiler 
 OpenMPI >1.6 (mpic++)
 
-COMPILATION
+###COMPILATION
 If you have g++ and OpenMPI installed, compile the software with these commands, where $HOME is the directory containing bucky.
 
   cd $HOME/mpi-bucky/src
@@ -33,13 +38,13 @@ I suggest putting copies in ~/local/bin if this is in your path.
 
 This has only been tested in a Linux environment (Ubuntu 14.04)
 
-HELP
+###HELP
 Type these commands for very brief help messages.
 
   mbsum --help
   bucky --help
 
-EXAMPLE
+###EXAMPLE
 Suppose that you have a directory where each file is of the form *.t and is a MrBayes output file.
 Use mbsum to summarize each file.  Remove the first 1000 trees of each for burnin.
 
@@ -55,17 +60,13 @@ Next, to run bucky with multiple threads (where $procs is an integer representin
 This will create a bunch of output files of the form run1.* .
 You can pick your own root file name.
 
-YEAST EXAMPLE
+###YEAST EXAMPLE
 To try the yeast example described in the Ane et-al MBE paper (with a much smaller number of updates),
 you can try the following.
 
   cd $BUCKY_HOME/mpi-bucky/data/yeast
   mpirun -np 8 ../../src/bucky y???/*.in
 
-EXAMINING OUTPUT
+###EXAMINING OUTPUT
 Mac users who want to use standard Mac applications to read the output can open any of the output files
 using TextEdit.
-
-Bret Larget and Cecile Ane
-17 January, 2007
-Madison, Wisconsin
