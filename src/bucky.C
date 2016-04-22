@@ -1,5 +1,9 @@
-// BUCKy 1.4.4 Bayesian Untangling of Concordance Knots (applied to yeast and other organisms)
-// Copyright (C) 2006-2014 by Bret Larget and Cecile Ane and Riley Larget
+// MPI-BUCKY
+// Tyler K. Chafin - tkchafin@uark.edu
+//
+// Modification of: 
+//   BUCKy 1.4.4 Bayesian Untangling of Concordance Knots (applied to yeast and other organisms)
+//   Copyright (C) 2006-2014 by Bret Larget and Cecile Ane and Riley Larget
 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, version 2, as
@@ -22,7 +26,7 @@
 // Version 1.3.1  29 October, 2009
 // Version 1.4.3   9 July, 2014
 // Version 1.4.4  22 June, 2015
-// Version 2.0.1 29 September, 2015 Tyler K. Chafin
+// Version 2.0.0 2016 Tyler K. Chafin
 
 // File:     bucky.C
 
@@ -97,11 +101,19 @@
 // --- Fixed error with genome-wide CFs, that occurred when grid<ngenes and for low-CF splits.
 //
 
-// Changes in version 2.0.1 
+// Changes in version 2.0.0 
 // ---MPI parallel implementation 
-// ------Major edits to main() 
-// ------multiple-core enabling of MCMCMC
+// ------Major revision to main() 
+// ------multiple-core enabled MCMCMC
 //
+
+
+//Developer notes
+//Known issues:
+//--- Threads not closed properly on calling help
+//--- Need to finish multithread enabling primary MCMCMC (burn in done)
+
+
 
 #include <iostream>
 #include <iomanip>
@@ -1331,21 +1343,17 @@ void MPI_readInputFiles(int rank, vector<string>& inputFiles,Table* &tgm, vector
   /*if (part != 0) {
       cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
       cout << "+----+----+----+----+----+----+----+----+----+----+" << endl;
-      fout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-      fout << "+----+----+----+----+----+----+----+----+----+----+" << endl;
   }
    * */
   taxid.resize(inputFiles.size());
   for (size_t i=0;i<inputFiles.size();i++){
     //if (part != 0 && i % part == 0) {
     //  cout << "*";
-    //  fout << "*";
     //}
     readFile(inputFiles[i],i,tgm,max,taxid[i],translateMap, changed);
   }
   //if (part != 0) {
   //  cout << endl;
-  //  fout << endl;
   //}
 }
 
@@ -1533,11 +1541,9 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   // .joint
   if(rp.getCreateJointFile()) {
     cout << "Writing joint posterior table to file " << fileNames.getJointFile() << "...." << flush;
-    fout << "Writing joint posterior table to file " << fileNames.getJointFile() << "...." << flush;
     ofstream jointStr(fileNames.getJointFile().c_str());
     if(jointStr.fail()) {
       cerr <<"Error: Cannot open file " << fileNames.getJointFile() << "." << endl;
-      fout <<"Error: Cannot open file " << fileNames.getJointFile() << "." << endl;
     }
     jointStr.setf(ios::fixed, ios::floatfield);
     jointStr.setf(ios::showpoint);
@@ -1549,16 +1555,13 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       jointStr << endl;
     }
     cout << "done." << endl;
-    fout << "done." << endl;
   }
 
   // .cluster
   cout << "Writing cluster summary to file " << fileNames.getClusterFile() << "...." << flush;
-  fout << "Writing cluster summary to file " << fileNames.getClusterFile() << "...." << flush;
   ofstream clusterStr(fileNames.getClusterFile().c_str());
   if(clusterStr.fail()) {
     cerr <<"Error: Cannot open file " << fileNames.getClusterFile() << "." << endl;
-    fout <<"Error: Cannot open file " << fileNames.getClusterFile() << "." << endl;
   }
   clusterStr.setf(ios::fixed, ios::floatfield);
   clusterStr.setf(ios::showpoint);
@@ -1634,16 +1637,13 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   }
   clusterStr.close();
   cout << "done." << endl;
-  fout << "done." << endl;
 
 
   // .concordance
   cout << "Writing concordance factors to " << fileNames.getConcordanceFile() << "...." << flush;
-  fout << "Writing concordance factors to " << fileNames.getConcordanceFile() << "...." << flush;
   ofstream concordanceStr(fileNames.getConcordanceFile().c_str());
   if(concordanceStr.fail()) {
     cerr <<"Error: Cannot open file " << fileNames.getConcordanceFile() << "." << endl;
-    fout <<"Error: Cannot open file " << fileNames.getConcordanceFile() << "." << endl;
   } else{
   concordanceStr.setf(ios::fixed, ios::floatfield);
   concordanceStr.setf(ios::showpoint);
@@ -1879,21 +1879,17 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   }
 
   cout << "done." << endl;
-  fout << "done." << endl;
 
   cout << "Average SD of mean sample-wide CF: " << AvgOfSDacrossSplits<<endl;
-  fout << "Average SD of mean sample-wide CF: " << AvgOfSDacrossSplits<<endl;
   }
   concordanceStr.close();
 
   // .pairs
   if(rp.getCalculatePairs()) {
     cout << "Writing tree pair data to " << fileNames.getPairTreeFile() << "...." << flush;
-    fout << "Writing tree pair data to " << fileNames.getPairTreeFile() << "...." << flush;
     ofstream pairsStr(fileNames.getPairTreeFile().c_str());
     if(pairsStr.fail()) {
       cerr <<"Error: Cannot open file " << fileNames.getPairTreeFile() << "." << endl;
-      fout <<"Error: Cannot open file " << fileNames.getPairTreeFile() << "." << endl;
     } else {
       pairsStr.setf(ios::fixed, ios::floatfield);
       pairsStr.setf(ios::showpoint);
@@ -1906,13 +1902,11 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       }
       pairsStr.close();
       cout << "done." << endl;
-      fout << "done." << endl;
     }
   }
 
   // .topologies --- eliminated
 //  cout << "Writing topology single and joint posterior distribution to " << fileNames.getTreePosteriorFile() << "...." << flush;
-//  fout << "Writing topology single and joint posterior distribution to " << fileNames.getTreePosteriorFile() << "...." << flush;
 //  ofstream treePosteriorStr(fileNames.getTreePosteriorFile().c_str());
 //  treePosteriorStr.setf(ios::fixed, ios::floatfield);
 //  treePosteriorStr.setf(ios::showpoint);
@@ -1934,44 +1928,32 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
 //  }
 //  treePosteriorStr.close();
 //  cout << "done." << endl;
-//  fout << "done." << endl;
 
 // .gene
   cout << "Writing single and joint gene posteriors to " << fileNames.getGenePosteriorFile() << "...." << flush;
-  fout << "Writing single and joint gene posteriors to " << fileNames.getGenePosteriorFile() << "...." << flush;
   ofstream genePostStr(fileNames.getGenePosteriorFile().c_str());
   if(genePostStr.fail()) {
     cerr <<"Error: Cannot open file " << fileNames.getGenePosteriorFile() << "." << endl;
-    fout <<"Error: Cannot open file " << fileNames.getGenePosteriorFile() << "." << endl;
   } else {
     for(int i=0;i<numGenes;i++)
       genes[i]->print(genePostStr,newTable,rp.getNumUpdates()*rp.getNumRuns(),topologies,max);
     genePostStr.close();
     cout << "done." << endl;
-    fout << "done." << endl;
   }
 
   if(rp.getNumChains()>1) {
     cout.setf(ios::fixed, ios::floatfield);
     cout.setf(ios::showpoint);
-    fout.setf(ios::fixed, ios::floatfield);
-    fout.setf(ios::showpoint);
     for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
       cout << "\nMCMCMC acceptance statistics in run " << irun+1 <<":" << endl;
       cout << "         alpha1 <-->         alpha2 accepted proposed proportion" << endl;
-      fout << "\nMCMCMC acceptance statistics in run " << irun+1 <<":" << endl;
-      fout << "alpha1          <--> alpha2         accepted proposed proportion" << endl;
       for(int i=0;i<rp.getNumChains()-1;i++) {
 	cout << setw(15) << alphas[i] << " <-->" << setw(15) << alphas[i+1];
 	cout << setw(9) << mcmcmcAccepts[irun][i] << setw(9) << mcmcmcProposals[irun][i];
-	fout << setw(15) << alphas[i] << " <--> " << setw(15) << alphas[i+1];
-	fout << setw(9) << mcmcmcAccepts[irun][i] << setw(9) << mcmcmcProposals[irun][i];
 	if(mcmcmcProposals[irun][i] > 0) {
 	  cout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[irun][i]) / (double) (mcmcmcProposals[irun][i]);
-	  fout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[irun][i]) / (double) (mcmcmcProposals[irun][i]);
 	}
 	cout << endl;
-	fout << endl;
       }
     }
   }
@@ -2071,6 +2053,7 @@ int main(int argc, char *argv[])
       //Populate new world communicator with the subset that is needed
       MPI_Group_incl(world_group, total, subset.data() , &new_group);  
       MPI_Comm_create(MPI_COMM_WORLD, new_group, &MPI_New_World); 
+      
   }else{
     start = my_rank*(total/p); 
     end = ((total/p)+my_rank*(total/p))-1; 
@@ -2120,9 +2103,7 @@ int main(int argc, char *argv[])
     intro(fout);
 
     cout << "Program initiated at " << ctime(&beginTime) << endl << endl;
-    fout << "Program initiated at " << ctime(&beginTime) << endl << endl;
 
-    fout << "Program invocation:";
     for(int i=0;i<argc;i++)
         fout << " " << argv[i];
     fout << endl << endl;
@@ -2130,7 +2111,6 @@ int main(int argc, char *argv[])
     fout << endl;
 
     cout << "Reading in summary files....";
-    fout << "Reading in summary files....";
   }
 
   Table *topToGeneMap = new TGM();
@@ -2139,16 +2119,13 @@ int main(int argc, char *argv[])
   numTaxa = translateTable.size();
   if (my_rank==0){
     cout << "done." << endl;
-    fout << "done." << endl;
   }
   
   // check that genome-wide grid size > number of genes: otherwise the genome-wide estimates are innacurate.
   if (rp.getNumGenomewideGrid() < 3*numGenes){
     if (my_rank ==0){
       cout << "The grid size to get genome-wide CFs is too small compared to the number of sampled genes...";
-      fout << "The grid size to get genome-wide CFs is too small compared to the number of sampled genes...";
       cout << " changing this grid size to "<< 3*numGenes << " (3 * # genes)"<<endl;
-      fout << " changing this grid size to "<< 3*numGenes << " (3 * # genes)"<<endl;
     }
     rp.setNumGenomewideGrid(3*numGenes);
   }
@@ -2160,18 +2137,14 @@ int main(int argc, char *argv[])
       problem=true;
     if ((problem) && (my_rank==0)) {
       cerr <<"\nError: Expecting " << translateTable.size() << " taxa."<<endl;
-      fout <<"\nError: Expecting " << translateTable.size() << " taxa."<<endl;
       cerr <<  "       File " << inputFiles[i] << " contains trees with the following " << taxid[i].size() << " taxa:" <<endl;
-      fout <<  "       File " << inputFiles[i] << " contains trees with the following " << taxid[i].size() << " taxa:" <<endl;
       for (int j=0; j<taxid[i].size(); j++){
 	cerr << setw(4) << j+1 << " " << setw(4) << taxid[i][j];
 	fout << setw(4) << j+1 << " " << setw(4) << taxid[i][j];
 	if (taxid[i][j] <= translateTable.size()){
 	  cerr << " " << translateTable[taxid[i][j]-1] << endl;
-	  fout << " " << translateTable[taxid[i][j]-1] << endl;}
 	else {
 	  cerr << " " << "(outside range of translate table)" <<endl;
-	  fout << " " << "(outside range of translate table)" <<endl; }
       }
       exit(1);
     }
@@ -2184,7 +2157,6 @@ int main(int argc, char *argv[])
   allTaxList.setInclude(taxlist);
   if (my_rank == 0){
     allTaxList.print(cout);
-    allTaxList.print(fout);
   }
   // fixit:
   // prune the missing taxa from all topologies, which is a vector<string>
@@ -2197,9 +2169,7 @@ int main(int argc, char *argv[])
   //Rank 0 only
   if (my_rank ==0){
     cout << "Read " << numGenes << " genes with a total of " << numTrees << " different sampled tree topologies" << endl;
-    fout << "Read " << numGenes << " genes with a total of " << numTrees << " different sampled tree topologies" << endl;
     cout << "Writing input file names to file " << fileNames.getInputFile() << "...." << flush;
-    fout << "Writing input file names to file " << fileNames.getInputFile() << "...." << flush;
     
     ofstream inputStr(fileNames.getInputFile().c_str());
     inputStr << "Gene Filename" << endl;
@@ -2208,17 +2178,14 @@ int main(int argc, char *argv[])
         inputStr << setw(4) << i << " " << inputFiles[i] << endl;
     inputStr << "============================================" << endl;
     cout << "done." << endl;
-    fout << "done." << endl;
 
     cout << "Sorting trees by average posterior probability...." << flush;
-    fout << "Sorting trees by average posterior probability...." << flush;
   }
   
   topToGeneMap->reorder(); // sort according to topology counts
   vector<string> topologies = topToGeneMap->getTopologies();
   if (my_rank ==0){
     cout << "done." << endl;
-    fout << "done." << endl;
   }
   // Print table of individual gene posteriors
 
@@ -2226,7 +2193,6 @@ int main(int argc, char *argv[])
   // Rank 0 only
   if((rp.getCreateSingleFile()) && (my_rank==0)) {
     cout << "Writing single gene posterior distribution table to file " << fileNames.getSingleFile() << "...." << flush;
-    fout << "Writing single gene posterior distribution table to file " << fileNames.getSingleFile() << "...." << flush;
     ofstream singleStr(fileNames.getSingleFile().c_str());
     singleStr.setf(ios::fixed, ios::floatfield);
     singleStr.setf(ios::showpoint);
@@ -2239,7 +2205,6 @@ int main(int argc, char *argv[])
     }
     singleStr.close();
     cout << "done." << endl;
-    fout << "done." << endl;
   }
 
   // Initialize random number generator.
@@ -2250,7 +2215,6 @@ int main(int argc, char *argv[])
   
   if (my_rank ==0){
     cout << "Initializing random number generator....";
-    fout << "Initializing random number generator....";
   }
   
   vector<int> global_seeds; 
@@ -2284,7 +2248,6 @@ int main(int argc, char *argv[])
   Rand mcmc_rand(rp.getSeed1(),rp.getSeed2());
   if (my_rank ==0){
     cout << "done." << endl;
-    fout << "done." << endl;
   }
   MPI_Scatter(global_seeds.data(), 2, MPI_INT, local_seeds, 2, MPI_INT, 0, MPI_New_World);
   rp.setSeed1(local_seeds[0]);
@@ -2297,7 +2260,6 @@ int main(int argc, char *argv[])
   // Create genes
   if (my_rank ==0){
     cout << "Initializing gene information...." << endl << flush;
-    fout << "Initializing gene information...." << endl << flush;
   }
   vector<Gene*> genes(numGenes);
   vector<double> counts(numTrees);
@@ -2321,7 +2283,6 @@ int main(int argc, char *argv[])
     genes[i]->updateState(topologies.size());
   }
   //cout << "done." << endl << flush;
-  //fout << "done." << endl << flush;
   // Finished with table and taxid, so delete them.
   delete topToGeneMap;
   for(int i=0;i<taxid.size();i++){
@@ -2351,10 +2312,8 @@ int main(int argc, char *argv[])
   }
 //  topologyStr.close();
 //  cout << "done." << endl;
-//  fout << "done." << endl;
   if (my_rank == 0){
     cout << "Initializing splits counts (found " << splits.size() << " distinct splits)...." << flush;
-    fout << "Initializing splits counts (found " << splits.size() << " distinct splits)...." << flush;
   }
   sort(splits.begin(),splits.end());
 
@@ -2380,7 +2339,6 @@ int main(int argc, char *argv[])
   }
   if (my_rank == 0){
     cout << "done." << endl;
-    fout << "done." << endl;
   }
   
   
@@ -2389,7 +2347,6 @@ int main(int argc, char *argv[])
     return 0;
   if (my_rank ==0){
     cout << "Setting initial MCMC state...." << flush;
-    fout << "Setting initial MCMC state...." << flush;
   }
 
     
@@ -2464,7 +2421,6 @@ int main(int argc, char *argv[])
     }
     if (my_rank ==0){
         cout << "done." << endl <<flush;
-        fout << "done." << endl <<flush;
     }
   //}
   
@@ -2491,7 +2447,6 @@ int main(int argc, char *argv[])
   
   if (my_rank==0){
     cout << "Initializing MCMCMC acceptance counters and pairwise counters...." << flush;
-    fout << "Initializing MCMCMC acceptance counters and pairwise counters...." << flush;
   }
     
     
@@ -2513,7 +2468,6 @@ int main(int argc, char *argv[])
   }
   if (my_rank==0){
     cout << "done." << endl;
-    fout << "done." << endl;
   }
 
   
@@ -2521,16 +2475,12 @@ int main(int argc, char *argv[])
   time(&beginMCMCtime);
   if (my_rank==0){
     cout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl << endl;
-    fout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl << endl;
   }
   int numBurn = rp.getNumUpdates()/10;
   if (my_rank==0){
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
     //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
     //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
-    fout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
-    //fout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-    //fout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
     int part = numBurn / 50;
   int thisRun, local_idx; 
@@ -2569,8 +2519,6 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     //cout << "*" << endl;
     cout << " ....done." << endl << flush;
-    //fout << "*" << endl;
-    fout << " ....done." << endl << flush;
   }
    
  
@@ -2579,7 +2527,6 @@ int main(int argc, char *argv[])
   
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
-    fout << "Initializing summary tables..." << flush;
   }
     
   vector<vector<int> > local_clusterCount(rp.getNumRuns());
@@ -2591,19 +2538,15 @@ int main(int argc, char *argv[])
 
   if (my_rank==0){
     cout << "done." << endl << flush;
-    fout << "done." << endl << flush;
   }
   
   //Not used by default, will have to figure out how to save topologies later..
   //if(rp.getCreateSampleFile()) {
   //  cout << "Sampled topologies will be in file(s) " << fileNames.getSampleFile(1);
-  //  fout << "Sampled topologies will be in file(s) " << fileNames.getSampleFile(1);
    // if(rp.getNumRuns()==1){
    //   cout << "." << endl;
-   //   fout << "." << endl;
     //} else {
     //  cout << " to " << fileNames.getSampleFile(rp.getNumRuns()) << "." << endl;
-     // fout << " to " << fileNames.getSampleFile(rp.getNumRuns()) << "." << endl;
     //}
   //}
 
@@ -2613,9 +2556,6 @@ int main(int argc, char *argv[])
     cout << "Beginning " << rp.getNumUpdates() << " MCMC updates..." << endl;
     //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
     //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
-    fout << "Beginning " << rp.getNumUpdates() << " MCMC updates..." << endl;
-    //fout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-    //fout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
   part = rp.getNumUpdates() / 50;
   
@@ -2691,15 +2631,12 @@ int main(int argc, char *argv[])
     }
     //if( cycle % part == 0) {
     //  cout << "*" << flush;
-    //  fout << "*" << flush;
     //}
   }
 
   /*
   cout << "*" << endl;
   cout << " ....done." << endl << flush;
-  fout << "*" << endl;
-  fout << " ....done." << endl << flush;
 
   if(rp.getCreateSampleFile())
     for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
@@ -2729,7 +2666,6 @@ int main(int argc, char *argv[])
 
   if (my_rank==0){
     cout << "Program ended at " << ctime(&endTime) << endl << endl;
-    fout << "Program ended at " << ctime(&endTime) << endl << endl;
     int diff=endTime-beginTime,days=diff/(24*60*60),hours=diff%(24*60*60)/(60*60);
     int minutes=diff%(60*60)/60,seconds=diff%60;
     fout.close();
