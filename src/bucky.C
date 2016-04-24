@@ -2000,6 +2000,12 @@ void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
 //TKC:
 //Note: Valgrind shows a ton of memory leaks. 
 
+/*Known issues
+ * --mpi process aborts when proc has more than 1 run
+ * ----Double free, may have fixed with most recent edits (24 Apr)
+ * ----Check further, run tests
+ * 
+ * */
 
 
 
@@ -2119,7 +2125,7 @@ int main(int argc, char *argv[])
     showParameters(fout,fileNames,defaults,mp,rp);
     fout << endl;
 
-    cout << "Reading in summary files....";
+    cout << "Reading in summary files...";
   }
 
   Table *topToGeneMap = new TGM();
@@ -2188,7 +2194,7 @@ int main(int argc, char *argv[])
     inputStr << "============================================" << endl;
     cout << "done." << endl;
 
-    cout << "Sorting trees by average posterior probability...." << flush;
+    cout << "Sorting trees by average posterior probability..." << flush;
   }
   
   topToGeneMap->reorder(); // sort according to topology counts
@@ -2223,7 +2229,7 @@ int main(int argc, char *argv[])
    Then MPI_Scatter random ints to processes, which use these as local seeds*/
   
   if (my_rank ==0){
-    cout << "Initializing random number generator....";
+    cout << "Initializing random number generator...";
   }
   
   vector<int> global_seeds; 
@@ -2268,7 +2274,7 @@ int main(int argc, char *argv[])
 
   // Create genes
   if (my_rank ==0){
-    cout << "Initializing gene information...." << endl << flush;
+    cout << "Initializing gene information..." << endl << flush;
   }
   vector<Gene*> genes(numGenes);
   vector<double> counts(numTrees);
@@ -2322,7 +2328,7 @@ int main(int argc, char *argv[])
 //  topologyStr.close();
 //  cout << "done." << endl;
   if (my_rank == 0){
-    cout << "Initializing splits counts (found " << splits.size() << " distinct splits)...." << flush;
+    cout << "Initializing splits counts (found " << splits.size() << " distinct splits)..." << flush;
   }
   sort(splits.begin(),splits.end());
 
@@ -2355,7 +2361,7 @@ int main(int argc, char *argv[])
   if(rp.getNumUpdates()==0)
     return 0;
   if (my_rank ==0){
-    cout << "Setting initial MCMC state...." << flush;
+    cout << "Setting initial MCMC state..." << flush;
   }
 
     //Allocate space for alphas
@@ -2453,7 +2459,7 @@ int main(int argc, char *argv[])
   
   
   if (my_rank==0){
-    cout << "Initializing MCMCMC acceptance counters and pairwise counters...." << flush;
+    cout << "Initializing MCMCMC acceptance counters and pairwise counters..." << flush;
   }
     
     
@@ -2525,7 +2531,7 @@ int main(int argc, char *argv[])
 
   if (my_rank==0){
     //cout << "*" << endl;
-    cout << " ....done." << endl << flush;
+    cout << "done." << endl << flush;
   }
   
   if (my_rank==0){
@@ -2555,7 +2561,7 @@ int main(int argc, char *argv[])
 
   
   if (my_rank==0){
-    cout << "Beginning " << rp.getNumUpdates() << " MCMC updates..." << endl;
+    cout << "Beginning " << rp.getNumUpdates() << " MCMC updates...";
     //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
     //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
@@ -2636,7 +2642,7 @@ int main(int argc, char *argv[])
     //}
   }
   if (my_rank == 0)
-    cout << " ....done." << endl << flush;
+    cout << "done." << endl << flush;
 
   if(rp.getCreateSampleFile()){
 	  if (hasCold == true){
@@ -2649,6 +2655,11 @@ int main(int argc, char *argv[])
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
     
+   /* Need to gather:
+    * alphas
+    * accepts
+    * proposals
+    * */
     
   //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
 	//      newTable,clusterCount,splits,splitsGeneMatrix,
@@ -2658,10 +2669,8 @@ int main(int argc, char *argv[])
   for(int i=0;i<numGenes;i++)
     delete genes[i];
 
-  for (unsigned int irun=0; irun<my_runs; irun++){
-    for(int i=0;i<my_chains;i++)
-      delete local_states[i+start];
-  }
+  for(int i=0;i<my_chains;i++)
+    delete local_states[i+start];
   
   delete localTable;
       
