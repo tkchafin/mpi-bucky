@@ -2635,10 +2635,8 @@ int main(int argc, char *argv[])
     //  cout << "*" << flush;
     //}
   }
-
-  
-  cout << "*" << endl;
-  cout << " ....done." << endl << flush;
+  if (my_rank == 0)
+    cout << " ....done." << endl << flush;
 
   if(rp.getCreateSampleFile()){
 	  if (hasCold == true){
@@ -2660,9 +2658,13 @@ int main(int argc, char *argv[])
   for(int i=0;i<numGenes;i++)
     delete genes[i];
 
-  for (unsigned int irun=0; irun<my_runs; irun++)
+  for (unsigned int irun=0; irun<my_runs; irun++){
     for(int i=0;i<my_chains;i++)
       delete local_states[i+start];
+  }
+  
+  delete localTable;
+      
 //^^Make sure to do the same for global_states (rank 0)
 
   time_t endTime;
