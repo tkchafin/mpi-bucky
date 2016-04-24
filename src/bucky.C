@@ -2004,7 +2004,10 @@ void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
  * --mpi process aborts when proc has more than 1 run
  * ----Double free, may have fixed with most recent edits (24 Apr)
  * ----Check further, run tests
- * 
+ * --Error on calling --help
+ * --Dividing runs/chains not correct. 5 runs on 2 processes, each proc gets 3
+ * --create-sample-file needs to be called per run (e.g. for.. i<my_runs)
+ * ----Data structure needs to match
  * */
 
 
@@ -2197,6 +2200,11 @@ int main(int argc, char *argv[])
     cout << "Sorting trees by average posterior probability..." << flush;
   }
   
+  // -------------------------------!!!------------------------------
+  //Need to check that each proc sorts topToGeneMap the same. Could alternativey  
+  //create in Rank 0 and bcast it                                    
+  //--------------------------------!!!------------------------------
+  
   topToGeneMap->reorder(); // sort according to topology counts
   vector<string> topologies = topToGeneMap->getTopologies();
   if (my_rank ==0){
@@ -2376,8 +2384,8 @@ int main(int argc, char *argv[])
     vector<int> global_index(total);
     vector<int> global_runs(total);
     vector<int> global_ranks(total);
-    //Resize index vectors
     
+    //Resize index vectors
     global_index.resize(total);
     global_runs.resize(total);
     int position=0;
@@ -2425,10 +2433,11 @@ int main(int argc, char *argv[])
             position++; 
         }
     }
-    int my_runs = (global_runs[end]+1)-global_runs[start]; 
+    int my_runs = (global_runs[end]+1)-(global_runs[start]+1); 
     int my_chains = end+1 - start;
     
     vector<State*>local_states(total); 
+    
     for (int i=start; i<=end; i++){
         //Each local_states will only fill chains under each rank
         //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
@@ -2437,7 +2446,7 @@ int main(int argc, char *argv[])
     if (my_rank ==0){
         cout << "done." << endl <<flush;
     }
-  //}
+
   
     cout << flush;   
     cout << "Rank " << my_rank <<" has chains: ";
@@ -2448,14 +2457,25 @@ int main(int argc, char *argv[])
             hasCold=true;
     }
     cout << endl; 
-
-    
+ 
+ if (my_rank == 0){
+    cout << "Global indices: "; 
+    for (int i=0; i < rp.getNumChains(); i++)
+      cout << global_index[i] << " ";
+    cout << endl << "Global run indices: ";
+    for (int k=0; k < rp.getNumRuns(); k++)
+      cout << global_runs[k] << " ";
+    cout << endl;
+      
+  }
+  
     //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
     cout << my_rank << " has " << my_chains << " chains\n";
     cout << my_rank << " has " << my_runs << " runs\n";
     cout << my_rank << " has chains: "<<global_index[start]<<" - "<<global_index[end]<<endl;
     
- 
+  MPI_Finalize();
+  return 0;
   
   
   if (my_rank==0){
