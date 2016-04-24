@@ -30,11 +30,11 @@ OpenMPI >1.6 (mpic++)
 ###COMPILATION
 If you have g++ and OpenMPI installed, compile the software with these commands, where $HOME is the directory containing bucky.
 
-  cd $HOME/mpi-bucky/src
+  cd $HOME/mpi-bucky/src;
   make
 
 This will compile programs mbsum and bucky.
-I suggest putting copies in ~/local/bin if this is in your path.
+I suggest making dynamic links in ~/local/bin if this is in your path.
 
 This has only been tested in a Linux environment (Ubuntu 14.04)
 
