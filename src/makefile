@@ -6,7 +6,7 @@ OBJS = TaxonSet.o Alias.o mbsumtree.o TGM.o Quartets.o
 TARGET = all
 
 CC = mpic++
-CFLAGS = -O1 -I.
+CFLAGS = -O3 -I.
 
 .SUFFIXES: .C .o 
 
