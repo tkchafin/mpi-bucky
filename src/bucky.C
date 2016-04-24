@@ -1654,7 +1654,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     for(int j=0;j<numGenes+1;j++){
       splitsGeneMatrixPP[i][j]=0.0;
       for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-	splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][i][j];
+	    splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][i][j];
       splitsGeneMatrixPP[i][j] /= ((double)rp.getNumUpdates() * rp.getNumRuns());
     }
   }
@@ -1697,10 +1697,12 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     if(add || keep){
       y.updatePriorProbability();
       if (add)
-	ctree.push_back(y);
+	    ctree.push_back(y);
       else
-	otherClade.push_back(y);
+	    otherClade.push_back(y);
       GenomewideDistribution* g;
+      //TKC: I don't g is ever freed from memory?
+      //Need to go through gwDistr and otherGwDistr and delete
       g = new GenomewideDistribution(numGenes, rp.getNumGenomewideGrid());
       g->updatePriorProbability(y);
       g->updateSamplewide(splitsGeneMatrixPP[i]);
@@ -1711,20 +1713,20 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       }
       double meanpostCFsd=0.0; // SD of estimated sample-wide CF, across runs
       if (rp.getNumRuns()>1){
-	for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
-	  double meanpostCF =0.0;
-	  for(int j=0;j<numGenes+1;j++)
-	    meanpostCF += j * (double)splitsGeneMatrix[irun][i][j];
-	  meanpostCF /= (double)rp.getNumUpdates();
-	  meanpostCFsd += (meanpostCF - y.getWeight()) * (meanpostCF - y.getWeight());
-	}
-	meanpostCFsd = sqrt(meanpostCFsd / (rp.getNumRuns()-1));  // number of genes
-	g->setSamplewidePosteriorMeanSD(meanpostCFsd / numGenes); // proportion of genes
+	    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+	      double meanpostCF =0.0;
+	      for(int j=0;j<numGenes+1;j++)
+	        meanpostCF += j * (double)splitsGeneMatrix[irun][i][j];
+	      meanpostCF /= (double)rp.getNumUpdates();
+	      meanpostCFsd += (meanpostCF - y.getWeight()) * (meanpostCF - y.getWeight());
+	    }
+	    meanpostCFsd = sqrt(meanpostCFsd / (rp.getNumRuns()-1));  // number of genes
+	    g->setSamplewidePosteriorMeanSD(meanpostCFsd / numGenes); // proportion of genes
       }
       if (add)
-	gwDistr.push_back(g);
+	    gwDistr.push_back(g);
       else
-	otherGwDistr.push_back(g);
+	    otherGwDistr.push_back(g);
     }
   }
 
@@ -1826,6 +1828,12 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   concordanceStr<<"Average SD of mean sample-wide CF: " << AvgOfSDacrossSplits<<endl<<endl;
 
   concordanceStr << "All Splits:" << endl;
+
+  //TKC: Free memory from GenomeWideDistribution objects
+  for (int i = 0; i <gwDistr.size(); i++)
+    delete gwDistr[i];
+  for (int i = 0; i <otherGwDistr.size(); i++)
+    delete otherGwDistr[i];
 
   for(int w=0;w<splits.size();w++) {
     int i = sw[w].getIndex();
@@ -1957,6 +1965,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       }
     }
   }
+
 }
 
 
@@ -2307,7 +2316,7 @@ int main(int argc, char *argv[])
       topologySplitsMatrix[i][j] = x;
       int n = find(splits.begin(),splits.end(),x) - splits.begin();
       if(n==splits.size())
-	splits.push_back(x);
+	    splits.push_back(x);
     }
   }
 //  topologyStr.close();
@@ -2412,6 +2421,7 @@ int main(int argc, char *argv[])
     }
     int my_runs = (global_runs[end]+1)-global_runs[start]; 
     int my_chains = end+1 - start;
+    
     vector<State*>local_states(total); 
     for (int i=start; i<=end; i++){
         //Each local_states will only fill chains under each rank
@@ -2439,10 +2449,7 @@ int main(int argc, char *argv[])
     cout << my_rank << " has " << my_runs << " runs\n";
     cout << my_rank << " has chains: "<<global_index[start]<<" - "<<global_index[end]<<endl;
     
-  //Note for tomorrow: 
-        //I've created a local version of the MPI table on each process
-        //Tomorrow implement the MCMC, and initialize MCMC states
-  
+ 
   
   
   if (my_rank==0){
@@ -2555,14 +2562,16 @@ int main(int argc, char *argv[])
   part = rp.getNumUpdates() / 50;
   
   //Not working
-  vector<ofstream*> sampleFileStr(rp.getNumRuns()); //Make an ofstream, but some threads wont use it
+  vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
+  //Some local processes will not use
   if (hasCold == true){
     if(rp.getCreateSampleFile()) {
-      for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
-        sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(irun+1).c_str());
+      for (unsigned int irun=0; irun<my_runs; irun++){
+		thisRun = global_runs[(irun+start)];
+        sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
         if (sampleFileStr[irun]->fail()){
-	  cerr << "Error: could not open file " << fileNames.getSampleFile(irun+1) << endl;
-	  exit(1);
+	      cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
+	      exit(1);
         }
         sampleFileStr[irun]->setf(ios::fixed, ios::floatfield);
         sampleFileStr[irun]->setf(ios::showpoint);
@@ -2577,24 +2586,22 @@ int main(int argc, char *argv[])
   }
 
   
-  
   Table* localTable;
   if (rp.shouldOptSpace())
       localTable = new TGM(topologies);
   else
       localTable = new TGMTable(numGenes, topologies);
 
-    
-  
+
   for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {
     for (int irun=0; irun<my_runs; irun++){
       thisRun = global_runs[(irun+start)];
       for(int i=0;i<my_chains;i++) { 
-	local_accept[start+i] += local_states[start+i]->update(mcmc_rand);
-	if(rp.getUseUpdateGroups()) {
-	  int gene = (int)(mcmc_rand.runif()*genes.size());
-	  local_accept[start+i] += local_states[start+i]->updateOneGroup(gene,mcmc_rand);
-	}
+	    local_accept[start+i] += local_states[start+i]->update(mcmc_rand);
+	    if(rp.getUseUpdateGroups()) {
+	      int gene = (int)(mcmc_rand.runif()*genes.size());
+	      local_accept[start+i] += local_states[start+i]->updateOneGroup(gene,mcmc_rand);
+	    }
       }
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){	
         MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
@@ -2604,14 +2611,13 @@ int main(int argc, char *argv[])
       }
       // update counts
       
-      
       //BELOW: 
       //Need to work on the calculate pairs and create sample file issues. 
       //Only need to execute the following on processes which have chain 0!
-      int i0 = thisRun*rp.getNumChains();
+      int i0 = thisRun*rp.getNumChains();   
+      local_idx = thisRun*rp.getNumChains(); 
       
-      local_idx = thisRun*rp.getNumChains();
-      
+      //Output to files
       if (hasCold == true){
         local_states[i0]->updateTable(localTable);
         local_states[i0]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
@@ -2619,12 +2625,11 @@ int main(int argc, char *argv[])
         if( rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
           local_states[i0]->updatePairCounts(local_pairCounts);
         if( rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0) {
-	      *sampleFileStr[thisRun] << setw(8) << local_accept[thisRun*rp.getNumChains()];//Output only chain 0
+	      *sampleFileStr[irun] << setw(8) << local_accept[thisRun*rp.getNumChains()];//Output only chain 0
 	      local_accept[i0] = 0;
-	      local_states[i0]->sample(*sampleFileStr[thisRun]); //***
+	      local_states[i0]->sample(*sampleFileStr[irun]); //***
         }
       }
-     
     }
     //if( cycle % part == 0) {
     //  cout << "*" << flush;
@@ -2636,9 +2641,11 @@ int main(int argc, char *argv[])
   cout << " ....done." << endl << flush;
 
   if(rp.getCreateSampleFile()){
-    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
-	  sampleFileStr[irun]->close();
-	  delete sampleFileStr[irun];
+	  if (hasCold == true){
+        for (unsigned int irun=0; irun<my_runs; irun++){
+	      sampleFileStr[irun]->close();
+	      delete sampleFileStr[irun];
+      }
     }
   }
    
