@@ -131,6 +131,9 @@
 #include "mpi.h"
 
 using namespace std;
+string PRE="MPI-BUCKy (BUCKy 2.0.0) using OpenMPI Message Passing Interface";
+string PRE2="Written by Tyler K. Chafin, last modified 26 April 2016";
+string PRE3="Based on (please cite original authors):";
 string VERSION = "1.4.4";
 string DATE = "22 June 2015";
 string COPYRIGHT = "Copyright (C) 2006-2015 by Bret Larget, Cecile Ane and Riley Larget";
@@ -893,15 +896,14 @@ void Tree::getSplits(SplitSet& s) {
 void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas, 
         Rand* rand, vector<int>& accepts, vector<int>& proposals, 
         int rank, const vector<int>& runs, const vector<int>& chains , 
-        int numChains , int runNum, vector<int>& rank_idx, 
-        int myRun, MPI_Comm comm)
+        int numChains , int runNum, vector<int>& rank_idx, MPI_Comm comm)
 {
     
   //rand is swap_rand- all ranks in sync
   int a = (int) ( (numChains-1)*rand->runif() );
   //cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
   int b = a+1;
-  int local_a = a+(numChains*runNum);//I don't think this is correct
+  int local_a = a+(numChains*runNum);
   int local_b = a+(numChains*runNum)+1;
   
   int send_rank, recv_rank; 
@@ -976,32 +978,16 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
       aLogPostProb = states[local_a]->getLogPriorProb(); 
       //Receiving process calculates if proposed change is accepted
       double logProbDiff = ((-aLogPriorProb - bLogPriorProb)+(aLogPostProb + bLogPostProb));
-      if (logAccept < logProbDiff){
+      if (logAccept < logProbDiff){ //accept
           accept = true; 
           accepts[local_a]++; 
-      }else{
+      }else{ //reject
           accept = false; 
           states[local_a]->setAlpha(alphas[local_a]);
           states[local_b]->setAlpha(alphas[local_b]);
       }
     }
   }
-  
-
-  /*
-  double logAcceptProb = - states[myRun][local_a]->getLogPriorProb() - states[myRun][local_b]->getLogPriorProb();
-  states[myRun][myChain]->setAlpha(alphas[b+runNum]);
-  states[myRun][myChain]->setAlpha(alphas[a+runNum]);
-  logAcceptProb += states[myRun][local_a]->getLogPriorProb() + states[myRun][local_b]->getLogPriorProb();
-  if(log(rand.runif()) < logAcceptProb) { // accept
-    accepts[local_a]++;
-  }
-  else { // reject
-    states[local_a]->setAlpha(alphas[a+runNum]);
-    states[local_b]->setAlpha(alphas[b+runNum]);
-  }
-
-   * */
 }
 
 
@@ -1078,7 +1064,9 @@ void showParameters(ostream& f,FileNames& fn,Defaults defaults,ModelParameters& 
 }
 
 void intro(ostream& f) {
+  f << endl << endl; 
   f << "Bayesian Untangling of Concordance Knots (applied to yeast and other organisms)" << endl;
+  f << endl<< PRE << endl << PRE2 << endl << endl<< PRE3 << endl ;
   f << "BUCKy version " << VERSION << ", " << DATE << endl;
   f << COPYRIGHT << endl << endl;
   f << "This is free software; see the source for copying conditions.  There is NO" << endl;
@@ -2008,6 +1996,9 @@ void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
  * --Dividing runs/chains not correct. 5 runs on 2 processes, each proc gets 3
  * --create-sample-file needs to be called per run (e.g. for.. i<my_runs)
  * ----Data structure needs to match
+ * --*******Seg fault when a run is split across two threads********
+ * ----Occurs AFTER burn-in
+ * ----Not in MPI_MCMCMC
  * */
 
 
@@ -2389,7 +2380,6 @@ int main(int argc, char *argv[])
     global_index.resize(total);
     global_runs.resize(total);
     int position=0;
-    bool hasCold = false; 
     int numPer; 
     if (total < p){
         numPer=1; 
@@ -2402,7 +2392,6 @@ int main(int argc, char *argv[])
         //Allocate space for later collecting final states
         //global_states[irun].resize(rp.getNumChains()); 
         for(int i=0;i<rp.getNumChains();i++){  
-            //
             if (i==0){
                 global_alphas[irun*rp.getNumChains()] = mp.getAlpha();
             }else{
@@ -2422,18 +2411,15 @@ int main(int argc, char *argv[])
                 rankIdx++; 
             }
             global_ranks[position] = rankIdx; 
-            //if (my_rank==0){
-                //cout << "Position "<<position<<" has "<<rankIdx<<endl;
-            //}
             count++; 
-            
-            
+                 
             global_index[position] = i;
             global_runs[position] = irun; 
             position++; 
         }
     }
-    int my_runs = (global_runs[end]+1)-(global_runs[start]+1); 
+    
+    int my_runs = (global_runs[end]+1)-(global_runs[start]); 
     int my_chains = end+1 - start;
     
     vector<State*>local_states(total); 
@@ -2447,23 +2433,22 @@ int main(int argc, char *argv[])
         cout << "done." << endl <<flush;
     }
 
-  
     cout << flush;   
     cout << "Rank " << my_rank <<" has chains: ";
+    
+    
     for (int i=start; i <= end; i++){
         cout<< global_index[i] << " ";
-        //Check if one of "my" chains is chain 0
-        if (global_index[i] == 0)
-            hasCold=true;
     }
     cout << endl; 
+    
  
  if (my_rank == 0){
     cout << "Global indices: "; 
-    for (int i=0; i < rp.getNumChains(); i++)
+    for (int i=0; i < global_index.size(); i++)
       cout << global_index[i] << " ";
     cout << endl << "Global run indices: ";
-    for (int k=0; k < rp.getNumRuns(); k++)
+    for (int k=0; k < global_runs.size(); k++)
       cout << global_runs[k] << " ";
     cout << endl;
       
@@ -2472,10 +2457,10 @@ int main(int argc, char *argv[])
     //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
     cout << my_rank << " has " << my_chains << " chains\n";
     cout << my_rank << " has " << my_runs << " runs\n";
-    cout << my_rank << " has chains: "<<global_index[start]<<" - "<<global_index[end]<<endl;
-    
-  MPI_Finalize();
-  return 0;
+    cout << my_rank << " has chains: ";
+    for (int i=start; i<=end; i++)
+      cout << global_index[i] << " ";
+    cout << endl;
   
   
   if (my_rank==0){
@@ -2499,6 +2484,7 @@ int main(int argc, char *argv[])
     for(int j=0;j<numGenes;j++)
       local_pairCounts[i][j] = 0;
   }
+  
   if (my_rank==0){
     cout << "done." << endl;
   }
@@ -2512,8 +2498,6 @@ int main(int argc, char *argv[])
   int numBurn = rp.getNumUpdates()/10;
   if (my_rank==0){
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
-    //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-    //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
   
   int part = numBurn / 50;
@@ -2521,16 +2505,12 @@ int main(int argc, char *argv[])
   for(int cycle=0;cycle<numBurn;cycle++) {
     //TKC: For each run, for each chain, update MCMC states
     //TKC: Need to take a look at updateOneGroup()
-    for (int irun=0; irun<my_runs; irun++){ //Not sure I need this
-      for(int i=0;i<my_chains;i++) {
-		local_states[start+i]->update(mcmc_rand);
-          //cout << "Gen "<<cycle<<" - "<<my_rank<<": run "
-           //       <<global_runs[irun+start]<<", chain "<<i<<endl; 
-		if(rp.getUseUpdateGroups()) {
-		  int gene = (int)(mcmc_rand.runif()*genes.size());
-			local_states[start+i]->updateOneGroup(gene,mcmc_rand);
-		}
-      }
+    for(int i=start;i<=end;i++) {
+      local_states[i]->update(mcmc_rand);
+	  if(rp.getUseUpdateGroups()) {
+		int gene = (int)(mcmc_rand.runif()*genes.size());
+	      local_states[i]->updateOneGroup(gene,mcmc_rand);
+	  }
       //TKC: If 2 or more chains, and mcmcmc interval is met
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
         //for (int k=0; k<my_chains; k++){
@@ -2540,20 +2520,25 @@ int main(int argc, char *argv[])
           //cout << endl;
         //}
         //MCMCMC
-        thisRun = global_runs[(irun+start)];
+        thisRun = global_runs[i];
         MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          thisRun, global_ranks, irun, MPI_New_World);   
+          thisRun, global_ranks, MPI_New_World);   
       } 
     }
   }
+
+ 
 
   if (my_rank==0){
     //cout << "*" << endl;
     cout << "done." << endl << flush;
   }
   
+MPI_Finalize();
+return(0);
+
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
   }
@@ -2590,24 +2575,39 @@ int main(int argc, char *argv[])
   //Not working
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
-  if (hasCold == true){
+  
+  
+  
+  for (int i=0; i<sampleFileStr.size(); i++){
+	  //cout << "Rank " << my_rank << " has: " << i;
+  }
+  
+cout << flush; 
+
+
     if(rp.getCreateSampleFile()) {
+      //for (int i=start; i < end; i++){
+       // if
+		
       for (unsigned int irun=0; irun<my_runs; irun++){
-		thisRun = global_runs[(irun+start)];
+		thisRun = global_runs[((irun*rp.getNumChains())+start)];
+		cout << my_rank << " has file for run " << thisRun << endl;
+
         sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
+        cout << fileNames.getSampleFile(thisRun+1) << endl;
         if (sampleFileStr[irun]->fail()){
 	      cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
 	      exit(1);
         }
         sampleFileStr[irun]->setf(ios::fixed, ios::floatfield);
         sampleFileStr[irun]->setf(ios::showpoint);
-      }
-    }
-  }
+      } 
+   }
+
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
-  for (unsigned int i=0; i<total; i++){
+  for (int i=0; i<total; i++){
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = local_accept[i] = 0;
   }
 
@@ -2633,7 +2633,7 @@ int main(int argc, char *argv[])
         MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          thisRun, global_ranks, irun, MPI_New_World); 
+          thisRun, global_ranks, MPI_New_World); 
       }
       // update counts
       
@@ -2644,7 +2644,7 @@ int main(int argc, char *argv[])
       local_idx = thisRun*rp.getNumChains(); 
       
       //Output to files
-      if (hasCold == true){
+      //if (hasCold == true){
         local_states[i0]->updateTable(localTable);
         local_states[i0]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
         local_clusterCount[thisRun][local_states[i0]->getNumGroups()]++;
@@ -2656,7 +2656,7 @@ int main(int argc, char *argv[])
 	      local_states[i0]->sample(*sampleFileStr[irun]); //***
         }
       }
-    }
+    //}
     //if( cycle % part == 0) {
     //  cout << "*" << flush;
     //}
@@ -2665,12 +2665,12 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
 
   if(rp.getCreateSampleFile()){
-	  if (hasCold == true){
+	  //if (hasCold == true){
         for (unsigned int irun=0; irun<my_runs; irun++){
 	      sampleFileStr[irun]->close();
 	      delete sampleFileStr[irun];
       }
-    }
+    //}
   }
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
