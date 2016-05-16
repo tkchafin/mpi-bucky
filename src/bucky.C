@@ -1901,7 +1901,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     }
   }
 
-  // .topologies --- eliminated
+// .topologies --- eliminated
 //  cout << "Writing topology single and joint posterior distribution to " << fileNames.getTreePosteriorFile() << "...." << flush;
 //  ofstream treePosteriorStr(fileNames.getTreePosteriorFile().c_str());
 //  treePosteriorStr.setf(ios::fixed, ios::floatfield);
@@ -1999,6 +1999,11 @@ void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
  * --*******Seg fault when a run is split across two threads********
  * ----Occurs AFTER burn-in
  * ----Not in MPI_MCMCMC
+ * 
+ * --A lot of this would probably be easier if we made it more object-oriented
+ * ----e.g. "Chain" object which has its own members for id, alpha, state
+ * ----Rather than having all of these independent collections (more error prone)
+ * ----Consider re-write, once bugs with current version are worked out.
  * */
 
 
@@ -2423,11 +2428,14 @@ int main(int argc, char *argv[])
     int my_chains = end+1 - start;
     
     vector<State*>local_states(total); 
+    vector<int> local_runs(my_runs); 
     
     for (int i=start; i<=end; i++){
         //Each local_states will only fill chains under each rank
         //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
         local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
+		if (vectorContains((vector<int>* local_runs global_runs[i]) == false)
+		  local_runs.insert(global_runs[i];
     }
     if (my_rank ==0){
         cout << "done." << endl <<flush;
@@ -2467,7 +2475,6 @@ int main(int argc, char *argv[])
     cout << "Initializing MCMCMC acceptance counters and pairwise counters..." << flush;
   }
     
-    
   //TKC: Again, for MPI version only need 1D vectors
   vector<int> local_mcmcmcAccepts(total);
   vector<int> local_mcmcmcProposals(total);
@@ -2500,8 +2507,7 @@ int main(int argc, char *argv[])
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
   }
   
-  int part = numBurn / 50;
-  int thisRun, local_idx; 
+  int thisRun; 
   for(int cycle=0;cycle<numBurn;cycle++) {
     //TKC: For each run, for each chain, update MCMC states
     //TKC: Need to take a look at updateOneGroup()
@@ -2511,6 +2517,9 @@ int main(int argc, char *argv[])
 		int gene = (int)(mcmc_rand.runif()*genes.size());
 	      local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
+    }
+    
+    for (int irun=0; irun
       //TKC: If 2 or more chains, and mcmcmc interval is met
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
         //for (int k=0; k<my_chains; k++){
@@ -2526,10 +2535,8 @@ int main(int argc, char *argv[])
           global_runs, global_index, rp.getNumChains(), 
           thisRun, global_ranks, MPI_New_World);   
       } 
-    }
+    
   }
-
- 
 
   if (my_rank==0){
     //cout << "*" << endl;
@@ -2572,11 +2579,9 @@ return(0);
   }
   part = rp.getNumUpdates() / 50;
   
-  //Not working
+
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
-  
-  
   
   for (int i=0; i<sampleFileStr.size(); i++){
 	  //cout << "Rank " << my_rank << " has: " << i;
@@ -2584,10 +2589,9 @@ return(0);
   
 cout << flush; 
 
-
     if(rp.getCreateSampleFile()) {
-      //for (int i=start; i < end; i++){
-       // if
+      for (int i=start; i <= end; i++){
+        if (local_ind
 		
       for (unsigned int irun=0; irun<my_runs; irun++){
 		thisRun = global_runs[((irun*rp.getNumChains())+start)];
