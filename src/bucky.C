@@ -2556,7 +2556,7 @@ int main(int argc, char *argv[])
   }
   
   MPI_Finalize();
-  return(0);
+  exit(0);
   
   //Not used by default, will have to figure out how to save topologies later..
   //if(rp.getCreateSampleFile()) {
