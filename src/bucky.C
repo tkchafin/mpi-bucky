@@ -2500,9 +2500,12 @@ int main(int argc, char *argv[])
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
   }
   
-  int part = numBurn / 50;
+  //int part = numBurn / 50;
+  
   int thisRun, local_idx; 
   for(int cycle=0;cycle<numBurn;cycle++) {
+	 if (my_rank==0)
+		 cout << "Cycle: " << cycle << endl;
     //TKC: For each run, for each chain, update MCMC states
     //TKC: Need to take a look at updateOneGroup()
     for(int i=start;i<=end;i++) {
