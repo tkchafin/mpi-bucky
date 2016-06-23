@@ -2524,11 +2524,12 @@ int main(int argc, char *argv[])
         //}
         //MCMCMC
         thisRun = global_runs[i];
-        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
+        /*MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
           thisRun, global_ranks, MPI_New_World);   
-      } 
+      */
+	  } 
     }
   }
 
