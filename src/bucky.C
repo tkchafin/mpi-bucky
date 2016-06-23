@@ -2539,8 +2539,6 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-MPI_Finalize();
-return(0); }
 
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
