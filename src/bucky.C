@@ -1844,7 +1844,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     for(int j=a;j<b+1;j++) {
       concordanceStr << setw(6) << j ;
       for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-	concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][i][j];
+	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][i][j];
       csum += splitsGeneMatrixPP[i][j];
       concordanceStr << " " << setw(12) << setprecision(6) << splitsGeneMatrixPP[i][j]
 		     << " " << setw(11) << setprecision(6) << csum << endl;
@@ -2552,9 +2552,6 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-  MPI_Finalize();
-  exit(0);
-  
   //Not used by default, will have to figure out how to save topologies later..
   //if(rp.getCreateSampleFile()) {
   //  cout << "Sampled topologies will be in file(s) " << fileNames.getSampleFile(1);
@@ -2604,14 +2601,12 @@ int main(int argc, char *argv[])
       sampleFileStr[irun]->setf(ios::showpoint);
     } 
   }
-
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
   for (int i=0; i<total; i++){
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = local_accept[i] = 0;
   }
-
   
   Table* localTable;
   if (rp.shouldOptSpace())
@@ -2619,7 +2614,7 @@ int main(int argc, char *argv[])
   else
       localTable = new TGMTable(numGenes, topologies);
   
-  //Track if
+  //Track if process controls a rank 0 chain
   bool hasCold= false; 
   for(int i=start;i<=end;i++){
     if (global_index[i] == 0)
@@ -2639,24 +2634,36 @@ int main(int argc, char *argv[])
     //TKC: If 2 or more chains, and mcmcmc interval is met, 
     // then for each run, swap chain states
     if (cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){
-      int begin = global_runs[start];
-      for(int irun=begin; irun < (begin + my_runs); irun+= rp.getNumChains()){       
+	  int begin = global_runs[start];
+      for(int irun=begin; irun < (begin + my_runs); irun++){     
         //MCMCMC
-        //thisRun = global_runs[i];
-        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
+        MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          thisRun, global_ranks, MPI_New_World);
-      }
+          irun, global_ranks, MPI_New_World);
+          
+        //Execute the following if process controls a rank 0 chain
+        if (hasCold == true){
+	      for (int i=start; i<= end; i++){
+		    if (global_index[i] == 0){
+		      local_states[i]->updateTable(localTable);
+		      local_states[i]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
+		    }
+		  }
+	    }
       //for (int i=start; i<=end
        /*if chain is rank 0: 
 	   * local_states[i] ->updateTable(localTable);
 	   * local_states[i]
 	   * 
 	   * */
-      //}
+      }
 	} 
   }  
+
+  MPI_Finalize();
+  exit(0);
+
 	 /* 
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){	
         MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
