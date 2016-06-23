@@ -2016,7 +2016,7 @@ int main(int argc, char *argv[])
   MPI_Comm_size(MPI::COMM_WORLD, &p); //Get number of processes
   
   //cout << flush; 
-  //cout << "\nHello from rank " << my_rank <<"\n";
+  cout << "\nHello from rank " << my_rank <<"\n";
   MPI_Barrier(MPI_COMM_WORLD); 
    
   time_t beginTime;
@@ -2434,8 +2434,8 @@ int main(int argc, char *argv[])
         //Each local_states will only fill chains under each rank
         //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
         local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
-		if (vectorContains((vector<int>* local_runs global_runs[i]) == false)
-		  local_runs.insert(global_runs[i];
+		//if (vectorContains(vector<int>* local_runs global_runs[i]) == false)
+		  //local_runs.insert(global_runs[i]);
     }
     if (my_rank ==0){
         cout << "done." << endl <<flush;
@@ -2519,7 +2519,7 @@ int main(int argc, char *argv[])
 	  }
     }
     
-    for (int irun=0; irun
+    for (int i=0; i<my_chains; i++){
       //TKC: If 2 or more chains, and mcmcmc interval is met
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
         //for (int k=0; k<my_chains; k++){
@@ -2535,7 +2535,7 @@ int main(int argc, char *argv[])
           global_runs, global_index, rp.getNumChains(), 
           thisRun, global_ranks, MPI_New_World);   
       } 
-    
+	}
   }
 
   if (my_rank==0){
@@ -2577,7 +2577,7 @@ return(0);
     //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
     //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
-  part = rp.getNumUpdates() / 50;
+  //int part = rp.getNumUpdates() / 50;
   
 
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
@@ -2586,12 +2586,11 @@ return(0);
   for (int i=0; i<sampleFileStr.size(); i++){
 	  //cout << "Rank " << my_rank << " has: " << i;
   }
-  
-cout << flush; 
+  //cout << flush; 
 
     if(rp.getCreateSampleFile()) {
-      for (int i=start; i <= end; i++){
-        if (local_ind
+      //for (int i=start; i <= end; i++){
+        //if (local_ind
 		
       for (unsigned int irun=0; irun<my_runs; irun++){
 		thisRun = global_runs[((irun*rp.getNumChains())+start)];
@@ -2645,7 +2644,7 @@ cout << flush;
       //Need to work on the calculate pairs and create sample file issues. 
       //Only need to execute the following on processes which have chain 0!
       int i0 = thisRun*rp.getNumChains();   
-      local_idx = thisRun*rp.getNumChains(); 
+      //int local_idx = thisRun*rp.getNumChains(); 
       
       //Output to files
       //if (hasCold == true){
