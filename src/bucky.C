@@ -2539,7 +2539,9 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-
+  MPI_Finalize();
+  exit(0);
+  
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
   }
@@ -2555,8 +2557,7 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-  MPI_Finalize();
-  exit(0);
+  
   
   //Not used by default, will have to figure out how to save topologies later..
   //if(rp.getCreateSampleFile()) {
