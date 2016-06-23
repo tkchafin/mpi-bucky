@@ -2555,7 +2555,7 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-  MPI_Finalize();
+  MPI_Abort();
   return(0);
   
   //Not used by default, will have to figure out how to save topologies later..
