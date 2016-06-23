@@ -1818,6 +1818,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   concordanceStr << "All Splits:" << endl;
 
   //TKC: Free memory from GenomeWideDistribution objects
+  //Fixed memory leak
   for (int i = 0; i <gwDistr.size(); i++)
     delete gwDistr[i];
   for (int i = 0; i <otherGwDistr.size(); i++)
@@ -1926,6 +1927,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
 //  cout << "done." << endl;
 
 // .gene
+
   cout << "Writing single and joint gene posteriors to " << fileNames.getGenePosteriorFile() << "...." << flush;
   ofstream genePostStr(fileNames.getGenePosteriorFile().c_str());
   if(genePostStr.fail()) {
@@ -2357,8 +2359,10 @@ int main(int argc, char *argv[])
   
   
   
-  if(rp.getNumUpdates()==0)
+  if(rp.getNumUpdates()==0){
+	  MPI_Finalize();
     return 0;
+  }
   if (my_rank ==0){
     cout << "Setting initial MCMC state..." << flush;
   }
@@ -2434,6 +2438,8 @@ int main(int argc, char *argv[])
     }
 
     cout << flush;   
+    cout << "Rank " << my_rank <<" has " << my_runs << " runs!" << endl;
+    cout << "Rank " << my_rank <<" has " << my_chains << " chains!" << endl;
     cout << "Rank " << my_rank <<" has chains: ";
     
     
@@ -2465,14 +2471,11 @@ int main(int argc, char *argv[])
   
   if (my_rank==0){
     cout << "Initializing MCMCMC acceptance counters and pairwise counters..." << flush;
-  }
-    
+  }  
     
   //TKC: Again, for MPI version only need 1D vectors
   vector<int> local_mcmcmcAccepts(total);
   vector<int> local_mcmcmcProposals(total);
-  
-  //Might need to make global linearized version instead, and have rank 0 combine them. 
   
   for (unsigned int i=0; i<total; i++){
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = 0;
@@ -2489,9 +2492,7 @@ int main(int argc, char *argv[])
     cout << "done." << endl;
   }
 
-  
   time_t beginMCMCtime;
-  time(&beginMCMCtime);
   if (my_rank==0){
     cout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl << endl;
   }
@@ -2501,50 +2502,43 @@ int main(int argc, char *argv[])
   }
   
   int part = numBurn / 50;
-  
   int thisRun, local_idx; 
+  
+  //BEGIN BURN IN CYCLE
   for(int cycle=0;cycle<numBurn;cycle++) {
 	 if (my_rank==0)
 		 cout << "Cycle: " << cycle << endl;
-    //TKC: For each run, for each chain, update MCMC states
     //TKC: Need to take a look at updateOneGroup()
+    
+    //Update each chain
     for(int i=start;i<=end;i++) {
       local_states[i]->update(mcmc_rand);
 	  if(rp.getUseUpdateGroups()) {
 		int gene = (int)(mcmc_rand.runif()*genes.size());
 	      local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
-      //TKC: If 2 or more chains, and mcmcmc interval is met
+	}
+	
+    //TKC: If 2 or more chains, and mcmcmc interval is met, 
+    // then for each run, swap chain states
+    int begin = global_runs[start];
+    for(int irun=begin; irun < (begin + my_runs); irun++){
+	  cout << "Rank " << my_rank << " calling MCMCMC for run: " << irun << endl;
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
-        //for (int k=0; k<my_chains; k++){
-          //cout << "RANK "<<my_rank<<", RUN "<<irun<<", CHAIN "<<k<<" "; 
-          //Seems to be working
-          //local_states[start+k]->print(cout); 
-          //cout << endl;
-        //}
         //MCMCMC
-        thisRun = global_runs[i];
-        /*MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
+        //thisRun = global_runs[i];
+        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
           thisRun, global_ranks, MPI_New_World);   
-      */
-	  } 
-    }
+      }
+	} 
   }
-
- 
 
   if (my_rank==0){
     //cout << "*" << endl;
     cout << "done." << endl << flush;
   }
-  
-  //ISSUE!!!!!!!!!!!!!!!!!!!!!
-  //Something is wrong in MPI_mcmcmc? A send is not matched, so MPI_Finalize() hangs. Check it out!
-  
-  MPI_Finalize();
-  exit(0);
   
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
@@ -2585,14 +2579,14 @@ int main(int argc, char *argv[])
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
   
-  
-  
   for (int i=0; i<sampleFileStr.size(); i++){
 	  //cout << "Rank " << my_rank << " has: " << i;
   }
+ 
+  MPI_Finalize();
+  exit(0);
   
 cout << flush; 
-
 
     if(rp.getCreateSampleFile()) {
       //for (int i=start; i < end; i++){
