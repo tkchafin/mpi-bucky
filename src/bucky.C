@@ -2711,6 +2711,6 @@ cout << flush;
   }
   
  //} //END RANK 0 WORK
- // MPI_Finalize();
+  MPI_Finalize();
   return 0;
 } 
