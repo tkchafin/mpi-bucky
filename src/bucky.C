@@ -2540,7 +2540,7 @@ int main(int argc, char *argv[])
   }
   
 MPI_Finalize();
-return(0);
+return(0); }
 
   if (my_rank==0){
     cout << "Initializing summary tables..." << flush;
