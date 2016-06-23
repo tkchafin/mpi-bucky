@@ -133,10 +133,10 @@
 using namespace std;
 string PRE="MPI-BUCKy (BUCKy 2.0.0) using OpenMPI Message Passing Interface";
 string PRE2="Written by Tyler K. Chafin, last modified 26 April 2016";
-string PRE3="Based on (please cite original authors):";
+string PRE3="Based on :";
 string VERSION = "1.4.4";
 string DATE = "22 June 2015";
-string COPYRIGHT = "Copyright (C) 2006-2015 by Bret Larget, Cecile Ane and Riley Larget";
+string COPYRIGHT = "Copyright (C) 2006-2015 by Bret Larget, Cecile Ane and Riley Larget\nPlease cite original authors";
 
 int countTaxa(string top) {
   int countTaxa=0;
@@ -160,6 +160,7 @@ bool getTaxa(string& file, set<string>& taxaInIFile, map<string, int>& translate
   ifstream f(file.c_str());
   if(f.fail()) {
     cerr <<"Error: Cannot open file " << file << "." << endl;
+    MPI_Finalize();
     exit(1);
   }
 
@@ -207,7 +208,7 @@ bool getTaxa(string& file, set<string>& taxaInIFile, map<string, int>& translate
 
 }
 
-void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslateMap, vector<string>& translateTable, string pruneFile, bool shouldPruneGene, bool& changed) {
+void getTaxaSubset(int rank, vector<string>& inputFiles, map<string, int>& prunedTranslateMap, vector<string>& translateTable, string pruneFile, bool shouldPruneGene, bool& changed) {
   vector<int> genesToIgnore;
   map<string, int> translateMap;
   set<string> taxaNames;
@@ -217,9 +218,11 @@ void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslate
   if (!pruneFile.empty()) {
     bool hasTable = getTaxa(pruneFile, taxaNames, translateMap);
     if (!hasTable) {
-      cerr << "\nBucky cannot find the translate table in " << pruneFile
-	   << ". The prune file should start with keyword 'translate'."
-	   << "Please cross check translate table format. "<< endl;
+	  if (rank==0){
+        cerr << "\nBucky cannot find the translate table in " << pruneFile
+	     << ". The prune file should start with keyword 'translate'."
+	     << "Please cross check translate table format. "<< endl;
+      }
       exit(0);
     }
     fileNum = 0;
@@ -229,10 +232,12 @@ void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslate
   else {
     bool hasTable = getTaxa(inputFiles[0], taxaNames, translateMap);
     if (!hasTable) {
-      cerr << "\nBucky cannot find the translate table in " << inputFiles[0]
-	   << ".\nPlease double check the presence or format\n"
-	   << "of the translate table in this file.\n"
-	   << "All input files should start with keyword 'translate'."<<endl;
+      if (rank==0){
+        cerr << "\nBucky cannot find the translate table in " << inputFiles[0]
+	     << ".\nPlease double check the presence or format\n"
+	     << "of the translate table in this file.\n"
+	     << "All input files should start with keyword 'translate'."<<endl;
+	   }
       exit(0);
     }
   }
@@ -241,10 +246,12 @@ void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslate
     set<string> taxaInIFile;
     bool hasTable = getTaxa(inputFiles[fileNum], taxaInIFile, translateMap);
     if (!hasTable) {
-      cerr << "\nBucky cannot find translate table in " << inputFiles[fileNum]
-	   << ".\nPlease double check the presence or format\n"
-	   << "of the translate table in this file.\n"
-	   << "All input files should start with keyword 'translate'."<< endl;
+	  if (rank==0){
+        cerr << "\nBucky cannot find translate table in " << inputFiles[fileNum]
+	     << ".\nPlease double check the presence or format\n"
+	     << "of the translate table in this file.\n"
+	     << "All input files should start with keyword 'translate'."<< endl;
+	   }
       exit(0);
     }
 
@@ -252,6 +259,7 @@ void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslate
     int count = taxaInIFile.size();
     set_intersection(taxaNames.begin(), taxaNames.end(), taxaInIFile.begin(), taxaInIFile.end(), inserter(output, output.begin()));
     if (shouldPruneGene && (taxaNames.size() != output.size() || taxaNames.size() > taxaInIFile.size())) {
+        if (rank==0)
         cerr << "Skipping gene " << inputFiles[fileNum] << " as translate table does not match with that of reference: " << firstFile << endl;
         genesToIgnore.push_back(fileNum);
     }
@@ -260,15 +268,19 @@ void getTaxaSubset(vector<string>& inputFiles, map<string, int>& prunedTranslate
         changed = true;
       }
       if (output.size() < maxTaxa) {
-        cerr << "\nCannot prune to taxa subset specified in " << firstFile << endl;
-        cerr << inputFiles[fileNum] << " does not have all taxa specified in the prune file" << endl;
+		if(rank==0){
+          cerr << "\nCannot prune to taxa subset specified in " << firstFile << endl;
+          cerr << inputFiles[fileNum] << " does not have all taxa specified in the prune file" << endl;
+	    }
         for (set<string>::iterator itr = output.begin(); itr != output.end(); itr++) {
           taxaNames.erase(*itr);
         }
-        cerr << "Missing taxa for this locus:\n";
-        for (set<string>::iterator itr = taxaNames.begin(); itr != taxaNames.end(); itr++) {
-          cerr << *itr << "\n";
-        }
+        if (rank==0){
+          cerr << "Missing taxa for this locus:\n";
+          for (set<string>::iterator itr = taxaNames.begin(); itr != taxaNames.end(); itr++) {
+            cerr << *itr << "\n";
+          }
+	    }
 
         exit(0);
       }
@@ -344,6 +356,7 @@ void readFile(string filename, int i, Table*& tgm, int &max,
   ifstream f(filename.c_str());
   if(f.fail()) {
     cerr <<"Error: Cannot open file " << filename << "." << endl;
+    MPI_Finalize();
     exit(1);
   }
 
@@ -1310,7 +1323,7 @@ void MPI_readInputFiles(int rank, vector<string>& inputFiles,Table* &tgm, vector
 {
   bool changed = false;
   map<string, int> translateMap;
-  getTaxaSubset(inputFiles, translateMap, translateTable, prunefile, shouldPruneGene, changed);
+  getTaxaSubset(rank, inputFiles, translateMap, translateTable, prunefile, shouldPruneGene, changed);
   if (inputFiles.size() == 0) {
       if (rank ==0)
         cerr << "All genes skipped by the pruning step, Exiting..." << endl;
@@ -1328,21 +1341,12 @@ void MPI_readInputFiles(int rank, vector<string>& inputFiles,Table* &tgm, vector
 
 
   int part = inputFiles.size() / 50;
-  /*if (part != 0) {
-      cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-      cout << "+----+----+----+----+----+----+----+----+----+----+" << endl;
-  }
-   * */
+
   taxid.resize(inputFiles.size());
   for (size_t i=0;i<inputFiles.size();i++){
-    //if (part != 0 && i % part == 0) {
-    //  cout << "*";
-    //}
     readFile(inputFiles[i],i,tgm,max,taxid[i],translateMap, changed);
   }
-  //if (part != 0) {
-  //  cout << endl;
-  //}
+
 }
 
 void Defaults::print(ostream& f) {
@@ -2109,6 +2113,7 @@ int main(int argc, char *argv[])
     ofstream fout(fileNames.getOutFile().c_str());
     if(fout.fail()) {
         cerr <<"Error: Cannot open file " << fileNames.getOutFile() << "." << endl;
+        MPI_Finalize();
         exit(1);
     }
     intro(fout);
@@ -2367,89 +2372,79 @@ int main(int argc, char *argv[])
     cout << "Setting initial MCMC state..." << flush;
   }
 
-    //Allocate space for alphas
-    vector<double> global_alphas(rp.getNumChains());
-    global_alphas.resize(rp.getNumChains()*rp.getNumRuns());
+  //Allocate space for alphas
+  vector<double> global_alphas(rp.getNumChains());
+  global_alphas.resize(rp.getNumChains()*rp.getNumRuns());
     
-    //Allocate space for collecting states later (have each process make a local version)
-    if (my_rank==0)
-        vector<vector<State*> > global_states(rp.getNumRuns());
+  //Allocate space for collecting states later (have each process make a local version)
+  if (my_rank==0)
+    vector<vector<State*> > global_states(rp.getNumRuns());
 
-    //Make serial list of indices
-    vector<int> global_index(total);
-    vector<int> global_runs(total);
-    vector<int> global_ranks(total);
+  //Make serial list of indices
+  vector<int> global_index(total);
+  vector<int> global_runs(total);
+  vector<int> global_ranks(total);
     
-    //Resize index vectors
-    global_index.resize(total);
-    global_runs.resize(total);
-    int position=0;
-    int numPer; 
-    if (total < p){
-        numPer=1; 
-    }else{
-        numPer=total/p;
-    }
-    int rankIdx=0; 
-    int count=0; 
-    for (int irun=0; irun<rp.getNumRuns(); irun++){
-        //Allocate space for later collecting final states
-        //global_states[irun].resize(rp.getNumChains()); 
-        for(int i=0;i<rp.getNumChains();i++){  
-            if (i==0){
-                global_alphas[irun*rp.getNumChains()] = mp.getAlpha();
-            }else{
-                global_alphas[i+(irun*rp.getNumChains())]=rp.getAlphaMultiplier()*global_alphas[i-1];
-            }
-            //cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
-            //cout << "Run " << irun+1 <<" chain "<<i+1<<" has alpha "<<global_alphas[i]<<endl;
+  //Resize index vectors
+  global_index.resize(total);
+  global_runs.resize(total);
+  int position=0;
+  int numPer; 
+  if (total < p){
+    numPer=1; 
+  }else{
+    numPer=total/p;
+  }
+  int rankIdx=0; 
+  int count=0; 
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
+    //Allocate space for later collecting final states
+    //global_states[irun].resize(rp.getNumChains()); 
+    for(int i=0;i<rp.getNumChains();i++){  
+      if (i==0){
+        global_alphas[irun*rp.getNumChains()] = mp.getAlpha();
+      }else{
+        global_alphas[i+(irun*rp.getNumChains())]=rp.getAlphaMultiplier()*global_alphas[i-1];
+      }
+      //cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
+      //cout << "Run " << irun+1 <<" chain "<<i+1<<" has alpha "<<global_alphas[i]<<endl;
             
-            //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
-            //global_states[irun][i] = new State(global_alphas[i],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),rand);
-            //Store chain indices
+      //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
+      //global_states[irun][i] = new State(global_alphas[i],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),rand);
+      //Store chain indices
             
-            if (rankIdx == p-1){
-                numPer += total%p; 
-            }else if (count == numPer){
-                count = 0; 
-                rankIdx++; 
-            }
-            global_ranks[position] = rankIdx; 
-            count++; 
+      if (rankIdx == p-1){
+        numPer += total%p; 
+      }else if (count == numPer){
+        count = 0; 
+        rankIdx++; 
+      }
+      global_ranks[position] = rankIdx; 
+      count++; 
                  
-            global_index[position] = i;
-            global_runs[position] = irun; 
-            position++; 
-        }
+      global_index[position] = i;
+      global_runs[position] = irun; 
+      position++; 
     }
+  }
     
-    int my_runs = (global_runs[end]+1)-(global_runs[start]); 
-    int my_chains = end+1 - start;
+  int my_runs = (global_runs[end]+1)-(global_runs[start]); 
+  int my_chains = end+1 - start;
     
-    vector<State*>local_states(total); 
+  vector<State*>local_states(total); 
     
-    for (int i=start; i<=end; i++){
-        //Each local_states will only fill chains under each rank
-        //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
-        local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
-    }
-    if (my_rank ==0){
-        cout << "done." << endl <<flush;
-    }
+  for (int i=start; i<=end; i++){
+    //Each local_states will only fill chains under each rank
+    //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
+    local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
+  }
+  if (my_rank ==0){
+    cout << "done." << endl <<flush;
+  }
 
-    cout << flush;   
-    cout << "Rank " << my_rank <<" has " << my_runs << " runs!" << endl;
-    cout << "Rank " << my_rank <<" has " << my_chains << " chains!" << endl;
-    cout << "Rank " << my_rank <<" has chains: ";
-    
-    
-    for (int i=start; i <= end; i++){
-        cout<< global_index[i] << " ";
-    }
-    cout << endl; 
-    
+  cout << flush;      
  
- if (my_rank == 0){
+  if (my_rank == 0){
     cout << "Global indices: "; 
     for (int i=0; i < global_index.size(); i++)
       cout << global_index[i] << " ";
@@ -2461,12 +2456,12 @@ int main(int argc, char *argv[])
   }
   
     //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
-    cout << my_rank << " has " << my_chains << " chains\n";
-    cout << my_rank << " has " << my_runs << " runs\n";
-    cout << my_rank << " has chains: ";
-    for (int i=start; i<=end; i++)
-      cout << global_index[i] << " ";
-    cout << endl;
+    //cout << my_rank << " has " << my_chains << " chains\n";
+    //cout << my_rank << " has " << my_runs << " runs\n";
+    //cout << my_rank << " has chains: ";
+    //for (int i=start; i<=end; i++)
+    //  cout << global_index[i] << " ";
+    //cout << endl;
   
   
   if (my_rank==0){
@@ -2506,8 +2501,6 @@ int main(int argc, char *argv[])
   
   //BEGIN BURN IN CYCLE
   for(int cycle=0;cycle<numBurn;cycle++) {
-	 if (my_rank==0)
-		 cout << "Cycle: " << cycle << endl;
     //TKC: Need to take a look at updateOneGroup()   
     //Update each chain
     for(int i=start;i<=end;i++) {
@@ -2565,8 +2558,6 @@ int main(int argc, char *argv[])
   
   if (my_rank==0){
     cout << "Beginning " << rp.getNumUpdates() << " MCMC updates...";
-    //cout << "0   10   20   30   40   50   60   70   80   90   100" << endl;
-    //cout << "+----+----+----+----+----+----+----+----+----+----+" << endl << flush;
   }
   part = rp.getNumUpdates() / 50;
   
@@ -2621,6 +2612,7 @@ int main(int argc, char *argv[])
       bool hasCold = true;
   }
   
+  //FULL MCMC
   for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {  
     //Update each chain
     for(int i=start;i<=end;i++) {
@@ -2648,15 +2640,17 @@ int main(int argc, char *argv[])
 		    if (global_index[i] == 0){
 		      local_states[i]->updateTable(localTable);
 		      local_states[i]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
+		      local_clusterCount[irun][local_states[i]->getNumGroups()]++;
+		      if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
+		        local_states[i]->updatePairCounts(local_pairCounts); 
+		      if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
+			    //*sampleFileStr[irun] << setw(8) << local_accept[i];
+			    local_accept[i] = 0;
+			    //local_states[i]->sample(*sampleFileStr[irun]);
+			  }
 		    }
 		  }
 	    }
-      //for (int i=start; i<=end
-       /*if chain is rank 0: 
-	   * local_states[i] ->updateTable(localTable);
-	   * local_states[i]
-	   * 
-	   * */
       }
 	} 
   }  
