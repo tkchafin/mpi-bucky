@@ -2540,6 +2540,9 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
+  //ISSUE!!!!!!!!!!!!!!!!!!!!!
+  //Something is wrong in MPI_mcmcmc? A send is not matched, so MPI_Finalize() hangs. Check it out!
+  
   MPI_Finalize();
   exit(0);
   
