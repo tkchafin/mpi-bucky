@@ -2502,14 +2502,13 @@ int main(int argc, char *argv[])
   }
   
   int part = numBurn / 50;
-  int thisRun, local_idx; 
+  int thisRun; 
   
   //BEGIN BURN IN CYCLE
   for(int cycle=0;cycle<numBurn;cycle++) {
 	 if (my_rank==0)
 		 cout << "Cycle: " << cycle << endl;
-    //TKC: Need to take a look at updateOneGroup()
-    
+    //TKC: Need to take a look at updateOneGroup()   
     //Update each chain
     for(int i=start;i<=end;i++) {
       local_states[i]->update(mcmc_rand);
@@ -2517,20 +2516,18 @@ int main(int argc, char *argv[])
 		int gene = (int)(mcmc_rand.runif()*genes.size());
 	      local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
-	}
-	
+	}	
     //TKC: If 2 or more chains, and mcmcmc interval is met, 
     // then for each run, swap chain states
-    int begin = global_runs[start];
-    for(int irun=begin; irun < (begin + my_runs); irun++){
-	  cout << "Rank " << my_rank << " calling MCMCMC for run: " << irun << endl;
-      if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
+    if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){ 
+	  int begin = global_runs[start];
+      for(int irun=begin; irun < (begin + my_runs); irun++){      
         //MCMCMC
         //thisRun = global_runs[i];
-        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
+        MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          thisRun, global_ranks, MPI_New_World);   
+          irun, global_ranks, MPI_New_World);   
       }
 	} 
   }
@@ -2555,7 +2552,8 @@ int main(int argc, char *argv[])
     cout << "done." << endl << flush;
   }
   
-  
+  MPI_Finalize();
+  exit(0);
   
   //Not used by default, will have to figure out how to save topologies later..
   //if(rp.getCreateSampleFile()) {
@@ -2580,32 +2578,32 @@ int main(int argc, char *argv[])
   //Some local processes will not use
   
   for (int i=0; i<sampleFileStr.size(); i++){
+	  //------------------!!!------------------//
+	  //---------Need to get this working------//
+	  //------------------!!!------------------//
 	  //cout << "Rank " << my_rank << " has: " << i;
   }
  
-  MPI_Finalize();
-  exit(0);
   
-cout << flush; 
+  cout << flush; 
 
-    if(rp.getCreateSampleFile()) {
-      //for (int i=start; i < end; i++){
-       // if
-		
-      for (unsigned int irun=0; irun<my_runs; irun++){
-		thisRun = global_runs[((irun*rp.getNumChains())+start)];
-		cout << my_rank << " has file for run " << thisRun << endl;
+  if(rp.getCreateSampleFile()) {
+    //for (int i=start; i < end; i++){
+    // if
+	for (unsigned int irun=0; irun<my_runs; irun++){
+	  thisRun = global_runs[((irun*rp.getNumChains())+start)];
+	  cout << my_rank << " has file for run " << thisRun << endl;
 
-        sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
-        cout << fileNames.getSampleFile(thisRun+1) << endl;
-        if (sampleFileStr[irun]->fail()){
-	      cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
-	      exit(1);
-        }
-        sampleFileStr[irun]->setf(ios::fixed, ios::floatfield);
-        sampleFileStr[irun]->setf(ios::showpoint);
-      } 
-   }
+      sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
+      cout << fileNames.getSampleFile(thisRun+1) << endl;
+      if (sampleFileStr[irun]->fail()){
+	    cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
+	    exit(1);
+      }
+      sampleFileStr[irun]->setf(ios::fixed, ios::floatfield);
+      sampleFileStr[irun]->setf(ios::showpoint);
+    } 
+  }
 
   
   //TKC: Serialized 2D vector
@@ -2620,18 +2618,46 @@ cout << flush;
       localTable = new TGM(topologies);
   else
       localTable = new TGMTable(numGenes, topologies);
-
-
-  for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {
-    for (int irun=0; irun<my_runs; irun++){
-      thisRun = global_runs[(irun+start)];
-      for(int i=0;i<my_chains;i++) { 
-	    local_accept[start+i] += local_states[start+i]->update(mcmc_rand);
-	    if(rp.getUseUpdateGroups()) {
-	      int gene = (int)(mcmc_rand.runif()*genes.size());
-	      local_accept[start+i] += local_states[start+i]->updateOneGroup(gene,mcmc_rand);
-	    }
+  
+  //Track if
+  bool hasCold= false; 
+  for(int i=start;i<=end;i++){
+    if (global_index[i] == 0)
+      bool hasCold = true;
+  }
+  
+  for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {  
+    //Update each chain
+    for(int i=start;i<=end;i++) {
+	  //Update accepts
+      local_accept[i] += local_states[i]->update(mcmc_rand);
+	  if(rp.getUseUpdateGroups()) {
+	    int gene = (int)(mcmc_rand.runif()*genes.size());
+	    local_states[i]->updateOneGroup(gene,mcmc_rand);
+	  }
+	}	
+    //TKC: If 2 or more chains, and mcmcmc interval is met, 
+    // then for each run, swap chain states
+    if (cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){
+      int begin = global_runs[start];
+      for(int irun=begin; irun < (begin + my_runs); irun+= rp.getNumChains()){       
+        //MCMCMC
+        //thisRun = global_runs[i];
+        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
+          local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
+          global_runs, global_index, rp.getNumChains(), 
+          thisRun, global_ranks, MPI_New_World);
       }
+      //for (int i=start; i<=end
+       /*if chain is rank 0: 
+	   * local_states[i] ->updateTable(localTable);
+	   * local_states[i]
+	   * 
+	   * */
+      //}
+	} 
+  }  
+	 /* 
       if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){	
         MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
@@ -2663,7 +2689,8 @@ cout << flush;
     //if( cycle % part == 0) {
     //  cout << "*" << flush;
     //}
-  }
+  }*/ 
+  
   if (my_rank == 0)
     cout << "done." << endl << flush;
 
