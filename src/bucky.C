@@ -2457,7 +2457,7 @@ int main(int argc, char *argv[])
       
   }
   
-    cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
+    //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
     //cout << my_rank << " has " << my_chains << " chains\n";
     //cout << my_rank << " has " << my_runs << " runs\n";
     //cout << my_rank << " has chains: ";
@@ -2560,16 +2560,18 @@ int main(int argc, char *argv[])
       hasCold = true;
     }
   }
-  cout << "Rank " << my_rank << " Has cold chain? -- " << hasCold << endl;
+  
+  //cout << "Rank " << my_rank << " has cold? " << hasCold << endl;
   
   //Not working
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
   
   //Create file streams if necessary
-  if(rp.getCreateSampleFile()) {
+  if(rp.getCreateSampleFile() && hasCold==true) {
 	for (int i=start; i<=end; i++){
 	  if (global_index[i] == 0){
+		
 	    int thisRun = global_runs[i];
         sampleFileStr[thisRun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
         if (sampleFileStr[thisRun]->fail()){
@@ -2578,7 +2580,9 @@ int main(int argc, char *argv[])
         }
         sampleFileStr[thisRun]->setf(ios::fixed, ios::floatfield);
         sampleFileStr[thisRun]->setf(ios::showpoint);
-      }
+      }else{
+	    sampleFileStr[i] = NULL;
+	  }
     } 
   }
   
@@ -2617,41 +2621,45 @@ int main(int argc, char *argv[])
           global_runs, global_index, rp.getNumChains(), 
           irun, global_ranks, MPI_New_World);
 	  }
-      //Execute the following if process controls a rank 0 chain
-      if (hasCold == true){
-	    for (int i=start; i<= end; i++){
-		  if (global_index[i] == 0){
-		    local_states[i]->updateTable(localTable);
-		    local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
-		    local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
-		    if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-		      local_states[i]->updatePairCounts(local_pairCounts); 
-		    if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
-		      *sampleFileStr[global_runs[i]] << setw(8) << local_accept[i];
-			  local_accept[i] = 0;
-			  local_states[i]->sample(*sampleFileStr[global_runs[i]]);
-			}
+    }
+    //Execute the following if process controls a rank 0 chain
+    if (hasCold == true){
+	  for (int i=start; i<= end; i++){
+	    if (global_index[i] == 0){
+		  local_states[i]->updateTable(localTable);
+		  local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
+		  local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
+		  if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
+		    local_states[i]->updatePairCounts(local_pairCounts); 
+		  if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
+		    *sampleFileStr[global_runs[i]] << setw(8) << local_accept[i];
+		    local_accept[i] = 0;
+			local_states[i]->sample(*sampleFileStr[global_runs[i]]);
 		  }
 	    }
       }
 	} 
   }  
 
+
+  if (my_rank == 0)
+    cout << "done." << endl << flush;
+
+  //Free up memory used by the ofstreams
+  if(rp.getCreateSampleFile() && hasCold==true){
+    for (int i=0; i<=sampleFileStr.size(); i++){
+      if (sampleFileStr[i] != NULL){
+		  //cout << "-----Rank " << my_rank << " deleting index: " << i << endl;
+	    sampleFileStr[i]->close();
+	    delete sampleFileStr[i];
+	  }
+    }
+  }
+
   //Exit, below not tested yet
   MPI_Finalize();
   exit(0);
   
-  if (my_rank == 0)
-    cout << "done." << endl << flush;
-
-  if(rp.getCreateSampleFile()){
-	  //if (hasCold == true){
-        for (unsigned int irun=0; irun<my_runs; irun++){
-	      sampleFileStr[irun]->close();
-	      delete sampleFileStr[irun];
-      }
-    //}
-  }
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
     
