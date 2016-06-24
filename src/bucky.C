@@ -26,6 +26,7 @@
 // Version 1.3.1  29 October, 2009
 // Version 1.4.3   9 July, 2014
 // Version 1.4.4  22 June, 2015
+//------MPI------
 // Version 2.0.0 2016 Tyler K. Chafin
 
 // File:     bucky.C
@@ -111,7 +112,6 @@
 //Developer notes
 //Known issues:
 //--- Threads not closed properly on calling help
-//--- Need to finish multithread enabling primary MCMCMC (burn in done)
 
 
 
@@ -132,7 +132,7 @@
 
 using namespace std;
 string PRE="MPI-BUCKy (BUCKy 2.0.0) using OpenMPI Message Passing Interface";
-string PRE2="Written by Tyler K. Chafin, last modified 26 April 2016";
+string PRE2="Written by Tyler K. Chafin, last modified June 2016";
 string PRE3="Based on :";
 string VERSION = "1.4.4";
 string DATE = "22 June 2015";
@@ -1010,8 +1010,9 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
 
 
 
-void usage(Defaults defaults)
+void usage(int rank, Defaults defaults)
 {
+  if (rank == 0){
   cerr << "Usage: bucky [options] <input files>" << endl << endl;
   cerr << "  Options:" << endl;
   cerr << "  Parameter                      | Usage                      | Default Value" << endl;
@@ -1043,7 +1044,10 @@ void usage(Defaults defaults)
   cerr << "  help                           | -h OR --help               |" << endl;
   cerr << "  version                        | --version                  |" << endl;
   cerr << "  -------------------------------------------------------------------" << endl << endl;
-  exit(1);
+  }
+  
+  MPI_Finalize();
+  exit(0);
 }
 
 void showParameters(ostream& f,FileNames& fn,Defaults defaults,ModelParameters& mp,RunParameters& rp)
@@ -1086,7 +1090,7 @@ void intro(ostream& f) {
   f << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." << endl << endl;
 }
 
-int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunParameters& rp,Defaults& defaults)
+int readArguments(int rank, int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunParameters& rp,Defaults& defaults)
 {
   int k=1;
   bool done = (argc>1 ? false : true);
@@ -1095,13 +1099,13 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
     if(flag=="--version")
       exit(0);
     if(flag=="-h" || flag=="--help")
-      usage(defaults);
+      usage(rank, defaults);
     else if(flag=="-a") {
       double alpha;
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> alpha) )
-	usage(defaults);
+	usage(rank, defaults);
       if(alpha <= 0.0)
 	cerr << "Warning: parameter alpha must be positive.  Ignoring argument -a " << alpha << "." << endl;
       else
@@ -1113,7 +1117,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> numUpdates) )
-	usage(defaults);
+	usage(rank, defaults);
       rp.setNumUpdates(numUpdates);
       k++;
     }
@@ -1122,7 +1126,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> numRuns) )
-	usage(defaults);
+	usage(rank,defaults);
       if (numRuns==0){
 	cerr << "Warning: parameter number-of-runs must be at least one. Setting to default: -k 2." << endl;
 	numRuns=2;
@@ -1135,7 +1139,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> numChains) )
-	usage(defaults);
+	usage(rank,defaults);
       if(numChains==0) {
 	cerr << "Warning: parameter number-of-chains must be at least one. Setting to default -c 1." << endl;
 	numChains=1;
@@ -1152,7 +1156,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> alphaMultiplier) )
-	usage(defaults);
+	usage(rank,defaults);
       if(alphaMultiplier<=0)
 	cerr << "Warning: parameter alpha-multiplier must be positive. Ignoring argument -m " << alphaMultiplier << "." << endl;
       else
@@ -1164,7 +1168,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> mcmcmcRate) )
-	usage(defaults);
+	usage(rank,defaults);
       if(mcmcmcRate==0) {
 	cerr << "Warning: parameter MCMCMC-rate must be at least one. Setting to default -r 1." << endl;
 	mcmcmcRate=1;
@@ -1177,7 +1181,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> subsampleRate) )
-	usage(defaults);
+	usage(rank,defaults);
       if(subsampleRate==0) {
 	cerr << "Warning: parameter subsample-rate must be at least one. Setting to default -s 1." << endl;
 	subsampleRate=1;
@@ -1200,7 +1204,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> seed1) )
-	usage(defaults);
+	usage(rank,defaults);
       if(seed1==0)
 	cerr << "Warning: parameter seed1 must be at least one. Ignorning command -s1 " << seed1 << "." << endl;
       else
@@ -1212,7 +1216,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> seed2) )
-	usage(defaults);
+	usage(rank,defaults);
       if(seed2==0)
 	cerr << "Warning: parameter seed2 must be at least one. Ignorning command -s2 " << seed2 << "." << endl;
       else
@@ -1224,7 +1228,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> cutoff) )
-	usage(defaults);
+	usage(rank,defaults);
       rp.setSwCFcutoff(cutoff);
       k++;
     }
@@ -1276,7 +1280,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> ngrid) )
-	usage(defaults);
+	usage(rank,defaults);
       if(ngrid==0)
 	cerr << "Warning: parameter grid-size must be at least one. Ignoring option genomewide-grid-size " << ngrid << "." << endl;
       else
@@ -1296,7 +1300,7 @@ int readArguments(int argc, char *argv[],FileNames& fn,ModelParameters& mp,RunPa
   }
 
   if(fn.getInputListFileName().empty() && argc-k<1)
-    usage(defaults);
+    usage(rank,defaults);
   return k;
 }
 
@@ -2035,7 +2039,7 @@ int main(int argc, char *argv[])
   // Read arguments from the command line
   // return value k is the position of the first input file
   //   i.e. argv[k] is the first input file
-  int k=readArguments(argc,argv,fileNames,mp,rp,defaults);
+  int k=readArguments(my_rank,argc,argv,fileNames,mp,rp,defaults);
 
   // Populate input files vector from remaining command line arguments
   vector<string> inputFiles(argv + k, argv + argc);
@@ -2362,8 +2366,6 @@ int main(int argc, char *argv[])
     cout << "done." << endl;
   }
   
-  
-  
   if(rp.getNumUpdates()==0){
 	  MPI_Finalize();
     return 0;
@@ -2455,7 +2457,7 @@ int main(int argc, char *argv[])
       
   }
   
-    //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
+    cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
     //cout << my_rank << " has " << my_chains << " chains\n";
     //cout << my_rank << " has " << my_runs << " runs\n";
     //cout << my_rank << " has chains: ";
@@ -2544,16 +2546,6 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "done." << endl << flush;
   }
-  
-  //Not used by default, will have to figure out how to save topologies later..
-  //if(rp.getCreateSampleFile()) {
-  //  cout << "Sampled topologies will be in file(s) " << fileNames.getSampleFile(1);
-   // if(rp.getNumRuns()==1){
-   //   cout << "." << endl;
-    //} else {
-    //  cout << " to " << fileNames.getSampleFile(rp.getNumRuns()) << "." << endl;
-    //}
-  //}
 
   
   if (my_rank==0){
@@ -2561,35 +2553,32 @@ int main(int argc, char *argv[])
   }
   part = rp.getNumUpdates() / 50;
   
+    //Track if process controls a rank 0 chain
+  bool hasCold= false; 
+  for(int i=start;i<=end;i++){
+    if (global_index[i] == 0){
+      hasCold = true;
+    }
+  }
+  cout << "Rank " << my_rank << " Has cold chain? -- " << hasCold << endl;
+  
   //Not working
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
   
-  for (int i=0; i<sampleFileStr.size(); i++){
-	  //------------------!!!------------------//
-	  //---------Need to get this working------//
-	  //------------------!!!------------------//
-	  //cout << "Rank " << my_rank << " has: " << i;
-  }
- 
-  
-  cout << flush; 
-
+  //Create file streams if necessary
   if(rp.getCreateSampleFile()) {
-    //for (int i=start; i < end; i++){
-    // if
-	for (unsigned int irun=0; irun<my_runs; irun++){
-	  thisRun = global_runs[((irun*rp.getNumChains())+start)];
-	  cout << my_rank << " has file for run " << thisRun << endl;
-
-      sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
-      cout << fileNames.getSampleFile(thisRun+1) << endl;
-      if (sampleFileStr[irun]->fail()){
-	    cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
-	    exit(1);
+	for (int i=start; i<=end; i++){
+	  if (global_index[i] == 0){
+	    int thisRun = global_runs[i];
+        sampleFileStr[thisRun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
+        if (sampleFileStr[thisRun]->fail()){
+	      cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
+	      exit(1);
+        }
+        sampleFileStr[thisRun]->setf(ios::fixed, ios::floatfield);
+        sampleFileStr[thisRun]->setf(ios::showpoint);
       }
-      sampleFileStr[irun]->setf(ios::fixed, ios::floatfield);
-      sampleFileStr[irun]->setf(ios::showpoint);
     } 
   }
   
@@ -2604,14 +2593,8 @@ int main(int argc, char *argv[])
       localTable = new TGM(topologies);
   else
       localTable = new TGMTable(numGenes, topologies);
-  
-  //Track if process controls a rank 0 chain
-  bool hasCold= false; 
-  for(int i=start;i<=end;i++){
-    if (global_index[i] == 0)
-      bool hasCold = true;
-  }
-  
+
+
   //FULL MCMC
   for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {  
     //Update each chain
@@ -2633,64 +2616,31 @@ int main(int argc, char *argv[])
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
           irun, global_ranks, MPI_New_World);
-          
-        //Execute the following if process controls a rank 0 chain
-        if (hasCold == true){
-	      for (int i=start; i<= end; i++){
-		    if (global_index[i] == 0){
-		      local_states[i]->updateTable(localTable);
-		      local_states[i]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
-		      local_clusterCount[irun][local_states[i]->getNumGroups()]++;
-		      if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-		        local_states[i]->updatePairCounts(local_pairCounts); 
-		      if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
-			    //*sampleFileStr[irun] << setw(8) << local_accept[i];
-			    local_accept[i] = 0;
-			    //local_states[i]->sample(*sampleFileStr[irun]);
-			  }
-		    }
+	  }
+      //Execute the following if process controls a rank 0 chain
+      if (hasCold == true){
+		 cout<< "-----Doing some stuff"<<endl;
+	    for (int i=start; i<= end; i++){
+		  if (global_index[i] == 0){
+		    local_states[i]->updateTable(localTable);
+		    local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
+		    local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
+		    if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
+		      local_states[i]->updatePairCounts(local_pairCounts); 
+		    if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
+		      *sampleFileStr[global_runs[i]] << setw(8) << local_accept[i];
+			  local_accept[i] = 0;
+			  local_states[i]->sample(*sampleFileStr[global_runs[i]]);
+			}
 		  }
 	    }
       }
 	} 
   }  
 
+  //Exit, below not tested yet
   MPI_Finalize();
   exit(0);
-
-	 /* 
-      if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){	
-        MPI_mcmcmc(local_states, global_alphas, swap_rand[thisRun], 
-          local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
-          global_runs, global_index, rp.getNumChains(), 
-          thisRun, global_ranks, MPI_New_World); 
-      }
-      // update counts
-      
-      //BELOW: 
-      //Need to work on the calculate pairs and create sample file issues. 
-      //Only need to execute the following on processes which have chain 0!
-      int i0 = thisRun*rp.getNumChains();   
-      local_idx = thisRun*rp.getNumChains(); 
-      
-      //Output to files
-      //if (hasCold == true){
-        local_states[i0]->updateTable(localTable);
-        local_states[i0]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
-        local_clusterCount[thisRun][local_states[i0]->getNumGroups()]++;
-        if( rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-          local_states[i0]->updatePairCounts(local_pairCounts);
-        if( rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0) {
-	      *sampleFileStr[irun] << setw(8) << local_accept[thisRun*rp.getNumChains()];//Output only chain 0
-	      local_accept[i0] = 0;
-	      local_states[i0]->sample(*sampleFileStr[irun]); //***
-        }
-      }
-    //}
-    //if( cycle % part == 0) {
-    //  cout << "*" << flush;
-    //}
-  }*/ 
   
   if (my_rank == 0)
     cout << "done." << endl << flush;
