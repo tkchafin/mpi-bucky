@@ -2619,7 +2619,6 @@ int main(int argc, char *argv[])
 	  }
       //Execute the following if process controls a rank 0 chain
       if (hasCold == true){
-		 cout<< "-----Doing some stuff"<<endl;
 	    for (int i=start; i<= end; i++){
 		  if (global_index[i] == 0){
 		    local_states[i]->updateTable(localTable);
