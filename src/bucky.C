@@ -2408,7 +2408,7 @@ int main(int argc, char *argv[])
       }else{
         global_alphas[i+(irun*rp.getNumChains())]=rp.getAlphaMultiplier()*global_alphas[i-1];
       }
-      //cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
+      cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
       //cout << "Run " << irun+1 <<" chain "<<i+1<<" has alpha "<<global_alphas[i]<<endl;
             
       //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
@@ -2438,7 +2438,7 @@ int main(int argc, char *argv[])
   for (int i=start; i<=end; i++){
     //Each local_states will only fill chains under each rank
     //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
-    local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
+    local_states[i] = new State(global_alphas[i],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
   }
   if (my_rank ==0){
     cout << "done." << endl <<flush;
@@ -2497,6 +2497,10 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
   }
+  string name = to_string(my_rank) + ".state";
+  ofstream f(name);
+  for (int i=start; i<=end; i++)
+    local_states[i]->print(f);
   
   int part = numBurn / 50;
   int thisRun; 
@@ -2656,8 +2660,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  //ofstream f(to_string(my_rank));
-  //localTable->print(f);
+  
 
   //Exit, below not tested yet
   MPI_Finalize();
@@ -2674,6 +2677,7 @@ int main(int argc, char *argv[])
     * alphas
     * accepts
     * proposals
+    * Update TGMTable for all processes having cold chain
     * */
   
     

@@ -13,13 +13,13 @@ Please cite original authors
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- ./bucky -s1 4 -s2 45 -k 2 -c 4 -n 100000 --opt-space ../data/example1/ex0/ex.in ../data/example1/ex1/ex.in ../data/example1/ex2/ex.in ../data/example1/ex3/ex.in ../data/example1/ex4/ex.in ../data/example1/ex5/ex.in ../data/example1/ex6/ex.in ../data/example1/ex7/ex.in ../data/example1/ex8/ex.in ../data/example1/ex9/ex.in
+ ./bucky -s1 4 -s2 45 -k 1 -c 4 -n 1 ../data/example1/ex0/ex.in ../data/example1/ex1/ex.in ../data/example1/ex2/ex.in ../data/example1/ex3/ex.in ../data/example1/ex4/ex.in ../data/example1/ex5/ex.in ../data/example1/ex6/ex.in ../data/example1/ex7/ex.in ../data/example1/ex8/ex.in ../data/example1/ex9/ex.in
 
   Parameter              | Usage                    | Default Value | Value Used
   ------------------------------------------------------------------------------
   alpha                  | -a number                | 1             | 1
-  # of runs              | -k integer               | 2             | 2
-  # of MCMC updates      | -n integer               | 100000        | 100000
+  # of runs              | -k integer               | 2             | 1
+  # of MCMC updates      | -n integer               | 100000        | 1
   # of chains            | -c integer               | 1             | 4
   MCMCMC Rate            | -r integer               | 100           | 100
   alpha multiplier       | -m number                | 10            | 10
@@ -37,7 +37,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   use update groups      | --use-update-groups      | true          | true
   File with prune list   | -p pruneFile             |               | 
   skip genes             | -sg                      | false         | false
-  Space optimization     | --opt-space              | false         | true
   no population tree?    | --no-population-tree     | false         | false
   genomewide CF grid size| --genomewide-grid-size   | 1000          | 1000
   ------------------------------------------------------------------------------
