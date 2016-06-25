@@ -1038,7 +1038,6 @@ void usage(int rank, Defaults defaults)
   cerr << "  skip genes with fewer taxa     | -sg                        | false" << endl;
   cerr << "  use update groups              | --use-update-groups        | " << (defaults.getUseUpdateGroups() == true ? "true" : "false") << endl;
   cerr << "  use update groups              | --do-not-use-update-groups | " << endl;
-  cerr << "  Space optimization             | --opt-space                | " << (defaults.shouldOptSpace() == true ? "true" : "false") << endl;
   cerr << "  do not build population tree?  | --no-population-tree       | false"  << endl;
   cerr << "  grid-size for genomewide CF    | --genomewide-grid-size     | " << defaults.getNumGenomewideGrid() << endl;
   cerr << "  help                           | -h OR --help               |" << endl;
@@ -1074,7 +1073,6 @@ void showParameters(ostream& f,FileNames& fn,Defaults defaults,ModelParameters& 
   f << "  use update groups      | --use-update-groups      | " << left << setw(14) << (defaults.getUseUpdateGroups() == true ? "true" : "false")      << "| " << (rp.getUseUpdateGroups() ? "true" : "false")<< endl;
   f << "  File with prune list   | -p pruneFile             | " << left << setw(14) << ""                                                              << "| " << rp.getPruneFile() << endl;
   f << "  skip genes             | -sg                      | " << left << setw(14) <<"false" << "| " << (rp.getPruneGene() ? "true" : "false")<< endl;
-  f << "  Space optimization     | --opt-space              | " << left << setw(14) << (defaults.shouldOptSpace() == true ? "true" : "false")          << "| " << (rp.shouldOptSpace() ? "true" : "false") << endl;
   f << "  no population tree?    | --no-population-tree     | " << left << setw(14) <<"false" << "| " << (rp.shouldBuildPopulationTree() ? "false" : "true") << endl;
   f << "  genomewide CF grid size| --genomewide-grid-size   | " << left << setw(14) << defaults.getNumGenomewideGrid()                                 << "| " << rp.getNumGenomewideGrid() << endl;
   f << "  ------------------------------------------------------------------------------" << endl;
@@ -1288,7 +1286,9 @@ int readArguments(int rank, int argc, char *argv[],FileNames& fn,ModelParameters
       k++;
     }
     else if (flag =="--opt-space") {
-      rp.setOptSpace(true);
+	  if (rank==0)
+	    cerr << "Warning: --opt-space not available yet in MPI-BUCKy, ignoring flag!" << endl;
+      rp.setOptSpace(false);
       k++;
     }
     else if (flag =="--no-population-tree") {
@@ -2656,10 +2656,17 @@ int main(int argc, char *argv[])
     }
   }
 
+  //ofstream f(to_string(my_rank));
+  //localTable->print(f);
+
   //Exit, below not tested yet
   MPI_Finalize();
   exit(0);
   
+  MPI_Barrier(MPI_New_World); 
+   
+   //topologies -- same
+   //local_table
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
     
@@ -2668,6 +2675,7 @@ int main(int argc, char *argv[])
     * accepts
     * proposals
     * */
+  
     
   //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
 	//      newTable,clusterCount,splits,splitsGeneMatrix,

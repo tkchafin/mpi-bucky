@@ -63,6 +63,7 @@ public:
   virtual vector<string> getTopologies() = 0;
   
   virtual void print(ostream &f) = 0;
+  
 };
 
 class TGMTable : public Table
@@ -192,7 +193,7 @@ public:
     virtual int getNumTrees() {
         return table.size();
     }
-
+    
     virtual void print(ostream &f)
     {
         for (int i = 0; i < tops.size(); i++) {
@@ -203,6 +204,8 @@ public:
             f << endl;
         }
     }
+    
+
 
 private:
     vector<vector<double> > table;
@@ -257,7 +260,6 @@ public:
                 return;
             }
         }
-
         geneCounts.push_back(GeneCounts(gene, count));
     }
 
