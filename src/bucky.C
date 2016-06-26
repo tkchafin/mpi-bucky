@@ -921,7 +921,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
   
   int send_rank, recv_rank; 
 
-  //Query "global" tables to capture ranks involved in send
+  //Query "global" tables to capture ranks involved in send/recv
   send_rank = rank_idx[local_a]; //Is this correct?? 
   recv_rank = rank_idx[local_b];  
 
@@ -934,6 +934,11 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
     proposals[local_a]++;
     if (send_rank != recv_rank){
       if (rank == send_rank){
+		//Exchange ALPHA between send & recv ranks
+		double myAlpha = states[local_a]->getAlpha();
+		double otherAlpha;
+		//cout << rank << " sending "<<myAlpha<<" to rank "<< recv_rank<<endl;
+		MPI_Sendrecv(&myAlpha, 1, MPI_DOUBLE, recv_rank, 3, &otherAlpha, 1, MPI_DOUBLE, recv_rank, 3, comm, MPI_STATUS_IGNORE);
         //cout <<flush; 
         //cout << "Rank "<<send_rank<<" will exchange chain "
         //     << a << " (index "<<local_a<<") with chain "<<b<<
@@ -941,7 +946,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         //Capture probabilities to send
         aLogPriorProb = states[local_a]->getLogPriorProb(); 
         //cout << aLogPriorProb<<"\n";
-        states[local_a]->setAlpha(alphas[local_b]);
+        states[local_a]->setAlpha(otherAlpha);
         aLogPostProb = states[local_a]->getLogPriorProb(); 
         //cout << aLogPostProb<<"\n";
         //Send logPriorProb and logPostProb to recv_rank
@@ -953,14 +958,19 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         if (accept == true){ 
             accepts[local_a]++; 
         }else{
-            states[local_a]->setAlpha(alphas[local_a]);
+            states[local_a]->setAlpha(myAlpha);
         }
       }else if (rank == recv_rank){ 
+		//Exchange ALPHA between send & recv ranks
+		double myAlpha = states[local_b]->getAlpha();
+		double otherAlpha;
+		//cout << rank << " sending "<<myAlpha<<" to rank "<< send_rank<<endl;
+		MPI_Sendrecv(&myAlpha, 1, MPI_DOUBLE, send_rank, 3, &otherAlpha, 1, MPI_DOUBLE, send_rank, 3, comm, MPI_STATUS_IGNORE);
         //cout << "Rank "<<rank<<" is receiving from rank "<<send_rank<<endl;
         //Calculate log probabilities
         bLogPriorProb = states[local_b]->getLogPriorProb(); 
         //cout << bLogPriorProb<<"\n";
-        states[local_b]->setAlpha(alphas[local_a]);
+        states[local_b]->setAlpha(otherAlpha);
         bLogPostProb = states[local_b]->getLogPriorProb(); 
         //cout << bLogPostProb<<"\n";
         //Send logPriorProb and logPostProb from send_rank
@@ -973,7 +983,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
             accepts[local_a]++; 
         }else{
             accept = false; 
-            states[local_b]->setAlpha(alphas[local_b]);
+            states[local_b]->setAlpha(myAlpha);
         }
         //Return bool to send_rank
         MPI_Send(&accept, 1, MPI::BOOL, send_rank, 2, comm);
@@ -2497,10 +2507,7 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
   }
-  string name = to_string(my_rank) + ".state";
-  ofstream f(name);
-  for (int i=start; i<=end; i++)
-    local_states[i]->print(f);
+
   
   int part = numBurn / 50;
   int thisRun; 
@@ -2660,7 +2667,11 @@ int main(int argc, char *argv[])
     }
   }
 
-  
+  //Check final states!!
+  string name = to_string(my_rank) + ".state";
+  ofstream f(name);
+  for (int i=start; i<=end; i++)
+    local_states[i]->print(f);
 
   //Exit, below not tested yet
   MPI_Finalize();
