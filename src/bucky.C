@@ -913,6 +913,9 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
 {
     
   //rand is swap_rand- all ranks in sync
+  //Because all ranks received same swap seeds
+  //!!!ALL RANKS MUST CALL MCMCMC ONCE FOR EACH RUN THEY HAVE CHAINS FOR!!!
+  
   int a = (int) ( (numChains-1)*rand->runif() );
   //cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
   int b = a+1;
