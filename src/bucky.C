@@ -992,14 +992,16 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Send(&accept, 1, MPI::BOOL, send_rank, 2, comm);
       }
     }else if ((send_rank == recv_rank)&&(rank == send_rank)){ 
+	  double aAlpha = states[local_a]->getAlpha();
+	  double bAlpha = states[local_b]->getAlpha();
       //cout <<flush; 
       //cout << "Rank "<<send_rank<<" will exchange chain "
       //     << a << " (index "<<local_a<<") with chain "<<b
       //     << " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
       aLogPriorProb = states[local_a]->getLogPriorProb(); 
       bLogPriorProb = states[local_b]->getLogPriorProb(); 
-      states[local_a]->setAlpha(alphas[local_b]);
-      states[local_b]->setAlpha(alphas[local_a]);
+      states[local_a]->setAlpha(bAlpha);
+      states[local_b]->setAlpha(aAlpha);
       bLogPostProb = states[local_b]->getLogPriorProb();
       aLogPostProb = states[local_a]->getLogPriorProb(); 
       //Receiving process calculates if proposed change is accepted
@@ -1009,15 +1011,12 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
           accepts[local_a]++; 
       }else{ //reject
           accept = false; 
-          states[local_a]->setAlpha(alphas[local_a]);
-          states[local_b]->setAlpha(alphas[local_b]);
+          states[local_a]->setAlpha(aAlpha);
+          states[local_b]->setAlpha(bAlpha);
       }
     }
   }
 }
-
-
-
 
 
 
@@ -2421,7 +2420,7 @@ int main(int argc, char *argv[])
       }else{
         global_alphas[i+(irun*rp.getNumChains())]=rp.getAlphaMultiplier()*global_alphas[i-1];
       }
-      cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
+      //cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
       //cout << "Run " << irun+1 <<" chain "<<i+1<<" has alpha "<<global_alphas[i]<<endl;
             
       //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
@@ -2501,10 +2500,11 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "done." << endl;
   }
-
+  
+  MPI_Barrier(MPI_New_World); 
   time_t beginMCMCtime;
   if (my_rank==0){
-    cout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl << endl;
+    cout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl;
   }
   int numBurn = rp.getNumUpdates()/10;
   if (my_rank==0){
@@ -2541,6 +2541,7 @@ int main(int argc, char *argv[])
 	} 
   }
 
+  MPI_Barrier(MPI_New_World); 
   if (my_rank==0){
     //cout << "*" << endl;
     cout << "done." << endl << flush;
@@ -2556,7 +2557,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<local_clusterCount[irun].size();i++)
       local_clusterCount[irun][i] = 0;
   }
-
+  
+  MPI_Barrier(MPI_New_World); 
   if (my_rank==0){
     cout << "done." << endl << flush;
   }
@@ -2583,9 +2585,9 @@ int main(int argc, char *argv[])
   
   //Create file streams if necessary
   if(rp.getCreateSampleFile() && hasCold==true) {
+	sampleFileStr.resize(my_runs);
 	for (int i=start; i<=end; i++){
 	  if (global_index[i] == 0){
-		
 	    int thisRun = global_runs[i];
         sampleFileStr[thisRun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
         if (sampleFileStr[thisRun]->fail()){
@@ -2594,11 +2596,12 @@ int main(int argc, char *argv[])
         }
         sampleFileStr[thisRun]->setf(ios::fixed, ios::floatfield);
         sampleFileStr[thisRun]->setf(ios::showpoint);
-      }else{
-	    sampleFileStr[i] = NULL;
-	  }
+      }
     } 
   }
+  for (int y=0; y<sampleFileStr.size(); y++)
+    cout << "Rank "<<my_rank<<" has: " << sampleFileStr[y];
+  cout<<endl;
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
@@ -2607,11 +2610,9 @@ int main(int argc, char *argv[])
   }
   
   Table* localTable;
-  if (rp.shouldOptSpace())
-      localTable = new TGM(topologies);
-  else
-      localTable = new TGMTable(numGenes, topologies);
+  localTable = new TGMTable(numGenes, topologies);
 
+  cout << "Rank "<<my_rank<<" made it to primary MCMCMC"<<endl;
 
   //FULL MCMC
   for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {  
@@ -2624,12 +2625,14 @@ int main(int argc, char *argv[])
 	    local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
 	}	
+	
     //TKC: If 2 or more chains, and mcmcmc interval is met, 
     // then for each run, swap chain states
     if (cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){
 	  int begin = global_runs[start];
       for(int irun=begin; irun < (begin + my_runs); irun++){     
         //MCMCMC
+        cout << "MCMCMC";
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
@@ -2646,7 +2649,7 @@ int main(int argc, char *argv[])
 		  if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
 		    local_states[i]->updatePairCounts(local_pairCounts); 
 		  if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
-		    *sampleFileStr[global_runs[i]] << setw(8) << local_accept[i];
+		    *(sampleFileStr[global_runs[i]]) << setw(8) << local_accept[i];
 		    local_accept[i] = 0;
 			local_states[i]->sample(*sampleFileStr[global_runs[i]]);
 		  }
@@ -2655,13 +2658,19 @@ int main(int argc, char *argv[])
 	} 
   }  
 
-
+  cout << "Rank "<<my_rank<<" made it past primary MCMCMC"<<endl;
+  MPI_Barrier(MPI_New_World); 
+  
   if (my_rank == 0)
-    cout << "done." << endl << flush;
+    cout << "done." << endl << flush;  
+
+  //Exit, below not tested yet
+  //MPI_Finalize();
+  //exit(0);
 
   //Free up memory used by the ofstreams
   if(rp.getCreateSampleFile() && hasCold==true){
-    for (int i=0; i<=sampleFileStr.size(); i++){
+    for (int i=0; i<sampleFileStr.size(); i++){
       if (sampleFileStr[i] != NULL){
 		  //cout << "-----Rank " << my_rank << " deleting index: " << i << endl;
 	    sampleFileStr[i]->close();
@@ -2669,16 +2678,33 @@ int main(int argc, char *argv[])
 	  }
     }
   }
+  
 
+  
   //Check final states!!
   string name = to_string(my_rank) + ".state";
   ofstream f(name);
-  for (int i=start; i<=end; i++)
+  for (int i=start; i<end; i++)
     local_states[i]->print(f);
+  
+    
+  //Check final table
+  if (hasCold==true){
+    string name2 = to_string(my_rank) + ".table";
+    ofstream g(name2);
+    localTable->print(g);
+  }
 
+  if (hasCold==true){
+  //vector<double> newTable = localTable->getSerialTable();
+  //for (int t=0; t< newTable.size(); t++){
+	//  cout << newTable[t];
+  //}
+  }
+  
   //Exit, below not tested yet
-  MPI_Finalize();
-  exit(0);
+  //MPI_Finalize();
+  //exit(0);
   
   MPI_Barrier(MPI_New_World); 
    
@@ -2703,8 +2729,8 @@ int main(int argc, char *argv[])
   for(int i=0;i<numGenes;i++)
     delete genes[i];
 
-  for(int i=0;i<my_chains;i++)
-    delete local_states[i+start];
+  for(int i=start;i<=end;i++)
+    delete local_states[i];
   
   delete localTable;
       
