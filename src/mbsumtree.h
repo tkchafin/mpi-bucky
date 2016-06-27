@@ -8,10 +8,7 @@ class Node;
 class Edge {
 public:
   Edge() {}
-  ~Edge() {
-    for(int i=0;i<2;i++)
-      nodes[i] = NULL;
-  }
+  ~Edge() {}
   Edge(int n,double x) :
     number(n),
     length(x)
@@ -37,7 +34,9 @@ private:
 class Node {
 public:
   Node() { number = -1; }
-  ~Node() { edges.clear(); }
+  ~Node() { 
+	  edges.clear();
+  }
   Node(int n,bool l) : number(n), leaf(l) {}
   int getNumber() const { return number; }
   void setNumber(int x) { number = x; }
@@ -116,6 +115,7 @@ public:
       delete *n;
     nodes.clear();
     edges.clear();
+    //delete thePruner;
   }
   int getNumTaxa() { return numTaxa; }
   int getNumNodes() { return numNodes; }

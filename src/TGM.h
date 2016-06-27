@@ -64,12 +64,19 @@ public:
   
   virtual void print(ostream &f) = 0;
   
+  virtual vector<double> getSerialTable() = 0;
+  
 };
 
 class TGMTable : public Table
 {
 public:
     TGMTable() {nGenes = 0;}
+
+    ~TGMTable(){
+		table.clear();
+		tops.clear();
+	}
 
     TGMTable(int numGenes, vector<string>& topologies) {
         int numTrees = topologies.size();
@@ -80,6 +87,16 @@ public:
             table[i].resize(nGenes, 0);
         }
     }
+    
+    virtual vector<double> getSerialTable(){
+	    vector<double> retTable((this->tops.size())*(this->nGenes));
+		for(int t=0; t < this->table.size(); t++){
+			for(int g=0; g < this->table[t].size(); g++){
+				retTable[t*g] = this->table[t][g];
+			}
+		}
+		return retTable;
+	}
 
     virtual void addGeneCount(string top, int gene, double count) {
         vector<string>::iterator it = find(tops.begin(), tops.end(), top);
@@ -260,6 +277,7 @@ public:
                 return;
             }
         }
+
         geneCounts.push_back(GeneCounts(gene, count));
     }
 
@@ -352,6 +370,8 @@ public:
             f << endl;
         }
     }
+    
+    virtual vector<double> getSerialTable(){}
 
 private:
     vector<string> tops;
