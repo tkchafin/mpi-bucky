@@ -2466,6 +2466,10 @@ int main(int argc, char *argv[])
     for (int k=0; k < global_runs.size(); k++)
       cout << global_runs[k] << " ";
     cout << endl;
+    cout << endl << "Global rank indices: ";
+    for (int j=0; j < global_ranks.size(); j++)
+      cout << global_ranks[j] << " ";
+    cout << endl;
       
   }
   
@@ -2599,9 +2603,9 @@ int main(int argc, char *argv[])
       }
     } 
   }
-  for (int y=0; y<sampleFileStr.size(); y++)
-    cout << "Rank "<<my_rank<<" has: " << sampleFileStr[y];
-  cout<<endl;
+  //for (int y=0; y<sampleFileStr.size(); y++)
+    //cout << "Rank "<<my_rank<<" has: " << sampleFileStr[y];
+  //cout<<endl;
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
@@ -2611,8 +2615,6 @@ int main(int argc, char *argv[])
   
   Table* localTable;
   localTable = new TGMTable(numGenes, topologies);
-
-  cout << "Rank "<<my_rank<<" made it to primary MCMCMC"<<endl;
 
   //FULL MCMC
   for(int cycle=0;cycle<rp.getNumUpdates();cycle++) {  
@@ -2632,7 +2634,6 @@ int main(int argc, char *argv[])
 	  int begin = global_runs[start];
       for(int irun=begin; irun < (begin + my_runs); irun++){     
         //MCMCMC
-        cout << "MCMCMC";
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
@@ -2658,15 +2659,11 @@ int main(int argc, char *argv[])
 	} 
   }  
 
-  cout << "Rank "<<my_rank<<" made it past primary MCMCMC"<<endl;
   MPI_Barrier(MPI_New_World); 
   
   if (my_rank == 0)
     cout << "done." << endl << flush;  
 
-  //Exit, below not tested yet
-  //MPI_Finalize();
-  //exit(0);
 
   //Free up memory used by the ofstreams
   if(rp.getCreateSampleFile() && hasCold==true){
@@ -2674,14 +2671,13 @@ int main(int argc, char *argv[])
       if (sampleFileStr[i] != NULL){
 		  //cout << "-----Rank " << my_rank << " deleting index: " << i << endl;
 	    sampleFileStr[i]->close();
-	    delete sampleFileStr[i];
+	    //delete sampleFileStr[i];
 	  }
     }
   }
   
-
   
-  //Check final states!!
+  //Check final states
   string name = to_string(my_rank) + ".state";
   ofstream f(name);
   for (int i=start; i<end; i++)
@@ -2695,11 +2691,33 @@ int main(int argc, char *argv[])
     localTable->print(g);
   }
 
+  vector<double> serialTable;
   if (hasCold==true){
-  //vector<double> newTable = localTable->getSerialTable();
-  //for (int t=0; t< newTable.size(); t++){
-	//  cout << newTable[t];
-  //}
+    serialTable = localTable->getSerialTable();
+    int sz = serialTable.size();
+    //If master, collect tables
+    if (my_rank == 0){
+		cout << "RANK 0------------"<<endl;
+	  for (int i=0; i<total; i++){
+	    if ((global_index[i] == 0) && (global_ranks[i] != 0)){
+		  vector<double> tempTable;
+		  tempTable.resize(sz);
+		  int tag = 100 + global_ranks[i];
+		  cout << "Rank " << my_rank<<" attempting recv from rank "<<global_ranks[i]<<endl;
+	      //int s;
+	      //MPI_Recv(&s, 1, MPI_INT, global_ranks[i], 8, MPI_New_World, MPI_STATUS_IGNORE);
+	      //cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
+	      MPI_Recv(&tempTable[0], sz, MPI_INT, global_ranks[i], tag, MPI_New_World, MPI_STATUS_IGNORE);
+	      tempTable.clear();
+	    }
+	  }	
+	//Else, send to master	
+	}else{
+		int tag = 100 + my_rank;
+		//cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<<endl;
+		//MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
+		MPI_Ssend(&serialTable[0], sz, MPI_INT, 0, tag, MPI_New_World); 
+	}
   }
   
   //Exit, below not tested yet
