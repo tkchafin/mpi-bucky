@@ -90,9 +90,10 @@ public:
     
     virtual vector<double> getSerialTable(){
 	    vector<double> retTable((this->tops.size())*(this->nGenes));
-		for(int t=0; t < this->table.size(); t++){
-			for(int g=0; g < this->table[t].size(); g++){
-				retTable[t*g] = this->table[t][g];
+	    int sz = this->table.size();
+		for(int t=0; t < this->tops.size(); t++){
+			for(int g=0; g < sz; g++){
+				retTable[(t*sz)+g] = this->table[t][g];
 			}
 		}
 		return retTable;
