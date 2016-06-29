@@ -66,6 +66,8 @@ public:
   
   virtual vector<double> getSerialTable() = 0;
   
+  virtual void readSerialTable(vector<double> nt) = 0;
+  
 };
 
 class TGMTable : public Table
@@ -89,14 +91,18 @@ public:
     }
     
     virtual vector<double> getSerialTable(){
-	    vector<double> retTable((this->tops.size())*(this->nGenes));
+	    vector<double> retTable;
 	    int sz = this->table.size();
 		for(int t=0; t < this->tops.size(); t++){
 			for(int g=0; g < sz; g++){
-				retTable[(t*sz)+g] = this->table[t][g];
+				retTable.push_back(this->table[t][g]);
 			}
 		}
 		return retTable;
+	}
+
+	virtual void readSerialTable(vector<double> add) {
+		
 	}
 
     virtual void addGeneCount(string top, int gene, double count) {
@@ -191,7 +197,6 @@ public:
             cerr << "Internal error in finding topology" << endl;
             exit(0);
         }
-
         return table[n][gene];
     }
 
@@ -230,6 +235,7 @@ private:
     vector<string> tops;
     int nGenes;
 };
+
 
 class TGM : public Table
 {
@@ -373,11 +379,13 @@ public:
     }
     
     virtual vector<double> getSerialTable(){}
+	virtual void readSerialTable(vector<double> add){}
 
 private:
     vector<string> tops;
     vector<vector<GeneCounts> > topGeneCounts;
     unordered_map<string, int> topIndexMap;
 };
+
 
 #endif
