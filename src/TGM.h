@@ -66,7 +66,7 @@ public:
   
   virtual vector<double> getSerialTable() = 0;
   
-  virtual void readSerialTable(vector<double> nt) = 0;
+  virtual void readSerialTable(vector<double>& nt) = 0;
   
 };
 
@@ -101,8 +101,16 @@ public:
 		return retTable;
 	}
 
-	virtual void readSerialTable(vector<double> add) {
-		
+	virtual void readSerialTable(vector<double>& nt) {
+		int sz = this->table.size();
+		for(int t=0; t < this->tops.size(); t++){
+			for(int g=0; g < sz; g++){
+				double temp = nt[t*sz+g];
+				if (temp > 0 && temp < 1)
+				  temp = 0;
+				this->table[t][g] += temp;
+			}
+		}
 	}
 
     virtual void addGeneCount(string top, int gene, double count) {
@@ -231,6 +239,7 @@ public:
 
 
 private:
+//Why is this a double? Would take less mem for ints
     vector<vector<double> > table;
     vector<string> tops;
     int nGenes;
@@ -379,7 +388,7 @@ public:
     }
     
     virtual vector<double> getSerialTable(){}
-	virtual void readSerialTable(vector<double> add){}
+	virtual void readSerialTable(vector<double>& nt){}
 
 private:
     vector<string> tops;

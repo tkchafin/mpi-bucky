@@ -2584,11 +2584,11 @@ int main(int argc, char *argv[])
   //cout << "Rank " << my_rank << " has cold? " << hasCold << endl;
   
   //Not working
-  vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
+  //vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
   
   //Create file streams if necessary
-  if(rp.getCreateSampleFile() && hasCold==true) {
+  /*if(rp.getCreateSampleFile()) {
 	sampleFileStr.resize(my_runs);
 	for (int i=start; i<=end; i++){
 	  if (global_index[i] == 0){
@@ -2603,9 +2603,7 @@ int main(int argc, char *argv[])
       }
     } 
   }
-  //for (int y=0; y<sampleFileStr.size(); y++)
-    //cout << "Rank "<<my_rank<<" has: " << sampleFileStr[y];
-  //cout<<endl;
+  */
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
@@ -2640,22 +2638,25 @@ int main(int argc, char *argv[])
           irun, global_ranks, MPI_New_World);
 	  }
     }
+    
     //Execute the following if process controls a rank 0 chain
-    if (hasCold == true){
-	  for (int i=start; i<= end; i++){
-	    if (global_index[i] == 0){
-		  local_states[i]->updateTable(localTable);
-		  local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
-		  local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
-		  if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-		    local_states[i]->updatePairCounts(local_pairCounts); 
-		  if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
-		    *(sampleFileStr[global_runs[i]]) << setw(8) << local_accept[i];
-		    local_accept[i] = 0;
-			local_states[i]->sample(*sampleFileStr[global_runs[i]]);
-		  }
-	    }
-      }
+    //NEED TO LOOK INTO CONTENTS OF CLUSTERCOUNT AND SPLITSGENEMATRIX
+    //ALSO WHY ARE SPLITS, COUNTS, AND TABLE UPDATES EVERY SINGLE ITERATION? 
+    //PROBABLY SHOULD BE SUBSAMPLED??
+	for (int i=start; i<= end; i++){
+	//If chain is cold
+	  if (local_states[i]->getAlpha() == mp.getAlpha()){
+	    local_states[i]->updateTable(localTable);
+		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
+		local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
+		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
+		  local_states[i]->updatePairCounts(local_pairCounts); 
+		  /*if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
+		  *(sampleFileStr[global_runs[i]]) << setw(8) << local_accept[i];
+		  local_accept[i] = 0;
+		  local_states[i]->sample(*sampleFileStr[global_runs[i]]);*/
+		}
+	  }
 	} 
   }  
 
@@ -2664,8 +2665,13 @@ int main(int argc, char *argv[])
   if (my_rank == 0)
     cout << "done." << endl << flush;  
 
+  for (int i=0; i<3; i++){
+	  for (int j=0; j<topologySplitsIndexMatrix[i].size(); j++){
+	  cout << "Rank "<<my_rank<< "---"<< i<<"/"<<j<<": "<<topologySplitsIndexMatrix[i][j]<<endl;
+  }}
 
   //Free up memory used by the ofstreams
+  /*
   if(rp.getCreateSampleFile() && hasCold==true){
     for (int i=0; i<sampleFileStr.size(); i++){
       if (sampleFileStr[i] != NULL){
@@ -2674,7 +2680,7 @@ int main(int argc, char *argv[])
 	    //delete sampleFileStr[i];
 	  }
     }
-  }
+  }*/
   
   
   //Check final states
@@ -2685,39 +2691,40 @@ int main(int argc, char *argv[])
   
     
   //Check final table
-  if (hasCold==true){
-    string name2 = to_string(my_rank) + ".table";
-    ofstream g(name2);
-    localTable->print(g);
-  }
+  string name2 = to_string(my_rank) + ".table";
+  ofstream g(name2);
+  localTable->print(g);
+
+//topologySpliu
+//Will need to do the same with local_PairCounts
+//and splitsGeneMatrix
+//and clusterCount
 
   vector<double> serialTable;
-  if (hasCold==true){
-    serialTable = localTable->getSerialTable();
-    int sz = serialTable.size();
-    //If master, collect tables
-    if (my_rank == 0){
-		cout << "RANK 0------------"<<endl;
-	  for (int i=0; i<total; i++){
-	    if ((global_index[i] == 0) && (global_ranks[i] != 0)){
-		  vector<double> tempTable;
-		  tempTable.resize(sz);
-		  int tag = 100 + global_ranks[i];
-		  cout << "Rank " << my_rank<<" attempting recv from rank "<<global_ranks[i]<<endl;
-	      //int s;
-	      //MPI_Recv(&s, 1, MPI_INT, global_ranks[i], 8, MPI_New_World, MPI_STATUS_IGNORE);
-	      //cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
-	      MPI_Recv(&tempTable[0], sz, MPI_INT, global_ranks[i], tag, MPI_New_World, MPI_STATUS_IGNORE);
-	      tempTable.clear();
-	    }
-	  }	
+  serialTable = localTable->getSerialTable();
+  int sz = serialTable.size();
+  //If master, collect tables
+  if (my_rank == 0){
+	//Foreach daughter process, receive table
+	for (int i=1; i<p; i++){
+	  vector<double> tempTable;
+	  tempTable.resize(sz);
+	  int tag = 100 + i;
+	  cout << "Rank " << my_rank<<" attempting recv from rank "<<i<<endl;
+	  int s;
+	  //MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
+	  //cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
+	  MPI_Recv(&tempTable[0], sz, MPI_DOUBLE, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	  localTable->readSerialTable(tempTable);
+	  cout << tempTable[0];
+	  tempTable.clear();
+	}	
 	//Else, send to master	
-	}else{
-		int tag = 100 + my_rank;
-		//cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<<endl;
-		//MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
-		MPI_Ssend(&serialTable[0], sz, MPI_INT, 0, tag, MPI_New_World); 
-	}
+  }else{
+	int tag = 100 + my_rank;
+	//cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
+	//MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
+	MPI_Send(&serialTable[0], sz, MPI_DOUBLE, 0, tag, MPI_New_World);
   }
   
   //Exit, below not tested yet
@@ -2726,8 +2733,20 @@ int main(int argc, char *argv[])
   
   MPI_Barrier(MPI_New_World); 
    
+   if (my_rank == 0){
+     string name2 = "final.table";
+     ofstream g(name2);
+     localTable->print(g);
+   }
+   
+   //NOTE: 
+   //Convert TGMTable to ints not doubles. 
    //topologies -- same
-   //local_table
+   //local_table -- serialized, send done, need to incorporate
+   //topSplitsIndexMatrix -- same
+   //clusterCOunt
+   //splitsGeneMatrix
+   //local_pairCounts
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
     
