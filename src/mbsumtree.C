@@ -214,6 +214,7 @@ bool Tree::readSubtree(istringstream& s,Node* parent,int& numLeft,int numLine)
   return true;
 }
 
+//THERE IS A LARGE MEMORY LEAK HERE SOMEWHERE
 Tree::Tree(string line,int lineNumber, Pruner* aPruner):thePruner(aPruner)
 {
   // read in the tree from parenthetic representation.

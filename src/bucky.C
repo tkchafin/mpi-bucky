@@ -329,7 +329,7 @@ string pruneTop(string top, int lineNum, mbsumtree::Pruner* p) {
   return newtop.str();
 }
 
-void normalize(vector<double>& table) {
+void normalize(vector<unsigned int>& table) {
   double sum = 0;
   for(int j=0;j<table.size();j++)
     sum += table[j];
@@ -351,7 +351,7 @@ void normalize(vector<double>& table) {
 void readFile(string filename, int i, Table*& tgm, int &max,
               vector<int>& taxid, map<string, int>& translateMap, bool changed)
 {
-  vector<double> table;
+  vector<unsigned int> table;
   vector<string> topologies;
   ifstream f(filename.c_str());
   if(f.fail()) {
@@ -454,7 +454,7 @@ void readFile(string filename, int i, Table*& tgm, int &max,
   delete thePruner;
 
   normalize(table);
-  vector<double>::iterator citr;
+  vector<unsigned int>::iterator citr;
   vector<string>::iterator titr;
   for (titr = topologies.begin(), citr = table.begin(); titr != topologies.end(); titr++, citr++) {
     tgm->addGeneCount(*titr, i, *citr);
@@ -1558,7 +1558,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     for(int i=0;i<numTrees;i++) {
       jointStr << setw(4) << i << " " << setw(max) << left << topologies[i].substr(0,max) << right;
       for(int j=0;j<numGenes;j++) {
-          jointStr << " " << setw(8) << setprecision(5) << newTable->getCounts(i, j) / ((double)rp.getNumRuns()*rp.getNumUpdates());
+          jointStr << " " << setw(8) << setprecision(5) << (double) newTable->getCounts(i, j) / ((double)rp.getNumRuns()*rp.getNumUpdates());
       }
       jointStr << endl;
     }
@@ -2298,6 +2298,7 @@ int main(int argc, char *argv[])
   if (my_rank ==0){
     cout << "Initializing gene information..." << endl << flush;
   }
+  
   vector<Gene*> genes(numGenes);
   vector<double> counts(numTrees);
 
@@ -2305,6 +2306,9 @@ int main(int argc, char *argv[])
   for(int i=0;i<numGenes;i++) {
     genes[i] = new Gene(i);
   }
+
+  MPI_Finalize();
+  return 0;
 
   // update counts for gene objects
   int topIndex = 0;
@@ -2700,21 +2704,21 @@ int main(int argc, char *argv[])
 //and splitsGeneMatrix
 //and clusterCount
 
-  vector<double> serialTable;
+  vector<unsigned int> serialTable;
   serialTable = localTable->getSerialTable();
   int sz = serialTable.size();
   //If master, collect tables
   if (my_rank == 0){
 	//Foreach daughter process, receive table
 	for (int i=1; i<p; i++){
-	  vector<double> tempTable;
+	  vector<unsigned int> tempTable;
 	  tempTable.resize(sz);
 	  int tag = 100 + i;
 	  cout << "Rank " << my_rank<<" attempting recv from rank "<<i<<endl;
 	  int s;
 	  //MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
 	  //cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
-	  MPI_Recv(&tempTable[0], sz, MPI_DOUBLE, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	  MPI_Recv(&tempTable[0], sz, MPI_UNSIGNED, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
 	  localTable->readSerialTable(tempTable);
 	  cout << tempTable[0];
 	  tempTable.clear();
@@ -2724,7 +2728,7 @@ int main(int argc, char *argv[])
 	int tag = 100 + my_rank;
 	//cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
 	//MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
-	MPI_Send(&serialTable[0], sz, MPI_DOUBLE, 0, tag, MPI_New_World);
+	MPI_Send(&serialTable[0], sz, MPI_UNSIGNED, 0, tag, MPI_New_World);
   }
   
   //Exit, below not tested yet
