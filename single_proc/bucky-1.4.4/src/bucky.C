@@ -2208,6 +2208,7 @@ int main(int argc, char *argv[])
 	if(rp.getUseUpdateGroups()) {
 	  int gene = (int)(rand.runif()*genes.size());
 	  states[irun][i]->updateOneGroup(gene,rand);
+	  //states[irun][i]->print(cout);
 	}
       }
 
@@ -2296,11 +2297,11 @@ int main(int argc, char *argv[])
       states[irun][i0]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
       clusterCount[irun][states[irun][i0]->getNumGroups()]++;
       if( rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-	states[irun][i0]->updatePairCounts(pairCounts);
+	    states[irun][i0]->updatePairCounts(pairCounts);
       if( rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0) {
-	*sampleFileStr[irun] << setw(8) << accept[irun][0];
-	accept[irun][0] = 0;
-	states[irun][i0]->sample(*sampleFileStr[irun]);
+	    *sampleFileStr[irun] << setw(8) << accept[irun][0];
+	    accept[irun][0] = 0;
+	    states[irun][i0]->sample(*sampleFileStr[irun]);
       }
     }
     if( cycle % part == 0) {
