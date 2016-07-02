@@ -209,7 +209,7 @@ public:
     {
         for (int i = 0; i < tops.size(); i++) {
             f << "Topology: " << tops[i] << endl;
-            for (int j = 0; j < nGenes; j++) {
+            for (int j = 0; j <nGenes; j++) {
                 f << "Gene " << j << ": Count "<< table[i][j] << endl;
             }
             f << endl;
