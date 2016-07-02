@@ -2457,7 +2457,6 @@ int main(int argc, char *argv[])
   int my_runs = (global_runs[end]+1)-(global_runs[start]); 
   int my_chains = end+1 - start;
     
-<<<<<<< HEAD
   vector<State*>local_states(total); 
     
   for (int i=start; i<=end; i++){
@@ -2468,21 +2467,6 @@ int main(int argc, char *argv[])
   if (my_rank ==0){
     cout << "done." << endl <<flush;
   }
-=======
-    vector<State*>local_states(total); 
-    vector<int> local_runs(my_runs); 
-    
-    for (int i=start; i<=end; i++){
-        //Each local_states will only fill chains under each rank
-        //Place default objects in global_states -> need to make a copy constructor for later collecting (?)
-        local_states[i] = new State(global_alphas[i+start],numTaxa,numTrees,genes,mp.getUseIndependencePrior(),mcmc_rand);
-		//if (vectorContains(vector<int>* local_runs global_runs[i]) == false)
-		  //local_runs.insert(global_runs[i]);
-    }
-    if (my_rank ==0){
-        cout << "done." << endl <<flush;
-    }
->>>>>>> master
 
   cout << flush;      
  
@@ -2512,11 +2496,8 @@ int main(int argc, char *argv[])
   
   if (my_rank==0){
     cout << "Initializing MCMCMC acceptance counters and pairwise counters..." << flush;
-<<<<<<< HEAD
   }  
-=======
-  }
->>>>>>> master
+
     
   //TKC: Again, for MPI version only need 1D vectors
   vector<int> local_mcmcmcAccepts(total);
@@ -2548,14 +2529,12 @@ int main(int argc, char *argv[])
   }
 
   
-<<<<<<< HEAD
+
   int part = numBurn / 50;
   int thisRun; 
   
   //BEGIN BURN IN CYCLE
-=======
-  int thisRun; 
->>>>>>> master
+
   for(int cycle=0;cycle<numBurn;cycle++) {
     //TKC: Need to take a look at updateOneGroup()   
     //Update each chain
@@ -2565,45 +2544,25 @@ int main(int argc, char *argv[])
 		int gene = (int)(mcmc_rand.runif()*genes.size());
 	      local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
-<<<<<<< HEAD
 	}	
     //TKC: If 2 or more chains, and mcmcmc interval is met, 
     // then for each run, swap chain states
     if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){ 
 	  int begin = global_runs[start];
       for(int irun=begin; irun < (begin + my_runs); irun++){      
-=======
-    }
-    
-    for (int i=0; i<my_chains; i++){
-      //TKC: If 2 or more chains, and mcmcmc interval is met
-      if(cycle % rp.getMCMCMCRate() == 0 && rp.getNumChains()>1){           
-        //for (int k=0; k<my_chains; k++){
-          //cout << "RANK "<<my_rank<<", RUN "<<irun<<", CHAIN "<<k<<" "; 
-          //Seems to be working
-          //local_states[start+k]->print(cout); 
-          //cout << endl;
-        //}
->>>>>>> master
+
         //MCMCMC
         //thisRun = global_runs[i];
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-<<<<<<< HEAD
           irun, global_ranks, MPI_New_World);   
       }
 	} 
   }
 
   MPI_Barrier(MPI_New_World); 
-=======
-          thisRun, global_ranks, MPI_New_World);   
-      } 
-	}
-  }
 
->>>>>>> master
   if (my_rank==0){
     //cout << "*" << endl;
     cout << "done." << endl << flush;
@@ -2631,30 +2590,6 @@ int main(int argc, char *argv[])
   }
   //int part = rp.getNumUpdates() / 50;
   
-<<<<<<< HEAD
-    //Track if process controls a rank 0 chain
-  bool hasCold= false; 
-  for(int i=start;i<=end;i++){
-    if (global_index[i] == 0){
-      hasCold = true;
-    }
-  }
-  
-  //cout << "Rank " << my_rank << " has cold? " << hasCold << endl;
-  
-  //Not working
-  //vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
-  //Some local processes will not use
-  
-  //Create file streams if necessary
-  /*if(rp.getCreateSampleFile()) {
-	sampleFileStr.resize(my_runs);
-	for (int i=start; i<=end; i++){
-	  if (global_index[i] == 0){
-	    int thisRun = global_runs[i];
-        sampleFileStr[thisRun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
-        if (sampleFileStr[thisRun]->fail()){
-=======
 
   vector<ofstream*> sampleFileStr(my_runs); //Declare vector of ofstream
   //Some local processes will not use
@@ -2664,7 +2599,7 @@ int main(int argc, char *argv[])
   }
   //cout << flush; 
 
-    if(rp.getCreateSampleFile()) {
+  /*if(rp.getCreateSampleFile()) {
       //for (int i=start; i <= end; i++){
         //if (local_ind
 		
@@ -2675,7 +2610,6 @@ int main(int argc, char *argv[])
         sampleFileStr[irun] = new ofstream(fileNames.getSampleFile(thisRun+1).c_str());
         cout << fileNames.getSampleFile(thisRun+1) << endl;
         if (sampleFileStr[irun]->fail()){
->>>>>>> master
 	      cerr << "Error: could not open file " << fileNames.getSampleFile(thisRun+1) << endl;
 	      exit(1);
         }
@@ -2683,8 +2617,8 @@ int main(int argc, char *argv[])
         sampleFileStr[thisRun]->setf(ios::showpoint);
       }
     } 
-  }
-  */
+  }*/
+  
   
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
@@ -2716,7 +2650,6 @@ int main(int argc, char *argv[])
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-<<<<<<< HEAD
           irun, global_ranks, MPI_New_World);
 	  }
     }
@@ -2744,36 +2677,6 @@ int main(int argc, char *argv[])
 
   MPI_Barrier(MPI_New_World); 
   
-=======
-          thisRun, global_ranks, MPI_New_World); 
-      }
-      // update counts
-      
-      //BELOW: 
-      //Need to work on the calculate pairs and create sample file issues. 
-      //Only need to execute the following on processes which have chain 0!
-      int i0 = thisRun*rp.getNumChains();   
-      //int local_idx = thisRun*rp.getNumChains(); 
-      
-      //Output to files
-      //if (hasCold == true){
-        local_states[i0]->updateTable(localTable);
-        local_states[i0]->updateSplits(splitsGeneMatrix[irun],topologySplitsIndexMatrix);
-        local_clusterCount[thisRun][local_states[i0]->getNumGroups()]++;
-        if( rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0)
-          local_states[i0]->updatePairCounts(local_pairCounts);
-        if( rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0) {
-	      *sampleFileStr[irun] << setw(8) << local_accept[thisRun*rp.getNumChains()];//Output only chain 0
-	      local_accept[i0] = 0;
-	      local_states[i0]->sample(*sampleFileStr[irun]); //***
-        }
-      }
-    //}
-    //if( cycle % part == 0) {
-    //  cout << "*" << flush;
-    //}
-  }
->>>>>>> master
   if (my_rank == 0)
     cout << "done." << endl << flush;  
 
