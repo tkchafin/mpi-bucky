@@ -2698,7 +2698,7 @@ int main(int argc, char *argv[])
   
       
   //Check final table
-  string name2 = to_string(my_rank) + ".NEWtable";
+  string name2 = to_string(my_rank) + ".table";
   ofstream g(name2);
   localTable->print(g);
   

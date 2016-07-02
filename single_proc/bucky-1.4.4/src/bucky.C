@@ -2314,6 +2314,7 @@ int main(int argc, char *argv[])
   fout << "*" << endl;
   fout << " ....done." << endl << flush;
 
+
   if(rp.getCreateSampleFile())
     for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
 	 sampleFileStr[irun]->close();
