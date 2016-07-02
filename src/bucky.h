@@ -93,7 +93,7 @@ public:
       f << setw(5) << i << ":" << setw(7) << indices[i] << setw(12) << setprecision(8) << counts[i] << endl;
     f << endl;
   }
-  void print(ostream& f, Table* table, int numCycles,const vector<string> &topologies,int max) {
+  void print(ostream& f, TGMTable* table, int numCycles,const vector<string> &topologies,int max) {
     f.setf(ios::fixed, ios::floatfield);
     f.setf(ios::showpoint);
     f << "Gene " << number << ":" << endl;
@@ -215,13 +215,11 @@ public:
       f << setw(4) << tops[i];
     f << endl;
   }
-  void updateTable(vector<vector<int> >& table) {
+
+  
+  void updateTable(TGMTable* &table) {
     for(int j=0;j<genes.size();j++)
-      table[tops[j]][j]++;
-  }
-  void updateTable(Table* &table) {
-    for(int j=0;j<genes.size();j++)
-      table->addGeneCount(tops[j], j, 1);
+      table->addGeneCount(tops[j], j);
   }
   void print(ostream&);
   void testPrintState(){

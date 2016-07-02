@@ -40,37 +40,8 @@ private:
     double count;
 };
 
-class Table {
-public:
-  virtual ~Table() {}
-  
-  virtual void addGeneCount(string top, int gene, int count) = 0;
 
-  virtual void addGeneCount(int topIndex, int gene, int count) = 0;
-  
-  virtual unsigned int getCounts(int top, int gene) = 0;
-  
-  virtual unsigned int getCounts(string top, int gene) = 0;
-  
-  virtual const vector<GeneCounts> getCounts(string top) = 0;
-  
-  virtual unsigned int getTotalCounts(int top) = 0;
-  
-  virtual void reorder() = 0;
-  
-  virtual int getNumTrees() = 0;
-  
-  virtual vector<string> getTopologies() = 0;
-  
-  virtual void print(ostream &f) = 0;
-  
-  virtual vector<unsigned int> getSerialTable() = 0;
-  
-  virtual void readSerialTable(vector<unsigned int>& nt) = 0;
-  
-};
-
-class TGMTable : public Table
+class TGMTable 
 {
 public:
     TGMTable() {nGenes = 0;}
@@ -86,52 +57,41 @@ public:
         nGenes = numGenes;
         table.resize(numTrees);
         for (int i = 0; i < numTrees; i++) {
-            table[i].resize(nGenes, 0);
+            table[i].resize(nGenes);
+            for (int k=0; k <nGenes; k++)
+              table[i][k] = 0;
         }
     }
     
-    virtual vector<unsigned int> getSerialTable(){
-	    vector<unsigned int> retTable;
+    vector<int> getSerialTable(){
+	    vector<int> retTable;
 	    int sz = this->table.size();
-		for(int t=0; t < this->tops.size(); t++){
-			for(int g=0; g < sz; g++){
+		for(int t=0; t < sz; t++){
+			for(int g=0; g < this->table[t].size(); g++){
 				retTable.push_back(this->table[t][g]);
 			}
 		}
 		return retTable;
 	}
 
-	virtual void readSerialTable(vector<unsigned int>& nt) {
+	void readSerialTable(vector<int>& nt) {
 		int sz = this->table.size();
-		for(int t=0; t < this->tops.size(); t++){
-			for(int g=0; g < sz; g++){
-				int temp = nt[t*sz+g];
-				if (temp > 0 && temp < 1)
-				  temp = 0;
-				this->table[t][g] += temp;
+		int ts = this->tops.size();
+		cout << "Num tops: "<<ts<<" Num genes = "<<this->nGenes<<endl;
+		int t, g;
+		for (int i=0; i< nt.size(); i++){
+			this->table[t][g] += nt[i];
+			g++;
+			if (g >= this->nGenes){
+				t++;
+				g=0;
 			}
 		}
+		cout << "Last values: t="<<t<<" & g="<<g<<endl;
 	}
 
-    virtual void addGeneCount(string top, int gene, int count) {
-        vector<string>::iterator it = find(tops.begin(), tops.end(), top);
-        int index;
-        if (it == tops.end()) {
-            index = tops.size();
-            tops.push_back(top);
-            table.push_back(vector<unsigned int>(nGenes, 0));
-        }
-        else {
-            index = it - tops.begin();
-        }
 
-        if (table[index].size() <= gene) {
-            table[index].resize(gene + 1, 0.0);
-        }
-        table[index][gene] += count;
-    }
-
-    virtual const vector<GeneCounts> getCounts(string tp) {
+    const vector<GeneCounts> getCounts(string tp) {
         int index = find(tops.begin(), tops.end(), tp) - tops.begin();
         vector<GeneCounts> counts;
         for(int i = 0 ; i < table[index].size(); i++) {
@@ -141,7 +101,7 @@ public:
         return counts;
     }
 
-    virtual void reorder() {
+    void reorder() {
         vector<TreeWeight> topWts(tops.size());
         for (int i = 0;  i < tops.size(); i++) {
             topWts[i].setIndex(i);
@@ -149,8 +109,8 @@ public:
         }
 
         int topIndex = 0;
-        for (vector<vector<unsigned int> >::iterator itr = table.begin(); itr != table.end(); itr++, topIndex++) {
-            for (vector<unsigned int>::iterator git = itr->begin(); git != itr->end(); git++) {
+        for (vector<vector<int> >::iterator itr = table.begin(); itr != table.end(); itr++, topIndex++) {
+            for (vector<int>::iterator git = itr->begin(); git != itr->end(); git++) {
                 topWts[topIndex].addWeight(*git);
             }
         }
@@ -185,25 +145,41 @@ public:
         }
     }
 
-    virtual vector<string> getTopologies() {
+    vector<string> getTopologies() {
         return tops;
     }
 
-    virtual void addGeneCount(int topIndex, int gene, int count) {
-        table[topIndex][gene] += count;
-    }
     
-    virtual void addGeneCount(int topIndex, int gene) {
+    void addGeneCount(int topIndex, int gene) {
         table[topIndex][gene]++;
     }
+    
+    void addGeneCount(string top, int gene) {
+        vector<string>::iterator it = find(tops.begin(), tops.end(), top);
+        int index;
+        if (it == tops.end()) {
+            index = tops.size();
+            tops.push_back(top);
+            table.push_back(vector<int>(nGenes, 0));
+        }
+        else {
+            index = it - tops.begin();
+        }
 
-    virtual void getCounts(int topIndex, unordered_map<int, int>& geneCounts) {
+        if (table[index].size() <= gene) {
+            table[index].resize(gene + 1, 0.0);
+        }
+        table[index][gene]++;
+    }
+
+
+    void getCounts(int topIndex, unordered_map<int, int>& geneCounts) {
         for (int i = 0; i < table[topIndex].size(); i++) {
             geneCounts[i] = table[topIndex][i];
         }
     }
 
-    virtual unsigned int getCounts(string top, int gene) {
+    int getCounts(string top, int gene) {
         int n = find(tops.begin(),tops.end(),top) - tops.begin();
         if(n==tops.size()) {
             cerr << "Internal error in finding topology" << endl;
@@ -212,8 +188,8 @@ public:
         return table[n][gene];
     }
 
-    virtual unsigned int getTotalCounts(int top) {
-        unsigned int total = 0;
+   int getTotalCounts(int top) {
+        int total = 0;
         for (int i = 0; i < table[top].size(); i++) {
             total += table[top][i];
         }
@@ -221,19 +197,19 @@ public:
         return total;
     }
 
-    virtual unsigned int getCounts(int topIndex, int gene) {
+    int getCounts(int topIndex, int gene) {
         return table[topIndex][gene];
     }
 
-    virtual int getNumTrees() {
+    int getNumTrees() {
         return table.size();
     }
     
-    virtual void print(ostream &f)
+    void print(ostream &f)
     {
         for (int i = 0; i < tops.size(); i++) {
             f << "Topology: " << tops[i] << endl;
-            for (int j = 0; j < table.size(); j++) {
+            for (int j = 0; j < nGenes; j++) {
                 f << "Gene " << j << ": Count "<< table[i][j] << endl;
             }
             f << endl;
@@ -243,14 +219,14 @@ public:
 
 
 private:
-//COnvert to ints cuts memory usage of table in half
-    vector<vector<unsigned int> > table;
+//Convert to ints cuts memory usage of table in half
+    vector<vector<int> > table;
     vector<string> tops;
     int nGenes;
 };
 
 
-class TGM : public Table
+class TGM 
 {
 public:
     TGM() {}
@@ -266,7 +242,7 @@ public:
         topGeneCounts.resize(tops.size());
     }
 
-    void addGeneCount(string top, int gene, int count) {
+    void addGeneCount(string top, int gene, double count) {
         int index = topIndexMap[top];
         if (index == 0) {
             index = tops.size() + 1;
@@ -289,7 +265,7 @@ public:
         }
     }
 
-    virtual void addGeneCount(int topIndex, int gene, int count) {
+    void addGeneCount(int topIndex, int gene, double count) {
         vector<GeneCounts>& geneCounts = topGeneCounts[topIndex];
         for (vector<GeneCounts>::iterator itr = geneCounts.begin(); itr != geneCounts.end(); itr++) {
             if (itr->getGene() == gene) {
@@ -301,7 +277,7 @@ public:
         geneCounts.push_back(GeneCounts(gene, count));
     }
 
-    virtual const vector<GeneCounts> getCounts(string top) {
+    const vector<GeneCounts> getCounts(string top) {
         return topGeneCounts[topIndexMap[top] - 1];
     }
 
@@ -309,11 +285,11 @@ public:
         return topGeneCounts[topIndex];
     }
 
-    virtual unsigned int getCounts(string top, int gene) {
+    double getCounts(string top, int gene) {
         return getCounts(topIndexMap[top] - 1, gene);
     }
 
-    virtual unsigned int getCounts(int top, int gene) {
+    double getCounts(int top, int gene) {
         vector<GeneCounts> geneCounts = topGeneCounts[top];
         for (vector<GeneCounts>::iterator itr = geneCounts.begin(); itr != geneCounts.end(); itr++) {
             if (itr->getGene() == gene) {
@@ -324,8 +300,8 @@ public:
         return 0.0;
     }
 
-    virtual unsigned int getTotalCounts(int top) {
-        unsigned int total = 0;
+    double getTotalCounts(int top) {
+        double total = 0;
         for (int i = 0; i < topGeneCounts[top].size(); i++) {
             total += topGeneCounts[top][i].getCount();
         }
@@ -333,12 +309,12 @@ public:
         return total;
     }
 
-    virtual int getNumTrees() {
+    int getNumTrees() {
         return tops.size();
     }
 
-    virtual void printAvgTopsGenes() {
-        unsigned int total = 0;
+    void printAvgTopsGenes() {
+        double total = 0;
         for (vector<vector<GeneCounts> >::iterator titr = topGeneCounts.begin(); titr != topGeneCounts.end(); titr++) {
             total += titr->size();
         }
@@ -347,7 +323,7 @@ public:
         cerr << "Average genes for topology: " << ((double) total/topGeneCounts.size()) << endl;
     }
 
-    virtual void reorder()
+    void reorder()
     {
         vector<TreeWeight> topWts(tops.size());
         for (int i = 0;  i < tops.size(); i++) {
@@ -373,12 +349,12 @@ public:
         }
     }
 
-    virtual vector<string> getTopologies()
+    vector<string> getTopologies()
     {
         return tops;
     }
 
-    virtual void print(ostream &f)
+    void print(ostream &f)
     {
         for (vector<string>::iterator titr = tops.begin();titr != tops.end(); titr++) {
             f << "Topology : " << *titr << endl;
@@ -391,8 +367,6 @@ public:
         }
     }
     
-    virtual vector<unsigned int> getSerialTable(){}
-	virtual void readSerialTable(vector<unsigned int>& nt){}
 
 private:
     vector<string> tops;

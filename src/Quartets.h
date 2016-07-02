@@ -343,7 +343,7 @@ private:
 
 class TreeBuilder {
 public:
-    void getTree(Table* newTable, int numTaxa, string& top, string& topWithWts);
+    void getTree(TGMTable* newTable, int numTaxa, string& top, string& topWithWts);
     void printTies(ostream& f);
 private:
     string getTreeFromQuartetCounts(vector<vector<double> >& counts, int numTaxa, map<string, TieInfo*>& ties);

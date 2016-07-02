@@ -103,10 +103,16 @@
 //
 
 // Changes in version 2.0.0 
-// ---MPI parallel implementation 
-// ------Major revision to main() 
-// ------multiple-core enabled MCMCMC
-//
+// MPI parallel implementation 
+// ---Major revision to main() 
+// ---multiple-core enabled MCMCMC
+// ---Changed way track alphas (query through State::getAlpha()) 
+// ---MPI serialization and gather of relevant tables
+// ---Serialized many multi-dimensional vectors (states etc)
+// Memory Optimization 
+// ---Converted TGMTable to ints (32 bits) rather than doubles (64 bits)
+// ---Removed --opt-space option (deprecated Table class)
+ 
 
 
 //Developer notes
@@ -329,7 +335,7 @@ string pruneTop(string top, int lineNum, mbsumtree::Pruner* p) {
   return newtop.str();
 }
 
-void normalize(vector<unsigned int>& table) {
+void normalize(vector<double>& table) {
   double sum = 0;
   for(int j=0;j<table.size();j++)
     sum += table[j];
@@ -348,10 +354,10 @@ void normalize(vector<unsigned int>& table) {
 // add read topologies to row i of the table
 // when new topologies are discovered, add a new column to the table
 
-void readFile(string filename, int i, Table*& tgm, int &max,
+void readFile(string filename, int i, TGM*& tgm, int &max,
               vector<int>& taxid, map<string, int>& translateMap, bool changed)
 {
-  vector<unsigned int> table;
+  vector<double> table;
   vector<string> topologies;
   ifstream f(filename.c_str());
   if(f.fail()) {
@@ -454,7 +460,7 @@ void readFile(string filename, int i, Table*& tgm, int &max,
   delete thePruner;
 
   normalize(table);
-  vector<unsigned int>::iterator citr;
+  vector<double>::iterator citr;
   vector<string>::iterator titr;
   for (titr = topologies.begin(), citr = table.begin(); titr != topologies.end(); titr++, citr++) {
     tgm->addGeneCount(*titr, i, *citr);
@@ -1334,7 +1340,7 @@ void readInputFileList(string inputListFileName, vector<string>& inputFiles) {
   }
 }
 
-void MPI_readInputFiles(int rank, vector<string>& inputFiles,Table* &tgm, vector<string>& translateTable,
+void MPI_readInputFiles(int rank, vector<string>& inputFiles,TGM* &tgm, vector<string>& translateTable,
                     int& max, ostream& fout, vector<vector<int> >& taxid, string prunefile, bool shouldPruneGene)
 {
   bool changed = false;
@@ -1541,7 +1547,7 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
 // Currently one function to write all output
 // Should have separate functions for each type of output
 void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
-		 int numGenes,RunParameters& rp,ModelParameters& mp,Table *newTable,
+		 int numGenes,RunParameters& rp,ModelParameters& mp,TGMTable *newTable,
 		 vector<vector<int> >& clusterCount, vector<TaxonSet>& splits,  vector<vector<vector<int> > >& splitsGeneMatrix,
 		 vector<vector<int> >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
 		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable)
@@ -1863,7 +1869,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     double csum=0;
     for(int j=a;j<b+1;j++) {
       concordanceStr << setw(6) << j ;
-      for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
+      for (int irun=0; irun<rp.getNumRuns(); irun++)
 	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][i][j];
       csum += splitsGeneMatrixPP[i][j];
       concordanceStr << " " << setw(12) << setprecision(6) << splitsGeneMatrixPP[i][j]
@@ -1962,7 +1968,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   if(rp.getNumChains()>1) {
     cout.setf(ios::fixed, ios::floatfield);
     cout.setf(ios::showpoint);
-    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+    for (int irun=0; irun<rp.getNumRuns(); irun++){
       cout << "\nMCMCMC acceptance statistics in run " << irun+1 <<":" << endl;
       cout << "         alpha1 <-->         alpha2 accepted proposed proportion" << endl;
       for(int i=0;i<rp.getNumChains()-1;i++) {
@@ -2145,7 +2151,7 @@ int main(int argc, char *argv[])
     cout << "Reading in summary files...";
   }
 
-  Table *topToGeneMap = new TGM();
+  TGM *topToGeneMap = new TGM();
   MPI_readInputFiles(my_rank, inputFiles,topToGeneMap,translateTable,max,fout,taxid, rp.getPruneFile(), rp.getPruneGene());
   numGenes = inputFiles.size();
   numTaxa = translateTable.size();
@@ -2307,9 +2313,6 @@ int main(int argc, char *argv[])
     genes[i] = new Gene(i);
   }
 
-  MPI_Finalize();
-  return 0;
-
   // update counts for gene objects
   int topIndex = 0;
   for (vector<string>::iterator titr = topologies.begin(); titr != topologies.end(); titr++, topIndex++) {
@@ -2370,7 +2373,7 @@ int main(int argc, char *argv[])
 
   // splitsGeneMatrix[irun][i][j] = the number of times that split i is in exactly j genes, in run 'irun'.
   vector<vector<vector<int> > > splitsGeneMatrix(rp.getNumRuns());
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
     splitsGeneMatrix[irun].resize(splits.size());
     for(int i=0;i<splits.size();i++) {
       splitsGeneMatrix[irun][i].resize(numGenes+1);
@@ -2494,7 +2497,7 @@ int main(int argc, char *argv[])
   vector<int> local_mcmcmcAccepts(total);
   vector<int> local_mcmcmcProposals(total);
   
-  for (unsigned int i=0; i<total; i++){
+  for (int i=0; i<total; i++){
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = 0;
   }
 
@@ -2560,7 +2563,7 @@ int main(int argc, char *argv[])
   }
     
   vector<vector<int> > local_clusterCount(rp.getNumRuns());
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
     local_clusterCount[irun].resize(numGenes+1);
     for(int i=0;i<local_clusterCount[irun].size();i++)
       local_clusterCount[irun][i] = 0;
@@ -2615,7 +2618,7 @@ int main(int argc, char *argv[])
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = local_accept[i] = 0;
   }
   
-  Table* localTable;
+  TGMTable* localTable;
   localTable = new TGMTable(numGenes, topologies);
 
   //FULL MCMC
@@ -2693,32 +2696,33 @@ int main(int argc, char *argv[])
   for (int i=start; i<end; i++)
     local_states[i]->print(f);
   
-    
+      
   //Check final table
-  string name2 = to_string(my_rank) + ".table";
+  string name2 = to_string(my_rank) + ".NEWtable";
   ofstream g(name2);
   localTable->print(g);
+  
 
 //topologySpliu
 //Will need to do the same with local_PairCounts
 //and splitsGeneMatrix
 //and clusterCount
 
-  vector<unsigned int> serialTable;
+  vector<int> serialTable;
   serialTable = localTable->getSerialTable();
   int sz = serialTable.size();
   //If master, collect tables
   if (my_rank == 0){
 	//Foreach daughter process, receive table
 	for (int i=1; i<p; i++){
-	  vector<unsigned int> tempTable;
+	  vector<int> tempTable;
 	  tempTable.resize(sz);
 	  int tag = 100 + i;
 	  cout << "Rank " << my_rank<<" attempting recv from rank "<<i<<endl;
 	  int s;
-	  //MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
-	  //cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
-	  MPI_Recv(&tempTable[0], sz, MPI_UNSIGNED, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	  MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
+	  cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
+	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
 	  localTable->readSerialTable(tempTable);
 	  cout << tempTable[0];
 	  tempTable.clear();
@@ -2726,9 +2730,9 @@ int main(int argc, char *argv[])
 	//Else, send to master	
   }else{
 	int tag = 100 + my_rank;
-	//cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
-	//MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
-	MPI_Send(&serialTable[0], sz, MPI_UNSIGNED, 0, tag, MPI_New_World);
+	cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
+	MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
+	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tag, MPI_New_World);
   }
   
   //Exit, below not tested yet

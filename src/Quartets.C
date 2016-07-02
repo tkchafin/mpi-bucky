@@ -206,7 +206,7 @@ TaxonSet* getSetComplement(TaxonSet *t, int numTaxa) {
     return complement;
 }
 
-void TreeBuilder::getTree(Table* newTable, int numTaxa, string& top, string& topWithWts) {
+void TreeBuilder::getTree(TGMTable* newTable, int numTaxa, string& top, string& topWithWts) {
     vector<string> topologies = newTable->getTopologies();
     precomputeNcR(numTaxa);
     int numNodes = numTaxa + numTaxa - 3;
@@ -218,7 +218,7 @@ void TreeBuilder::getTree(Table* newTable, int numTaxa, string& top, string& top
     }
 
     for (int i = 0; i < topologies.size(); i++) {
-        double totalCount = newTable->getTotalCounts(i);
+        double totalCount = (double) newTable->getTotalCounts(i);
         Tree t(numTaxa, topologies[i]);
         vector<int> rind, cind;
         t.getQuartets(rind, cind);
