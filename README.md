@@ -44,6 +44,8 @@ Type these commands for very brief help messages.
   mbsum --help
   bucky --help
 
+NOTE: Number of chain iterations * number of runs cannot exceed 2^32
+
 ###EXAMPLE
 Suppose that you have a directory where each file is of the form *.t and is a MrBayes output file.
 Use mbsum to summarize each file.  Remove the first 1000 trees of each for burnin.
