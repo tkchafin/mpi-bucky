@@ -77,7 +77,6 @@ public:
 	void readSerialTable(vector<int>& nt) {
 		int sz = this->table.size();
 		int ts = this->tops.size();
-		cout << "Num tops: "<<ts<<" Num genes = "<<this->nGenes<<endl;
 		int t, g;
 		for (int i=0; i< nt.size(); i++){
 			this->table[t][g] += nt[i];
@@ -87,7 +86,6 @@ public:
 				g=0;
 			}
 		}
-		cout << "Last values: t="<<t<<" & g="<<g<<endl;
 	}
 
 

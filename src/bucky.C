@@ -2755,8 +2755,7 @@ int main(int argc, char *argv[])
      localTable->print(g);
    }
    
-   //NOTE: 
-   //Convert TGMTable to ints not doubles. 
+   //NOTE:  
    //topologies -- same
    //local_table -- serialized, send done, need to incorporate
    //topSplitsIndexMatrix -- same
