@@ -700,14 +700,15 @@ void State::print(ostream& f) {
 
 }
 
-void State::updateSplits(vector<int>& totals,vector<int>& topSplitsIndex, int numSplits, int numSplitsPerTree) {
+void State::updateSplits(vector<int>& totals,vector<vector<int> >& topSplitsIndex, int numSplits) {
 
+  int numSplitsPerTree = topSplitsIndex[0].size();
   vector<int> counts(numSplits);
   for(int i=0;i<numSplits;i++)
     counts[i] = 0;
   for(int i=0;i<genes.size();i++)
     for(int j=0;j<numSplitsPerTree;j++) {
-      counts[topSplitsIndex[(tops[i]*numSplitsPerTree)+j]]++;
+      counts[topSplitsIndex[tops[i]][j]]++;
     }
   for(int i=0;i<numSplits;i++)
     totals[(i*numSplits)+counts[i]]++;
@@ -2366,13 +2367,12 @@ int main(int argc, char *argv[])
   sort(splits.begin(),splits.end());
 
   // topologySplitsIndexMatrix[i][j] = index into splits vector of the jth split of topology i
-  //TKC: Serialized for easier MPI later
-  vector<int> topologySplitsIndexMatrix(topologies.size());
+  vector<vector<int> > topologySplitsIndexMatrix(topologies.size());
   if(numTaxa>3) {
-    topologySplitsIndexMatrix.resize(topologies.size()*numTaxa-3);
     for(int i=0;i<topologies.size();i++) {
+      topologySplitsIndexMatrix[i].resize(numTaxa-3);
       for(int j=0;j<numTaxa-3;j++)
-	    topologySplitsIndexMatrix[(i*(numTaxa-3))+j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
+	topologySplitsIndexMatrix[i][j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
     }
   }
 
@@ -2662,7 +2662,7 @@ int main(int argc, char *argv[])
 	//If chain is cold
 	  if (local_states[i]->getAlpha() == mp.getAlpha()){
 	    local_states[i]->updateTable(localTable);
-		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size(), numTaxa-3);
+		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size());
 		local_clusterCount[(global_runs[i]*numGenes)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
