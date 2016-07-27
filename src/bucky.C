@@ -2662,7 +2662,7 @@ int main(int argc, char *argv[])
 	//If chain is cold
 	  if (local_states[i]->getAlpha() == mp.getAlpha()){
 	    local_states[i]->updateTable(localTable);
-		//local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size(), topologies.size());
+		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size(), numTaxa-3);
 		local_clusterCount[(global_runs[i]*numGenes)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
