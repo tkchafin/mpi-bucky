@@ -2572,12 +2572,12 @@ int main(int argc, char *argv[])
     cout << "Initializing summary tables..." << flush;
   }
     
-  vector<vector<int> > local_clusterCount(rp.getNumRuns());
-  for (int irun=0; irun<rp.getNumRuns(); irun++){
+  vector<int> local_clusterCount(rp.getNumRuns()*numGenes);
+  /*for (int irun=0; irun<rp.getNumRuns(); irun++){
     local_clusterCount[irun].resize(numGenes+1);
     for(int i=0;i<local_clusterCount[irun].size();i++)
       local_clusterCount[irun][i] = 0;
-  }
+  }*/
   
   MPI_Barrier(MPI_New_World); 
   if (my_rank==0){
@@ -2663,7 +2663,7 @@ int main(int argc, char *argv[])
 	  if (local_states[i]->getAlpha() == mp.getAlpha()){
 	    local_states[i]->updateTable(localTable);
 		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
-		local_clusterCount[global_runs[i]][local_states[i]->getNumGroups()]++;
+		local_clusterCount[(global_runs[i]*numGenes)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
 		  /*if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
@@ -2680,9 +2680,9 @@ int main(int argc, char *argv[])
   if (my_rank == 0)
     cout << "done." << endl << flush;  
 
-  for (int i=0; i<3; i++){
-	  for (int j=0; j<topologySplitsIndexMatrix[i].size(); j++){
-	  cout << "Rank "<<my_rank<< "---"<< i<<"/"<<j<<": "<<topologySplitsIndexMatrix[i][j]<<endl;
+  for (int i=0; i<rp.getNumRuns(); i++){
+	  for (int j=0; j<numGenes; j++){
+	  cout << "Rank "<<my_rank<< "---"<< i<<"/"<<j<<": "<<local_clusterCount[(i*rp.getNumRuns())+j]<<endl;
   }}
 
   //Free up memory used by the ofstreams
