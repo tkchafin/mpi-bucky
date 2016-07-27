@@ -700,18 +700,17 @@ void State::print(ostream& f) {
 
 }
 
-void State::updateSplits(vector<vector<int> >& totals,vector<vector<int> >& topSplitsIndex) {
-  int numSplitsPerTree = topSplitsIndex[0].size();
-  int numSplits = totals.size();
+void State::updateSplits(vector<int>& totals,vector<int>& topSplitsIndex, int numSplits, int numSplitsPerTree) {
+
   vector<int> counts(numSplits);
   for(int i=0;i<numSplits;i++)
     counts[i] = 0;
   for(int i=0;i<genes.size();i++)
     for(int j=0;j<numSplitsPerTree;j++) {
-      counts[topSplitsIndex[tops[i]][j]]++;
+      counts[topSplitsIndex[(tops[i]*numSplitsPerTree)+j]]++;
     }
   for(int i=0;i<numSplits;i++)
-    totals[i][counts[i]]++;
+    totals[(i*numSplits)+counts[i]]++;
 }
 
 void State::updatePairCounts(vector<vector<int> >& counts)
@@ -2367,23 +2366,24 @@ int main(int argc, char *argv[])
   sort(splits.begin(),splits.end());
 
   // topologySplitsIndexMatrix[i][j] = index into splits vector of the jth split of topology i
-  vector<vector<int> > topologySplitsIndexMatrix(topologies.size());
+  //TKC: Serialized for easier MPI later
+  vector<int> topologySplitsIndexMatrix(topologies.size());
   if(numTaxa>3) {
+    topologySplitsIndexMatrix.resize(topologies.size()*numTaxa-3);
     for(int i=0;i<topologies.size();i++) {
-      topologySplitsIndexMatrix[i].resize(numTaxa-3);
       for(int j=0;j<numTaxa-3;j++)
-	topologySplitsIndexMatrix[i][j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
+	    topologySplitsIndexMatrix[(i*(numTaxa-3))+j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
     }
   }
 
   // splitsGeneMatrix[irun][i][j] = the number of times that split i is in exactly j genes, in run 'irun'.
-  vector<vector<vector<int> > > splitsGeneMatrix(rp.getNumRuns());
+  //TKC: Change to 1 serialized vector per run, easier for MPI later
+  vector<vector<int>> splitsGeneMatrix(rp.getNumRuns());
   for (int irun=0; irun<rp.getNumRuns(); irun++){
-    splitsGeneMatrix[irun].resize(splits.size());
+    splitsGeneMatrix[irun].resize((splits.size()*numGenes+1));
     for(int i=0;i<splits.size();i++) {
-      splitsGeneMatrix[irun][i].resize(numGenes+1);
       for(int j=0;j<numGenes+1;j++)
-	splitsGeneMatrix[irun][i][j] = 0;
+	    splitsGeneMatrix[irun][(i*numGenes+1)+j] = 0;
     }
   }
   if (my_rank == 0){
@@ -2662,11 +2662,11 @@ int main(int argc, char *argv[])
 	//If chain is cold
 	  if (local_states[i]->getAlpha() == mp.getAlpha()){
 	    local_states[i]->updateTable(localTable);
-		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
+		//local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size(), topologies.size());
 		local_clusterCount[(global_runs[i]*numGenes)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
-		  /*if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
+		/*if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
 		  *(sampleFileStr[global_runs[i]]) << setw(8) << local_accept[i];
 		  local_accept[i] = 0;
 		  local_states[i]->sample(*sampleFileStr[global_runs[i]]);*/
@@ -2680,10 +2680,6 @@ int main(int argc, char *argv[])
   if (my_rank == 0)
     cout << "done." << endl << flush;  
 
-  for (int i=0; i<rp.getNumRuns(); i++){
-	  for (int j=0; j<numGenes; j++){
-	  cout << "Rank "<<my_rank<< "---"<< i<<"/"<<j<<": "<<local_clusterCount[(i*rp.getNumRuns())+j]<<endl;
-  }}
 
   //Free up memory used by the ofstreams
   /*
@@ -2711,10 +2707,8 @@ int main(int argc, char *argv[])
   localTable->print(g);
   
 
-//topologySpliu
 //Will need to do the same with local_PairCounts
 //and splitsGeneMatrix
-//and clusterCount
 
   vector<int> serialTable;
   serialTable = localTable->getSerialTable();
@@ -2724,23 +2718,33 @@ int main(int argc, char *argv[])
 	//Foreach daughter process, receive table
 	for (int i=1; i<p; i++){
 	  vector<int> tempTable;
+	  vector<int> tempClust;
 	  tempTable.resize(sz);
-	  int tag = 100 + i;
+	  tempClust.resize(local_clusterCount.size());
+	  int tgmTag = 100 + i;
+	  int clustTag = 200 + i;
 	  cout << "Rank " << my_rank<<" attempting recv from rank "<<i<<endl;
 	  int s;
 	  MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
 	  cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
-	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	  //Receive serialized TGM table from daughter
+	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tgmTag, MPI_New_World, MPI_STATUS_IGNORE);
+	  //Update local copy of TGM 
 	  localTable->readSerialTable(tempTable);
 	  cout << tempTable[0];
 	  tempTable.clear();
+	  //Receive serialized clusterCount from daughter
+	  MPI_Recv(&tempClust[0], tempClust.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
+	
 	}	
 	//Else, send to master	
   }else{
-	int tag = 100 + my_rank;
+	int tgmTag = 100 + my_rank;
+	int clustTag = 200 + my_rank;
 	cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
 	MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
-	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tag, MPI_New_World);
+	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tgmTag, MPI_New_World);
+	MPI_Send(&local_clusterCount[0], local_clusterCount.size(), MPI_INT, 0, clustTag, MPI_New_World);
   }
   
   //Exit, below not tested yet
@@ -2757,10 +2761,11 @@ int main(int argc, char *argv[])
    
    //NOTE:  
    //topologies -- same
-   //local_table -- serialized, send done, need to incorporate
+   //local_table -- serialized, send done, incorporated by master
    //topSplitsIndexMatrix -- same
-   //clusterCOunt
-   //splitsGeneMatrix
+   //clusterCOunt -- Serialized, send done, incorporated by master
+   //splitsGeneMatrix -- Need to serialize and incorporate
+   //topologySplitsIndexMatrix-- Need to serialize and incorporate
    //local_pairCounts
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
