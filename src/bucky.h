@@ -229,7 +229,7 @@ public:
            << "logPriorProb = " << logPriorProb << "; "
            << "posteriorProb = " << logPosteriorProbProduct << "\n";
   }
-  void updateSplits(vector<vector<int> >&,vector<vector<int> >&);
+  void updateSplits(vector<int>&,vector<int>&, int, int);
   int updateOneGroup(int,Rand&);
   void updatePairCounts(vector<vector<int> >&);
  private:
