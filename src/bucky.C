@@ -2735,16 +2735,44 @@ int main(int argc, char *argv[])
 	  tempTable.clear();
 	  //Receive serialized clusterCount from daughter
 	  MPI_Recv(&tempClust[0], tempClust.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
-	
+      //Update local_clusterCount with daughter contents
+      for (int k=0; k < tempClust.size(); k++){
+        local_clusterCount[k] += tempClust[k];
+        tempClust.clear(); 
+	  }
+      //Receive serialized splitsGeneMatrix vectors for each run
+      for (int irun=0; irun < rp.getNumRuns(); irun++){
+		vector<int> tempSplits((splits.size()*numGenes+1));
+		int tag = ((30 + i)*10) + irun;
+        MPI_Recv(&tempSplits[0], tempSplits.size(), MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	    for (int j=0; j<tempSplits.size(); j++){
+		  splitsGeneMatrix[irun][j] += tempSplits[j];
+		  tempSplits.clear();
+	    }
+	  }
+        
 	}	
 	//Else, send to master	
   }else{
 	int tgmTag = 100 + my_rank;
 	int clustTag = 200 + my_rank;
+	int splitTag = (30 + my_rank)*10;
+	
 	cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
 	MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
+	//Send TGMTable
 	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tgmTag, MPI_New_World);
+	serialTable.clear();
+	//Send local_clusterCount
 	MPI_Send(&local_clusterCount[0], local_clusterCount.size(), MPI_INT, 0, clustTag, MPI_New_World);
+    local_clusterCount.clear();
+    //For each run, send serialized splitsGeneMatrix
+    for (int irun=0; irun < rp.getNumRuns(); irun++){
+	  int tempTag = splitTag + irun;
+	  vector<int> tempSplits(splits.size());  
+	  MPI_Send(&splitsGeneMatrix[irun][0], splitsGeneMatrix[irun].size(), MPI_INT, 0, tempTag, MPI_New_World);
+	  splitsGeneMatrix[irun].clear();
+	}
   }
   
   //Exit, below not tested yet
@@ -2764,8 +2792,8 @@ int main(int argc, char *argv[])
    //local_table -- serialized, send done, incorporated by master
    //topSplitsIndexMatrix -- same
    //clusterCOunt -- Serialized, send done, incorporated by master
-   //splitsGeneMatrix -- Need to serialize and incorporate
-   //topologySplitsIndexMatrix-- Need to serialize and incorporate
+   //splitsGeneMatrix -- Serialized, send done, need incorporate
+   //topologySplitsIndexMatrix-- Same
    //local_pairCounts
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
