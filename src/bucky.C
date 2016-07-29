@@ -714,14 +714,14 @@ void State::updateSplits(vector<int>& totals,vector<vector<int> >& topSplitsInde
     totals[(i*numSplits)+counts[i]]++;
 }
 
-void State::updatePairCounts(vector<vector<int> >& counts)
+void State::updatePairCounts(vector<int>& counts)
 {
   // slow way to do this.  maybe we should have State maintain a vector of groups....
   // only fill in upper triangle (i <= j)
   for(int i=0;i<genes.size();i++)
     for(int j=i;j<genes.size();j++)
       if( tops[i] == tops[j] )
-	counts[i][j]++;
+	counts[(i*genes.size())+j]++;
 }
 
 Node* Node::getNeighbor(int i) const { return edges[i]->getOtherNode(this); }
@@ -2507,11 +2507,10 @@ int main(int argc, char *argv[])
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = 0;
   }
 
-  vector<vector<int> > local_pairCounts(numGenes); // not adapted to several runs. Runs will be pooled.
-  for(int i=0;i<numGenes;i++) {
-    local_pairCounts[i].resize(numGenes);
+  vector<int> local_pairCounts(numGenes*numGenes); // not adapted to several runs. Runs will be pooled.
+  for(int i=0;i<numGenes;i++) {   
     for(int j=0;j<numGenes;j++)
-      local_pairCounts[i][j] = 0;
+      local_pairCounts[(i*numGenes)+j] = 0;
   }
   
   if (my_rank==0){
@@ -2572,12 +2571,11 @@ int main(int argc, char *argv[])
     cout << "Initializing summary tables..." << flush;
   }
     
-  vector<int> local_clusterCount(rp.getNumRuns()*numGenes);
-  /*for (int irun=0; irun<rp.getNumRuns(); irun++){
-    local_clusterCount[irun].resize(numGenes+1);
-    for(int i=0;i<local_clusterCount[irun].size();i++)
-      local_clusterCount[irun][i] = 0;
-  }*/
+  vector<int> local_clusterCount(rp.getNumRuns()*(numGenes+1));
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
+    for(int i=0;i<numGenes+1;i++)
+      local_clusterCount[(irun*numGenes+1)+i] = 0;
+  }
   
   MPI_Barrier(MPI_New_World); 
   if (my_rank==0){
@@ -2599,6 +2597,7 @@ int main(int argc, char *argv[])
   }
   //cout << flush; 
 
+//Not currently working!!!
   /*if(rp.getCreateSampleFile()) {
       //for (int i=start; i <= end; i++){
         //if (local_ind
@@ -2656,8 +2655,8 @@ int main(int argc, char *argv[])
     
     //Execute the following if process controls a rank 0 chain
     //NEED TO LOOK INTO CONTENTS OF CLUSTERCOUNT AND SPLITSGENEMATRIX
-    //ALSO WHY ARE SPLITS, COUNTS, AND TABLE UPDATES EVERY SINGLE ITERATION? 
-    //PROBABLY SHOULD BE SUBSAMPLED??
+    //ALSO WHY ARE SPLITS, COUNTS, AND TABLE UPDATED EVERY SINGLE ITERATION? 
+    //SHOULD THEY BE SUBSAMPLED??
 	for (int i=start; i<= end; i++){
 	//If chain is cold
 	  if (local_states[i]->getAlpha() == mp.getAlpha()){
@@ -2707,72 +2706,79 @@ int main(int argc, char *argv[])
   localTable->print(g);
   
 
-//Will need to do the same with local_PairCounts
-//and splitsGeneMatrix
+  //Doughter processes send, master collects all final data structures
 
   vector<int> serialTable;
   serialTable = localTable->getSerialTable();
   int sz = serialTable.size();
-  //If master, collect tables
+  //If master, collect 
   if (my_rank == 0){
-	//Foreach daughter process, receive table
+	//Foreach daughter process, receive
 	for (int i=1; i<p; i++){
-	  vector<int> tempTable;
-	  vector<int> tempClust;
+	  vector<int> tempTable;	  
 	  tempTable.resize(sz);
-	  tempClust.resize(local_clusterCount.size());
 	  int tgmTag = 100 + i;
-	  int clustTag = 200 + i;
-	  cout << "Rank " << my_rank<<" attempting recv from rank "<<i<<endl;
-	  int s;
-	  MPI_Recv(&s, 1, MPI_INT, i, 8, MPI_New_World, MPI_STATUS_IGNORE);
-	  cout << "Incoming size: "<<s<<" Expected: "<<sz<<endl;
+	  
 	  //Receive serialized TGM table from daughter
 	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tgmTag, MPI_New_World, MPI_STATUS_IGNORE);
-	  //Update local copy of TGM 
 	  localTable->readSerialTable(tempTable);
-	  cout << tempTable[0];
 	  tempTable.clear();
+	  
 	  //Receive serialized clusterCount from daughter
+	  vector<int> tempClust;
+	  tempClust.resize(local_clusterCount.size());
+	  int clustTag = 200 + i;
 	  MPI_Recv(&tempClust[0], tempClust.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
-      //Update local_clusterCount with daughter contents
       for (int k=0; k < tempClust.size(); k++){
         local_clusterCount[k] += tempClust[k];
         tempClust.clear(); 
 	  }
+      
       //Receive serialized splitsGeneMatrix vectors for each run
       for (int irun=0; irun < rp.getNumRuns(); irun++){
 		vector<int> tempSplits((splits.size()*numGenes+1));
 		int tag = ((30 + i)*10) + irun;
         MPI_Recv(&tempSplits[0], tempSplits.size(), MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
 	    for (int j=0; j<tempSplits.size(); j++){
-		  splitsGeneMatrix[irun][j] += tempSplits[j];
-		  tempSplits.clear();
+		  splitsGeneMatrix[irun][j] += tempSplits[j];  
 	    }
+	    tempSplits.clear();
 	  }
+	  
+	  //Receive pairCounts
+	  int pairTag = 400 + i;
+	  vector<int> tempCounts(local_pairCounts.size());
+	  MPI_Recv(&tempCounts[0], tempCounts.size(), MPI_INT, i, pairTag, MPI_New_World, MPI_STATUS_IGNORE);
+	  for (int k=0; k<tempCounts.size(); k++)
+	    local_pairCounts[k] += tempCounts[k];
+	  tempCounts.clear();
         
 	}	
 	//Else, send to master	
   }else{
-	int tgmTag = 100 + my_rank;
-	int clustTag = 200 + my_rank;
-	int splitTag = (30 + my_rank)*10;
-	
-	cout << "Rank " << my_rank<<" attempting send of TGMTable to rank 0"<< "(size "<<sz<<")"<<endl;
-	MPI_Send(&sz, 1, MPI_INT, 0, 8, MPI_New_World);
+	  
 	//Send TGMTable
+	int tgmTag = 100 + my_rank;
 	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tgmTag, MPI_New_World);
 	serialTable.clear();
+	
 	//Send local_clusterCount
+	int clustTag = 200 + my_rank;
 	MPI_Send(&local_clusterCount[0], local_clusterCount.size(), MPI_INT, 0, clustTag, MPI_New_World);
     local_clusterCount.clear();
+    
     //For each run, send serialized splitsGeneMatrix
+    int splitTag = (30 + my_rank)*10;
     for (int irun=0; irun < rp.getNumRuns(); irun++){
 	  int tempTag = splitTag + irun;
 	  vector<int> tempSplits(splits.size());  
 	  MPI_Send(&splitsGeneMatrix[irun][0], splitsGeneMatrix[irun].size(), MPI_INT, 0, tempTag, MPI_New_World);
 	  splitsGeneMatrix[irun].clear();
 	}
+	//Send local_pairCounts
+	int pairTag = 400 + my_rank;
+	MPI_Send(&local_pairCounts[0], local_pairCounts.size(), MPI_INT, 0, pairTag, MPI_New_World);
+	local_pairCounts.clear();
   }
   
   //Exit, below not tested yet
@@ -2792,9 +2798,14 @@ int main(int argc, char *argv[])
    //local_table -- serialized, send done, incorporated by master
    //topSplitsIndexMatrix -- same
    //clusterCOunt -- Serialized, send done, incorporated by master
-   //splitsGeneMatrix -- Serialized, send done, need incorporate
+   //splitsGeneMatrix -- Serialized, send done, incorporated
    //topologySplitsIndexMatrix-- Same
-   //local_pairCounts
+   //local_pairCounts -- Serialized, sent, incorporated
+   //alphas
+   //accepts
+   //proposals
+   //translateTable
+   //splits
    
    //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
     
@@ -2802,7 +2813,6 @@ int main(int argc, char *argv[])
     * alphas
     * accepts
     * proposals
-    * Update TGMTable for all processes having cold chain
     * */
   
     
