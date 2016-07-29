@@ -2753,6 +2753,18 @@ int main(int argc, char *argv[])
 	    local_pairCounts[k] += tempCounts[k];
 	  tempCounts.clear();
         
+      //Receive alphas
+      int alphaTag = 500 + i;
+      vector<double> tempAlphas(total);
+      MPI_Recv(&tempAlphas[0], total, MPI_DOUBLE, i, alphaTag, MPI_New_World, MPI_STATUS_IGNORE);
+      for (int l=0; l<total; l++){
+	    if (tempAlphas[l] != 0){
+	      global_alphas[l] = tempAlphas[l];
+	    }
+	  }
+	  //Update final alpha values for master
+	  for (int m=start; m<=end; m++)
+	    global_alphas[m] = local_states[m]->getAlpha();    
 	}	
 	//Else, send to master	
   }else{
@@ -2779,6 +2791,15 @@ int main(int argc, char *argv[])
 	int pairTag = 400 + my_rank;
 	MPI_Send(&local_pairCounts[0], local_pairCounts.size(), MPI_INT, 0, pairTag, MPI_New_World);
 	local_pairCounts.clear();
+	
+	//Send alphas
+	vector<double> local_alphas(total);
+	int alphaTag = 500 + my_rank;
+	for(int i=start;i<=end;i++) 
+	  local_alphas[i] = local_states[i]->getAlpha();
+	 MPI_Send(&local_alphas[0], total, MPI_DOUBLE, 0, alphaTag, MPI_New_World);
+	 local_alphas.clear();
+	 global_alphas.clear();
   }
   
   //Exit, below not tested yet
@@ -2791,6 +2812,10 @@ int main(int argc, char *argv[])
      string name2 = "final.table";
      ofstream g(name2);
      localTable->print(g);
+     cout << "Final alphas: ";
+     for (int i=0; i<total; i++)
+       cout<< global_alphas[i] << " ";
+     cout << endl;
    }
    
    //NOTE:  
@@ -2801,7 +2826,7 @@ int main(int argc, char *argv[])
    //splitsGeneMatrix -- Serialized, send done, incorporated
    //topologySplitsIndexMatrix-- Same
    //local_pairCounts -- Serialized, sent, incorporated
-   //alphas
+   //alphas -- All collected and incorporated
    //accepts
    //proposals
    //translateTable
