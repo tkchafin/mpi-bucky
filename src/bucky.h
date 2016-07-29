@@ -231,7 +231,7 @@ public:
   }
   void updateSplits(vector<int>&,vector<vector<int> >&, int);
   int updateOneGroup(int,Rand&);
-  void updatePairCounts(vector<vector<int> >&);
+  void updatePairCounts(vector<int>&);
  private:
   double alpha,logAlpha,alphaOverTop;
   bool useIndependencePrior;
