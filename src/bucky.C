@@ -923,7 +923,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
   //!!!ALL RANKS MUST CALL MCMCMC ONCE FOR EACH RUN THEY HAVE CHAINS FOR!!!
   
   int a = (int) ( (numChains-1)*rand->runif() );
-  //cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
+  cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
   int b = a+1;
   int local_a = a+(numChains*runNum);
   int local_b = a+(numChains*runNum)+1;
@@ -949,9 +949,9 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
 		//cout << rank << " sending "<<myAlpha<<" to rank "<< recv_rank<<endl;
 		MPI_Sendrecv(&myAlpha, 1, MPI_DOUBLE, recv_rank, 3, &otherAlpha, 1, MPI_DOUBLE, recv_rank, 3, comm, MPI_STATUS_IGNORE);
         //cout <<flush; 
-        //cout << "Rank "<<send_rank<<" will exchange chain "
-        //     << a << " (index "<<local_a<<") with chain "<<b<<
-        //        " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
+        cout << "Rank "<<send_rank<<" will exchange chain "
+             << a << " (index "<<local_a<<") with chain "<<b<<
+                " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
         //Capture probabilities to send
         aLogPriorProb = states[local_a]->getLogPriorProb(); 
         //cout << aLogPriorProb<<"\n";
@@ -965,6 +965,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Recv(&accept, 1, MPI::BOOL, recv_rank, 2, comm, MPI_STATUS_IGNORE);
         
         if (accept == true){ 
+			cout << 
             accepts[local_a]++; 
         }else{
             states[local_a]->setAlpha(myAlpha);
@@ -1001,10 +1002,10 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
 	  proposals[local_a]++;
 	  double aAlpha = states[local_a]->getAlpha();
 	  double bAlpha = states[local_b]->getAlpha();
-      //cout <<flush; 
+      cout <<flush; 
       //cout << "Rank "<<send_rank<<" will exchange chain "
-      //     << a << " (index "<<local_a<<") with chain "<<b
-      //     << " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
+           //<< a << " (index "<<local_a<<") with chain "<<b
+           //<< " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
       aLogPriorProb = states[local_a]->getLogPriorProb(); 
       bLogPriorProb = states[local_b]->getLogPriorProb(); 
       states[local_a]->setAlpha(bAlpha);
@@ -1024,7 +1025,6 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
     }
   }
 }
-
 
 
 
@@ -2503,7 +2503,6 @@ int main(int argc, char *argv[])
   //TKC: Again, for MPI version only need 1D vectors
   vector<int> local_mcmcmcAccepts(total);
   vector<int> local_mcmcmcProposals(total);
-  
   for (int i=0; i<total; i++){
     local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = 0;
   }
@@ -2527,8 +2526,6 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
   }
-
-  
 
   int part = numBurn / 50;
   int thisRun; 
@@ -2598,7 +2595,7 @@ int main(int argc, char *argv[])
   }
   //cout << flush; 
 
-//Not currently working!!!
+  //Not currently working!!!
   /*if(rp.getCreateSampleFile()) {
       //for (int i=start; i <= end; i++){
         //if (local_ind
@@ -2637,7 +2634,7 @@ int main(int argc, char *argv[])
       local_accept[i] += local_states[i]->update(mcmc_rand);
 	  if(rp.getUseUpdateGroups()) {
 	    int gene = (int)(mcmc_rand.runif()*genes.size());
-	    local_states[i]->updateOneGroup(gene,mcmc_rand);
+	    local_accept[i] += local_states[i]->updateOneGroup(gene,mcmc_rand);
 	  }
 	}	
 	
@@ -2763,21 +2760,31 @@ int main(int argc, char *argv[])
 	      global_alphas[l] = tempAlphas[l];
 	    }
 	  }
-	  //Update final alpha values for master
-	  for (int m=start; m<=end; m++)
-	    global_alphas[m] = local_states[m]->getAlpha();    
-	}	
 	
-		   cout << "Accepts: ";
-	   for (int p=0; p<local_mcmcmcAccepts.size(); p++)
-	     cout << " "<<local_mcmcmcAccepts[p]<<" ";
-	   cout << endl;
-	   cout << "Proposals: ";
-	   for (int p=0; p<local_mcmcmcProposals.size(); p++)
-	     cout << " "<<local_mcmcmcProposals[p]<<" ";
-	   cout << endl;
+	  //Receive accepts and proposals
+	  if (rp.getNumChains()>1){
+	    int acceptTag = 6000 + i;
+	    int propTag = 7000 + i;
+	    vector<int> tempA(total);
+	    vector<int> tempP(total);
+	    MPI_Recv(&tempA[0], total, MPI_INT, i, acceptTag, MPI_New_World, MPI_STATUS_IGNORE);
+	    for (int n=0; n<total; n++){
+	      if (tempA[n] != 0)
+	        local_mcmcmcAccepts[n] = tempA[n];
+	    }
+	    MPI_Recv(&tempP[0], total, MPI_INT, i, propTag, MPI_New_World, MPI_STATUS_IGNORE);
+	    for (int o=0; o<total; o++){
+	      if (tempP[o] != 0)
+	        local_mcmcmcProposals[o] = tempP[o];
+	    }
+      }    
+    }
+    	  
+	//Update final alpha values for master
+	for (int m=start; m<=end; m++)
+	  global_alphas[m] = local_states[m]->getAlpha();
 	
-	//Else, send to master	
+  //Else, send to master	
   }else{
 	  
 	//Send TGMTable
@@ -2806,8 +2813,8 @@ int main(int argc, char *argv[])
 	//Send alphas
 	vector<double> local_alphas(total);
 	int alphaTag = 5000 + my_rank;
-	for(int i=start;i<=end;i++) 
-	  local_alphas[i] = local_states[i]->getAlpha();
+	for(int a=start;a<=end;a++) 
+	  local_alphas[a] = local_states[a]->getAlpha();
 	 MPI_Send(&local_alphas[0], total, MPI_DOUBLE, 0, alphaTag, MPI_New_World);
 	 local_alphas.clear();
 	 global_alphas.clear();
@@ -2816,15 +2823,8 @@ int main(int argc, char *argv[])
 	   //Send accepts and proposals
 	   int acceptTag = 6000 + my_rank;
 	   int propTag = 7000 + my_rank;
-	   cout << "Accepts: ";
-	   for (int p=0; p<local_mcmcmcAccepts.size(); p++)
-	     cout << " "<<local_mcmcmcAccepts[p]<<" ";
-	   cout << endl;
-	   cout << "Proposals: ";
-	   for (int p=0; p<local_mcmcmcProposals.size(); p++)
-	     cout << " "<<local_mcmcmcProposals[p]<<" ";
-	   cout << endl;
-	   //MPI_Send(&local_mcmcmcAccepts[0]
+	   MPI_Send(&local_mcmcmcAccepts[0], local_mcmcmcAccepts.size(), MPI_INT, 0, acceptTag, MPI_New_World);
+	   MPI_Send(&local_mcmcmcProposals[0], local_mcmcmcProposals.size(), MPI_INT, 0, propTag, MPI_New_World);
      }
   }
   
@@ -2842,6 +2842,14 @@ int main(int argc, char *argv[])
      for (int i=0; i<total; i++)
        cout<< global_alphas[i] << " ";
      cout << endl;
+     cout << "Final accepts: ";
+     for (int i=0; i<total; i++)
+       cout<< local_mcmcmcAccepts[i] << " ";
+     cout << endl;
+     cout << "Final proposals: ";
+     for (int i=0; i<total; i++)
+       cout<< local_mcmcmcProposals[i] << " ";
+     cout << endl;
    }
    
    //NOTE:  
@@ -2853,8 +2861,8 @@ int main(int argc, char *argv[])
    //topologySplitsIndexMatrix-- Same
    //local_pairCounts -- Serialized, sent, incorporated
    //alphas -- All collected and incorporated
-   //accepts
-   //proposals
+   //accepts -- Collected
+   //proposals -- Collected
    //translateTable
    //splits
    
