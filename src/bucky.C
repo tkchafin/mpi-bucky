@@ -939,10 +939,10 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
   double logAccept = log(rand->runif()); 
   bool accept; 
   
-  if ((rank == send_rank) || (rank == recv_rank)){
-    proposals[local_a]++;
+  if ((rank == send_rank) || (rank == recv_rank)){    
     if (send_rank != recv_rank){
       if (rank == send_rank){
+		proposals[local_a]++;
 		//Exchange ALPHA between send & recv ranks
 		double myAlpha = states[local_a]->getAlpha();
 		double otherAlpha;
@@ -989,7 +989,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         double logProbDiff = ((-aLogPriorProb - bLogPriorProb)+(aLogPostProb + bLogPostProb));
         if (logAccept < logProbDiff){
             accept = true;
-            accepts[local_a]++; 
+            //accepts[local_a]++; 
         }else{
             accept = false; 
             states[local_b]->setAlpha(myAlpha);
@@ -998,6 +998,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Send(&accept, 1, MPI::BOOL, send_rank, 2, comm);
       }
     }else if ((send_rank == recv_rank)&&(rank == send_rank)){ 
+	  proposals[local_a]++;
 	  double aAlpha = states[local_a]->getAlpha();
 	  double bAlpha = states[local_b]->getAlpha();
       //cout <<flush; 
@@ -2717,7 +2718,7 @@ int main(int argc, char *argv[])
 	for (int i=1; i<p; i++){
 	  vector<int> tempTable;	  
 	  tempTable.resize(sz);
-	  int tgmTag = 100 + i;
+	  int tgmTag = 1000 + i;
 	  
 	  //Receive serialized TGM table from daughter
 	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tgmTag, MPI_New_World, MPI_STATUS_IGNORE);
@@ -2727,7 +2728,7 @@ int main(int argc, char *argv[])
 	  //Receive serialized clusterCount from daughter
 	  vector<int> tempClust;
 	  tempClust.resize(local_clusterCount.size());
-	  int clustTag = 200 + i;
+	  int clustTag = 2000 + i;
 	  MPI_Recv(&tempClust[0], tempClust.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
       for (int k=0; k < tempClust.size(); k++){
         local_clusterCount[k] += tempClust[k];
@@ -2737,7 +2738,7 @@ int main(int argc, char *argv[])
       //Receive serialized splitsGeneMatrix vectors for each run
       for (int irun=0; irun < rp.getNumRuns(); irun++){
 		vector<int> tempSplits((splits.size()*numGenes+1));
-		int tag = ((30 + i)*10) + irun;
+		int tag = ((300 + i)*100) + irun;
         MPI_Recv(&tempSplits[0], tempSplits.size(), MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
 	    for (int j=0; j<tempSplits.size(); j++){
 		  splitsGeneMatrix[irun][j] += tempSplits[j];  
@@ -2746,7 +2747,7 @@ int main(int argc, char *argv[])
 	  }
 	  
 	  //Receive pairCounts
-	  int pairTag = 400 + i;
+	  int pairTag = 4000 + i;
 	  vector<int> tempCounts(local_pairCounts.size());
 	  MPI_Recv(&tempCounts[0], tempCounts.size(), MPI_INT, i, pairTag, MPI_New_World, MPI_STATUS_IGNORE);
 	  for (int k=0; k<tempCounts.size(); k++)
@@ -2754,7 +2755,7 @@ int main(int argc, char *argv[])
 	  tempCounts.clear();
         
       //Receive alphas
-      int alphaTag = 500 + i;
+      int alphaTag = 5000 + i;
       vector<double> tempAlphas(total);
       MPI_Recv(&tempAlphas[0], total, MPI_DOUBLE, i, alphaTag, MPI_New_World, MPI_STATUS_IGNORE);
       for (int l=0; l<total; l++){
@@ -2766,21 +2767,31 @@ int main(int argc, char *argv[])
 	  for (int m=start; m<=end; m++)
 	    global_alphas[m] = local_states[m]->getAlpha();    
 	}	
+	
+		   cout << "Accepts: ";
+	   for (int p=0; p<local_mcmcmcAccepts.size(); p++)
+	     cout << " "<<local_mcmcmcAccepts[p]<<" ";
+	   cout << endl;
+	   cout << "Proposals: ";
+	   for (int p=0; p<local_mcmcmcProposals.size(); p++)
+	     cout << " "<<local_mcmcmcProposals[p]<<" ";
+	   cout << endl;
+	
 	//Else, send to master	
   }else{
 	  
 	//Send TGMTable
-	int tgmTag = 100 + my_rank;
+	int tgmTag = 1000 + my_rank;
 	MPI_Send(&serialTable[0], sz, MPI_INT, 0, tgmTag, MPI_New_World);
 	serialTable.clear();
 	
 	//Send local_clusterCount
-	int clustTag = 200 + my_rank;
+	int clustTag = 2000 + my_rank;
 	MPI_Send(&local_clusterCount[0], local_clusterCount.size(), MPI_INT, 0, clustTag, MPI_New_World);
     local_clusterCount.clear();
     
     //For each run, send serialized splitsGeneMatrix
-    int splitTag = (30 + my_rank)*10;
+    int splitTag = (300 + my_rank)*100;
     for (int irun=0; irun < rp.getNumRuns(); irun++){
 	  int tempTag = splitTag + irun;
 	  vector<int> tempSplits(splits.size());  
@@ -2788,18 +2799,33 @@ int main(int argc, char *argv[])
 	  splitsGeneMatrix[irun].clear();
 	}
 	//Send local_pairCounts
-	int pairTag = 400 + my_rank;
+	int pairTag = 4000 + my_rank;
 	MPI_Send(&local_pairCounts[0], local_pairCounts.size(), MPI_INT, 0, pairTag, MPI_New_World);
 	local_pairCounts.clear();
 	
 	//Send alphas
 	vector<double> local_alphas(total);
-	int alphaTag = 500 + my_rank;
+	int alphaTag = 5000 + my_rank;
 	for(int i=start;i<=end;i++) 
 	  local_alphas[i] = local_states[i]->getAlpha();
 	 MPI_Send(&local_alphas[0], total, MPI_DOUBLE, 0, alphaTag, MPI_New_World);
 	 local_alphas.clear();
 	 global_alphas.clear();
+	 
+	 if (rp.getNumChains()>1){
+	   //Send accepts and proposals
+	   int acceptTag = 6000 + my_rank;
+	   int propTag = 7000 + my_rank;
+	   cout << "Accepts: ";
+	   for (int p=0; p<local_mcmcmcAccepts.size(); p++)
+	     cout << " "<<local_mcmcmcAccepts[p]<<" ";
+	   cout << endl;
+	   cout << "Proposals: ";
+	   for (int p=0; p<local_mcmcmcProposals.size(); p++)
+	     cout << " "<<local_mcmcmcProposals[p]<<" ";
+	   cout << endl;
+	   //MPI_Send(&local_mcmcmcAccepts[0]
+     }
   }
   
   //Exit, below not tested yet
