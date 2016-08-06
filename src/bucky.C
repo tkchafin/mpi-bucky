@@ -1598,11 +1598,12 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
 // Currently one function to write all output
 //TKC: updated to receive new modified data structures
 
-/*void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
+void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
 		 int numGenes,RunParameters& rp,ModelParameters& mp,TGMTable *newTable,
 		 vector<int >& clusterCount, vector<TaxonSet>& splits,  vector<vector<int > >& splitsGeneMatrix,
 		 vector<int >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
-		 vector<int >& mcmcmcAccepts,vector<int >& mcmcmcProposals, vector<string>& translateTable)
+		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable,
+		 map<int,int>& alphaIndex)
 {
   // .joint
   if(rp.getCreateJointFile()) {
@@ -1637,18 +1638,22 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
   double wsumAvg=0.0, wsumSD=0.0;
   for (int irun=0; irun<rp.getNumRuns(); irun++)
     wsum[irun]=0.0;
-
+    
   for (int i=0; i<numGenes+1; i++){
     clusterPP[i]=0.0;
     for (int irun=0; irun<rp.getNumRuns(); irun++){
-      clusterPP[i] += (double)clusterCount[(irun*rp.getNumChains())+i];
-      wsum[irun] += i* (double)clusterCount[(irun*rp.getNumChains())+i];
+      clusterPP[i] += (double)clusterCount[(irun*numGenes+1)+i];
+      wsum[irun] += i* (double)clusterCount[(irun*numGenes+1)+i];
     }
     wsumAvg += i * clusterPP[i];
-    clusterPP[i] /= ((double)rp.getNumUpdates() * rp.getNumRuns());
+    //clusterPP[i] /= (rp.getNumUpdates() * rp.getNumRuns());
   }
-  for (int irun=0; irun<rp.getNumRuns(); irun++)
-    wsum[irun] /= (double)rp.getNumUpdates();
+  
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
+	double temp = wsum[irun] / ((double)rp.getNumUpdates());
+    cout << endl<<"Old: "<<wsum[irun] << " New: "<<temp<<endl;
+    wsum[irun] = temp;
+  }
   wsumAvg /= ((double)rp.getNumUpdates() * rp.getNumRuns());
 
   clusterStr << "mean #groups = " << setprecision(3) << wsumAvg << endl ;
@@ -1659,51 +1664,55 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
     clusterStr << "SD across runs = " << wsumSD <<endl;
   }
   clusterStr << endl ;
-
   clusterStr << "credible regions for # of groups" << endl;
   clusterStr << "probability region" << endl;
   clusterStr << "------------------" << endl;
-
+  
+  for (int j=0; j <clusterCount.size(); j++)
+	  cout << clusterCount[j] << " ";
+  cout << endl;
+  
   int a=numGenes,b=0;
-  for(int i=0;i<numGenes+1;i++)
+  for(int i=0;i<numGenes+1;i++){
     if(clusterPP[i]>0) {
       if(a>i)	a = i;
       if(b<i)	b = i;
     }
-
+  }
+  cout << "----1----" << endl;
   int lo=a,hi;
   double sum = clusterPP[lo];
   while(sum < .005)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .995)    sum += clusterPP[++hi];
   clusterStr << "  0.99      (" << lo << "," << hi << ")" << endl;
-
+cout << "----2----" << endl;
   lo=a;  sum = clusterPP[lo];
   while(sum < .025)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .975)    sum += clusterPP[++hi];
   clusterStr << "  0.95      (" << lo << "," << hi << ")" << endl;
-
+cout << "----3----" << endl;
   lo=a;  sum = clusterPP[lo];
   while(sum < .050)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .950)    sum += clusterPP[++hi];
   clusterStr << "  0.90      (" << lo << "," << hi << ")" << endl;
   clusterStr << "------------------" << endl << endl;
-
+cout << "----4----" << endl;
   for (int irun=0; irun<rp.getNumRuns(); irun++){
     clusterStr << "Distribution of cluster number in run " << irun+1 << ":" << endl;
     clusterStr << " # of    raw    posterior" << endl;
     clusterStr << "groups  counts probability" << endl;
     clusterStr << "--------------------------" << endl;
     for(int i=a;i<b+1;i++)
-      clusterStr << setw(3) << i << " " << setw(10) << clusterCount[(irun*rp.getNumChains())+i]
-		 << setw(12) << setprecision(8) << clusterCount[(irun*rp.getNumChains())+i] / (double)rp.getNumUpdates() << endl;
+      clusterStr << setw(3) << i << " " << setw(10) << clusterCount[(irun*numGenes+1)+i]
+		 << setw(12) << setprecision(8) << clusterCount[(irun*numGenes+1)+i] / (double)rp.getNumUpdates() << endl;
     clusterStr << "--------------------------" << endl << endl;
   }
   clusterStr.close();
   cout << "done." << endl;
-
+cout << "----5----" << endl;
 
   // .concordance
   cout << "Writing concordance factors to " << fileNames.getConcordanceFile() << "...." << flush;
@@ -2017,7 +2026,7 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
     cout << "done." << endl;
   }
 
-
+/*
   if(rp.getNumChains()>1) {
 	//TKC: This is not right because the alphas change for each accepted MCMCMC exchange?? Not always exchanging with right neighbor.
 	//e.g. alpha can start as [1,10,100,1000] but end as [1000,10,100,1]
@@ -2037,10 +2046,10 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
 	    cout << endl;
       }
     }
-  } 
+  } */
 }
 
-*/
+
 
 void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
     srand(s1); 
@@ -2733,10 +2742,10 @@ int main(int argc, char *argv[])
     //SHOULD THEY BE SUBSAMPLED??
 	for (int i=start; i<= end; i++){
 	//If chain is cold
-	  if (local_states[i]->getAlpha() == mp.getAlpha()){
+	  if (local_states[i]->getAlpha() == global_alphas[0]){
 	    local_states[i]->updateTable(localTable);
 		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size());
-		local_clusterCount[(global_runs[i]*numGenes)+(local_states[i]->getNumGroups())]++;
+		local_clusterCount[(global_runs[i]*numGenes+1)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
 		/*if (rp.getCreateSampleFile() && cycle % rp.getSubsampleRate() == 0){
@@ -2781,7 +2790,8 @@ int main(int argc, char *argv[])
   
 
   //Doughter processes send, master collects all final data structures
-
+   
+  
   vector<int> serialTable;
   serialTable = localTable->getSerialTable();
   int sz = serialTable.size();
@@ -2800,14 +2810,13 @@ int main(int argc, char *argv[])
 	  tempTable.clear();
 	  
 	  //Receive serialized clusterCount from daughter
-	  vector<int> tempClust;
-	  tempClust.resize(local_clusterCount.size());
+	  vector<int> tempClust(local_clusterCount.size());
 	  int clustTag = 2000 + i;
-	  MPI_Recv(&tempClust[0], tempClust.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
-      for (int k=0; k < tempClust.size(); k++){
+	  MPI_Recv(&tempClust[0], local_clusterCount.size(), MPI_INT, i, clustTag, MPI_New_World, MPI_STATUS_IGNORE);
+      for (int k=0; k < local_clusterCount.size(); k++){
         local_clusterCount[k] += tempClust[k];
-        tempClust.clear(); 
 	  }
+	  tempClust.clear();
       
       //Receive serialized splitsGeneMatrix vectors for each run
       for (int irun=0; irun < rp.getNumRuns(); irun++){
@@ -2912,8 +2921,13 @@ int main(int argc, char *argv[])
   //exit(0);
 
   MPI_Barrier(MPI_New_World); 
-   
+
+	
   if (my_rank == 0){
+	cout << "Final cluster counts: "<<endl;
+	for (int j =0; j <local_clusterCount.size(); j++)
+	  cout << local_clusterCount[j] << " ";
+	cout << endl; 
     string name2 = "final.table";
     ofstream g(name2);
     localTable->print(g);
@@ -2958,7 +2972,8 @@ int main(int argc, char *argv[])
   if (my_rank == 0){
     //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
 	      //localTable,local_clusterCount,splits,splitsGeneMatrix,local_pairCounts,
-	      //genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable);
+	      //genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable, 
+	      //alpha_index);
   }
   
     
