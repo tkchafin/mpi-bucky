@@ -18,6 +18,7 @@
 
 // Version History
 
+//##SEQUENTIAL BUCKY CHANGE LOG FOR REFERENCE
 // First alpha version 7 March, 2005
 // Version 1.1 released 30 October, 2006
 // Version 1.2a 21 August, 2007
@@ -26,8 +27,9 @@
 // Version 1.3.1  29 October, 2009
 // Version 1.4.3   9 July, 2014
 // Version 1.4.4  22 June, 2015
+
 //------MPI------
-// Version 2.0.0 2016 Tyler K. Chafin
+// Version 0.9.0 Tyler K. Chafin
 
 // File:     bucky.C
 
@@ -102,7 +104,7 @@
 // --- Fixed error with genome-wide CFs, that occurred when grid<ngenes and for low-CF splits.
 //
 
-// Changes in version 2.0.0 
+// MPI VERSION
 // MPI parallel implementation 
 // ---Major revision to main() 
 // ---multiple-core enabled MCMCMC
@@ -720,8 +722,8 @@ void State::updatePairCounts(vector<int>& counts)
   // only fill in upper triangle (i <= j)
   for(int i=0;i<genes.size();i++)
     for(int j=i;j<genes.size();j++)
-      if( tops[i] == tops[j] )
-	counts[(i*genes.size())+j]++;
+      if( tops[i] == tops[j] ) 
+	    counts[(i*genes.size())+j]++;
 }
 
 Node* Node::getNeighbor(int i) const { return edges[i]->getOtherNode(this); }
@@ -913,9 +915,11 @@ void Tree::getSplits(SplitSet& s) {
 
 // assumes that numChains > 1 and useIndependencePrior == false
 void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas, 
-        Rand* rand, vector<int>& accepts, vector<int>& proposals, 
-        int rank, const vector<int>& runs, const vector<int>& chains , 
-        int numChains , int runNum, vector<int>& rank_idx, MPI_Comm comm)
+        Rand* rand, vector<vector<int>>& accepts, 
+        vector<vector<int>>& proposals, int rank, 
+        const vector<int>& runs, const vector<int>& chains , 
+        int numChains , int runNum, vector<int>& rank_idx, 
+        map<int,int>& alphaI, MPI_Comm comm)
 {
     
   //rand is swap_rand- all ranks in sync
@@ -942,16 +946,24 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
   if ((rank == send_rank) || (rank == recv_rank)){    
     if (send_rank != recv_rank){
       if (rank == send_rank){
-		proposals[local_a]++;
+		  
 		//Exchange ALPHA between send & recv ranks
 		double myAlpha = states[local_a]->getAlpha();
 		double otherAlpha;
+		int myAI = alphaI.find(myAlpha)->second;
+		int theirAI = alphaI.find(otherAlpha)->second;
+	    if (myAI < theirAI){
+		  proposals[runNum][(theirAI*numChains)+myAI]++;
+		}else{
+		  proposals[runNum][(myAI*numChains)+theirAI]++;
+		}
+		
 		//cout << rank << " sending "<<myAlpha<<" to rank "<< recv_rank<<endl;
 		MPI_Sendrecv(&myAlpha, 1, MPI_DOUBLE, recv_rank, 3, &otherAlpha, 1, MPI_DOUBLE, recv_rank, 3, comm, MPI_STATUS_IGNORE);
         //cout <<flush; 
-        cout << "Rank "<<send_rank<<" will exchange chain "
-             << a << " (index "<<local_a<<") with chain "<<b<<
-                " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
+        //cout << "Rank "<<send_rank<<" will exchange chain "
+        //     << a << " (index "<<local_a<<") with chain "<<b<<
+        //        " (index "<<local_b<<") at rank "<<recv_rank<<endl; 
         //Capture probabilities to send
         aLogPriorProb = states[local_a]->getLogPriorProb(); 
         //cout << aLogPriorProb<<"\n";
@@ -965,11 +977,17 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Recv(&accept, 1, MPI::BOOL, recv_rank, 2, comm, MPI_STATUS_IGNORE);
         
         if (accept == true){ 
-			cout << 
-            accepts[local_a]++; 
+			cout << myAlpha << " replaced with "<<otherAlpha<<endl;
+		  if (myAI < theirAI){
+			accepts[runNum][(theirAI*numChains)+myAI]++;
+		  }else{
+			accepts[runNum][(myAI*numChains)+theirAI]++;
+            //accepts[local_a]++; 
+		  }
         }else{
             states[local_a]->setAlpha(myAlpha);
         }
+        
       }else if (rank == recv_rank){ 
 		//Exchange ALPHA between send & recv ranks
 		double myAlpha = states[local_b]->getAlpha();
@@ -999,9 +1017,19 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Send(&accept, 1, MPI::BOOL, send_rank, 2, comm);
       }
     }else if ((send_rank == recv_rank)&&(rank == send_rank)){ 
-	  proposals[local_a]++;
+	  //proposals[local_a]++;
 	  double aAlpha = states[local_a]->getAlpha();
 	  double bAlpha = states[local_b]->getAlpha();
+	  
+	  int aAI = alphaI.find(aAlpha)->second;
+      int bAI = alphaI.find(bAlpha)->second;
+		
+	  if (aAI < bAI){
+		proposals[runNum][(bAI*numChains)+aAI]++;
+	  }else{
+		proposals[runNum][(aAI*numChains)+bAI]++;
+	  }
+	  
       cout <<flush; 
       //cout << "Rank "<<send_rank<<" will exchange chain "
            //<< a << " (index "<<local_a<<") with chain "<<b
@@ -1015,8 +1043,13 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
       //Receiving process calculates if proposed change is accepted
       double logProbDiff = ((-aLogPriorProb - bLogPriorProb)+(aLogPostProb + bLogPostProb));
       if (logAccept < logProbDiff){ //accept
-          accept = true; 
-          accepts[local_a]++; 
+        accept = true; 
+        cout << aAlpha << " replaced with "<<bAlpha<<endl;
+        if (aAI < bAI){
+		  accepts[runNum][(bAI*numChains)+aAI]++;
+	    }else{
+		  accepts[runNum][(aAI*numChains)+bAI]++;
+	    } 
       }else{ //reject
           accept = false; 
           states[local_a]->setAlpha(aAlpha);
@@ -1077,6 +1110,7 @@ void showParameters(ostream& f,FileNames& fn,Defaults defaults,ModelParameters& 
   f << "  # of MCMC updates      | -n integer               | " << left << setw(14) << defaults.getNumUpdates()                                        << "| " << rp.getNumUpdates() << endl;
   f << "  # of chains            | -c integer               | " << left << setw(14) << defaults.getNumChains()                                         << "| " << rp.getNumChains() << endl;
   f << "  MCMCMC Rate            | -r integer               | " << left << setw(14) << defaults.getMCMCMCRate()                                        << "| " << rp.getMCMCMCRate() << endl;
+  f << "  Burn-in proportion     | -b float                 | " << left << setw(14) << defaults.getBurnIn()                                        << "| " << rp.getBurnIn() << endl; 
   f << "  alpha multiplier       | -m number                | " << left << setw(14) << defaults.getAlphaMultiplier()                                   << "| " << rp.getAlphaMultiplier() << endl;
   f << "  subsample rate         | -s integer               | " << left << setw(14) << defaults.getSubsampleRate()                                     << "| " << rp.getSubsampleRate() << endl;
   f << "  output root file name  | -o name                  | " << left << setw(14) << defaults.getRootFileName()                                      << "| " << fn.getRootFileName() << endl;
@@ -1175,9 +1209,9 @@ int readArguments(int rank, int argc, char *argv[],FileNames& fn,ModelParameters
       if( !(f >> alphaMultiplier) )
 	usage(rank,defaults);
       if(alphaMultiplier<=0)
-	cerr << "Warning: parameter alpha-multiplier must be positive. Ignoring argument -m " << alphaMultiplier << "." << endl;
+	     cerr << "Warning: parameter alpha-multiplier must be positive. Ignoring argument -m " << alphaMultiplier << "." << endl;
       else
-	rp.setAlphaMultiplier(alphaMultiplier);
+	    rp.setAlphaMultiplier(alphaMultiplier);
       k++;
     }
     else if(flag=="-r") {
@@ -1185,12 +1219,28 @@ int readArguments(int rank, int argc, char *argv[],FileNames& fn,ModelParameters
       string num = argv[++k];
       istringstream f(num);
       if( !(f >> mcmcmcRate) )
-	usage(rank,defaults);
+	    usage(rank,defaults);
       if(mcmcmcRate==0) {
-	cerr << "Warning: parameter MCMCMC-rate must be at least one. Setting to default -r 1." << endl;
-	mcmcmcRate=1;
+	    cerr << "Warning: parameter MCMCMC-rate must be at least one. Setting to default -r 1." << endl;
+	    mcmcmcRate=1;
       }
       rp.setMCMCMCRate(mcmcmcRate);
+      k++;
+    }
+    else if(flag=="-b") {
+      double burnRate;
+      string num = argv[++k];
+      istringstream f(num);
+      if( !(f >> burnRate) )
+	usage(rank,defaults);
+      if(burnRate < 0.0) {
+	    cerr << "Warning: parameter Burn-in Rate cannot be negative. Setting to default -b 0.10" << endl;
+	    burnRate = 0.1;
+      }else if (burnRate > 1.0){
+		cerr << "Warning: parameter Burn-in Rate cannot be greater than 1.0! Setting to default -b 0.10" << endl;
+	    burnRate = 0.1;
+	  }
+      rp.setBurnIn(burnRate);
       k++;
     }
     else if(flag=="-s") {
@@ -1546,12 +1596,13 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
 
 
 // Currently one function to write all output
-// Should have separate functions for each type of output
-void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
+//TKC: updated to receive new modified data structures
+
+/*void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
 		 int numGenes,RunParameters& rp,ModelParameters& mp,TGMTable *newTable,
-		 vector<vector<int> >& clusterCount, vector<TaxonSet>& splits,  vector<vector<vector<int> > >& splitsGeneMatrix,
-		 vector<vector<int> >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
-		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable)
+		 vector<int >& clusterCount, vector<TaxonSet>& splits,  vector<vector<int > >& splitsGeneMatrix,
+		 vector<int >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
+		 vector<int >& mcmcmcAccepts,vector<int >& mcmcmcProposals, vector<string>& translateTable)
 {
   // .joint
   if(rp.getCreateJointFile()) {
@@ -1584,25 +1635,25 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   vector<double> clusterPP(numGenes+1);
   vector<double> wsum(rp.getNumRuns());
   double wsumAvg=0.0, wsumSD=0.0;
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
+  for (int irun=0; irun<rp.getNumRuns(); irun++)
     wsum[irun]=0.0;
 
   for (int i=0; i<numGenes+1; i++){
     clusterPP[i]=0.0;
-    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-      clusterPP[i] += (double)clusterCount[irun][i];
+    for (int irun=0; irun<rp.getNumRuns(); irun++){
+      clusterPP[i] += (double)clusterCount[(irun*rp.getNumChains())+i];
+      wsum[irun] += i* (double)clusterCount[(irun*rp.getNumChains())+i];
+    }
     wsumAvg += i * clusterPP[i];
     clusterPP[i] /= ((double)rp.getNumUpdates() * rp.getNumRuns());
-    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-      wsum[irun] += i* (double)clusterCount[irun][i];
   }
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
+  for (int irun=0; irun<rp.getNumRuns(); irun++)
     wsum[irun] /= (double)rp.getNumUpdates();
   wsumAvg /= ((double)rp.getNumUpdates() * rp.getNumRuns());
 
   clusterStr << "mean #groups = " << setprecision(3) << wsumAvg << endl ;
   if (rp.getNumRuns()>1){
-    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
+    for (int irun=0; irun<rp.getNumRuns(); irun++)
       wsumSD += (wsum[irun]-wsumAvg)*(wsum[irun]-wsumAvg);
     wsumSD = sqrt(wsumSD / (rp.getNumRuns()-1));
     clusterStr << "SD across runs = " << wsumSD <<endl;
@@ -1640,14 +1691,14 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   clusterStr << "  0.90      (" << lo << "," << hi << ")" << endl;
   clusterStr << "------------------" << endl << endl;
 
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+  for (int irun=0; irun<rp.getNumRuns(); irun++){
     clusterStr << "Distribution of cluster number in run " << irun+1 << ":" << endl;
     clusterStr << " # of    raw    posterior" << endl;
     clusterStr << "groups  counts probability" << endl;
     clusterStr << "--------------------------" << endl;
     for(int i=a;i<b+1;i++)
-      clusterStr << setw(3) << i << " " << setw(10) << clusterCount[irun][i]
-		 << setw(12) << setprecision(8) << clusterCount[irun][i] / (double)rp.getNumUpdates() << endl;
+      clusterStr << setw(3) << i << " " << setw(10) << clusterCount[(irun*rp.getNumChains())+i]
+		 << setw(12) << setprecision(8) << clusterCount[(irun*rp.getNumChains())+i] / (double)rp.getNumUpdates() << endl;
     clusterStr << "--------------------------" << endl << endl;
   }
   clusterStr.close();
@@ -1669,7 +1720,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     for(int j=0;j<numGenes+1;j++){
       splitsGeneMatrixPP[i][j]=0.0;
       for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-	    splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][i][j];
+	    splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][(i*numGenes+1)+j];
       splitsGeneMatrixPP[i][j] /= ((double)rp.getNumUpdates() * rp.getNumRuns());
     }
   }
@@ -1731,7 +1782,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
 	    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
 	      double meanpostCF =0.0;
 	      for(int j=0;j<numGenes+1;j++)
-	        meanpostCF += j * (double)splitsGeneMatrix[irun][i][j];
+	        meanpostCF += j * (double)splitsGeneMatrix[irun][(i*numGenes+1)+j];
 	      meanpostCF /= (double)rp.getNumUpdates();
 	      meanpostCFsd += (meanpostCF - y.getWeight()) * (meanpostCF - y.getWeight());
 	    }
@@ -1871,7 +1922,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     for(int j=a;j<b+1;j++) {
       concordanceStr << setw(6) << j ;
       for (int irun=0; irun<rp.getNumRuns(); irun++)
-	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][i][j];
+	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][(i*numGenes+1)+j];
       csum += splitsGeneMatrixPP[i][j];
       concordanceStr << " " << setw(12) << setprecision(6) << splitsGeneMatrixPP[i][j]
 		     << " " << setw(11) << setprecision(6) << csum << endl;
@@ -1883,21 +1934,21 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     int lo=a,hi;
     sum = splitsGeneMatrixPP[i][lo];
     while(sum < .005)  sum += splitsGeneMatrixPP[i][++lo];
-    hi=lo;
+      hi=lo;
     while(sum < .995)  sum += splitsGeneMatrixPP[i][++hi];
     concordanceStr << "99% CI for CF = (" << lo << "," << hi << ")" << endl;
 
     lo=a;
     sum = splitsGeneMatrixPP[i][lo];
     while(sum < .025)  sum += splitsGeneMatrixPP[i][++lo];
-    hi=lo;
+      hi=lo;
     while(sum < .975)  sum += splitsGeneMatrixPP[i][++hi];
     concordanceStr << "95% CI for CF = (" << lo << "," << hi << ")" << endl;
 
     lo=a;
     sum = splitsGeneMatrixPP[i][lo];
     while(sum < .050)  sum += splitsGeneMatrixPP[i][++lo];
-    hi=lo;
+      hi=lo;
     while(sum < .950)  sum += splitsGeneMatrixPP[i][++hi];
     concordanceStr << "90% CI for CF = (" << lo << "," << hi << ")" << endl << endl;
   }
@@ -1917,12 +1968,12 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     } else {
       pairsStr.setf(ios::fixed, ios::floatfield);
       pairsStr.setf(ios::showpoint);
-      double total = pairCounts[0][0];
+      double total = pairCounts[0]; //TKC: Why is [0][0] the total? 
       for(int i=0;i<numGenes;i++) {
-	pairsStr << setw(4) << i << " ";
-	for(int j=0;j<numGenes;j++)
-	  pairsStr << setw(7) << setprecision(4) << (double) (i < j ? pairCounts[i][j] : pairCounts[j][i]) / total;
-	pairsStr << endl;
+	    pairsStr << setw(4) << i << " ";
+	    for(int j=0;j<numGenes;j++)
+	      pairsStr << setw(7) << setprecision(4) << (double) (i < j ? pairCounts[(i*numGenes)+j] : pairCounts[(j*numGenes)+i]) / total;
+	    pairsStr << endl;
       }
       pairsStr.close();
       cout << "done." << endl;
@@ -1966,25 +2017,30 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     cout << "done." << endl;
   }
 
+
   if(rp.getNumChains()>1) {
+	//TKC: This is not right because the alphas change for each accepted MCMCMC exchange?? Not always exchanging with right neighbor.
+	//e.g. alpha can start as [1,10,100,1000] but end as [1000,10,100,1]
+	//Need to update and fix later!!!
+	int chains = rp.getNumChains();
     cout.setf(ios::fixed, ios::floatfield);
     cout.setf(ios::showpoint);
     for (int irun=0; irun<rp.getNumRuns(); irun++){
       cout << "\nMCMCMC acceptance statistics in run " << irun+1 <<":" << endl;
       cout << "         alpha1 <-->         alpha2 accepted proposed proportion" << endl;
       for(int i=0;i<rp.getNumChains()-1;i++) {
-	cout << setw(15) << alphas[i] << " <-->" << setw(15) << alphas[i+1];
-	cout << setw(9) << mcmcmcAccepts[irun][i] << setw(9) << mcmcmcProposals[irun][i];
-	if(mcmcmcProposals[irun][i] > 0) {
-	  cout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[irun][i]) / (double) (mcmcmcProposals[irun][i]);
-	}
-	cout << endl;
+	    cout << setw(15) << alphas[i] << " <-->" << setw(15) << alphas[i+1];
+	    cout << setw(9) << mcmcmcAccepts[(irun*chains)+i] << setw(9) << mcmcmcProposals[(irun*chains)+i];
+	    if(mcmcmcProposals[(irun*chains)+i] > 0) {
+	      cout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[(irun*chains)+i]) / (double) (mcmcmcProposals[(irun*chains)+i]);
+	    }
+	    cout << endl;
       }
     }
-  }
-
+  } 
 }
 
+*/
 
 void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
     srand(s1); 
@@ -1998,9 +2054,6 @@ void MPI_seed(int s1, int s2, int procs, std::vector<int> &samples){
         //cout << "Random num " << i << " is " << samples[i] << endl;
     }
 }
-
-
-
 
 
 
@@ -2076,6 +2129,8 @@ int main(int argc, char *argv[])
   //TKC: Calc number of runs each process rank is responsible for
 
   int total = rp.getNumChains()*rp.getNumRuns(); 
+  int chains = rp.getNumChains();
+  int runs = rp.getNumRuns();
   int start, end; 
 
   //Get group of processes in world communicator
@@ -2164,6 +2219,7 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "done." << endl;
   }
+
   
   // check that genome-wide grid size > number of genes: otherwise the genome-wide estimates are innacurate.
   if (rp.getNumGenomewideGrid() < 3*numGenes){
@@ -2373,7 +2429,7 @@ int main(int argc, char *argv[])
     for(int i=0;i<topologies.size();i++) {
       topologySplitsIndexMatrix[i].resize(numTaxa-3);
       for(int j=0;j<numTaxa-3;j++)
-	topologySplitsIndexMatrix[i][j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
+	    topologySplitsIndexMatrix[i][j] = find(splits.begin(),splits.end(),topologySplitsMatrix[i][j]) - splits.begin();
     }
   }
 
@@ -2401,6 +2457,7 @@ int main(int argc, char *argv[])
 
   //Allocate space for alphas
   vector<double> global_alphas(rp.getNumChains());
+  map<int,int> alpha_index;
   global_alphas.resize(rp.getNumChains()*rp.getNumRuns());
     
   //Allocate space for collecting states later (have each process make a local version)
@@ -2424,14 +2481,16 @@ int main(int argc, char *argv[])
   }
   int rankIdx=0; 
   int count=0; 
-  for (int irun=0; irun<rp.getNumRuns(); irun++){
+  for (int irun=0; irun<runs; irun++){
     //Allocate space for later collecting final states
     //global_states[irun].resize(rp.getNumChains()); 
     for(int i=0;i<rp.getNumChains();i++){  
       if (i==0){
-        global_alphas[irun*rp.getNumChains()] = mp.getAlpha();
+        global_alphas[irun*chains] = mp.getAlpha();
       }else{
-        global_alphas[i+(irun*rp.getNumChains())]=rp.getAlphaMultiplier()*global_alphas[i-1];
+        global_alphas[i+(irun*chains)]=rp.getAlphaMultiplier()*global_alphas[i-1];
+        if (irun == 0)
+          alpha_index[global_alphas[i]] = i;
       }
       //cout << "Global alpha "<<i<<" is "<<global_alphas[i]<<endl;
       //cout << "Run " << irun+1 <<" chain "<<i+1<<" has alpha "<<global_alphas[i]<<endl;
@@ -2501,10 +2560,16 @@ int main(int argc, char *argv[])
 
     
   //TKC: Again, for MPI version only need 1D vectors
-  vector<int> local_mcmcmcAccepts(total);
-  vector<int> local_mcmcmcProposals(total);
-  for (int i=0; i<total; i++){
-    local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = 0;
+  vector<vector<int> > local_mcmcmcAccepts(runs);
+  vector<vector<int> > local_mcmcmcProposals(runs);
+  
+  for (int i=0; i<runs; i++){
+	local_mcmcmcAccepts[i].resize(chains*chains);
+    local_mcmcmcProposals[i].resize(chains*chains);
+    for (int k=0; k<chains*chains; k++){
+	  local_mcmcmcAccepts[i][k]= 0;
+      local_mcmcmcProposals[i][k]= 0;
+    }
   }
 
   vector<int> local_pairCounts(numGenes*numGenes); // not adapted to several runs. Runs will be pooled.
@@ -2522,9 +2587,10 @@ int main(int argc, char *argv[])
   if (my_rank==0){
     cout << "MCMC initiated at " << ctime(&beginMCMCtime) << endl;
   }
-  int numBurn = rp.getNumUpdates()/10;
+  int numBurn = (int) rp.getNumUpdates()*rp.getBurnIn();
+ 
   if (my_rank==0){
-    cout << "Beginning burn-in with " << numBurn << " updates (10% extra of desired updates)...";
+    cout << "Beginning burn-in with " << numBurn << " updates ("<< rp.getBurnIn()*100<<"% extra of desired updates)."<<endl;
   }
 
   int part = numBurn / 50;
@@ -2553,7 +2619,7 @@ int main(int argc, char *argv[])
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          irun, global_ranks, MPI_New_World);   
+          irun, global_ranks, alpha_index, MPI_New_World);   
       }
 	} 
   }
@@ -2620,7 +2686,17 @@ int main(int argc, char *argv[])
   //TKC: Serialized 2D vector
   vector<int> local_accept(total);
   for (int i=0; i<total; i++){
-    local_mcmcmcAccepts[i] = local_mcmcmcProposals[i] = local_accept[i] = 0;
+    local_accept[i] = 0;
+  }
+  
+  //Reset accepts/proposals
+  for (int i=0; i<runs; i++){
+	local_mcmcmcAccepts[i].resize(chains*chains);
+    local_mcmcmcProposals[i].resize(chains*chains);
+    for (int k=0; k<chains*chains; k++){
+	  local_mcmcmcAccepts[i][k]= 0;
+      local_mcmcmcProposals[i][k]= 0;
+    }
   }
   
   TGMTable* localTable;
@@ -2647,7 +2723,7 @@ int main(int argc, char *argv[])
         MPI_mcmcmc(local_states, global_alphas, swap_rand[irun], 
           local_mcmcmcAccepts, local_mcmcmcProposals, my_rank, 
           global_runs, global_index, rp.getNumChains(), 
-          irun, global_ranks, MPI_New_World);
+          irun, global_ranks, alpha_index, MPI_New_World);
 	  }
     }
     
@@ -2719,6 +2795,7 @@ int main(int argc, char *argv[])
 	  
 	  //Receive serialized TGM table from daughter
 	  MPI_Recv(&tempTable[0], sz, MPI_INT, i, tgmTag, MPI_New_World, MPI_STATUS_IGNORE);
+	  //Use serial table to update localTable
 	  localTable->readSerialTable(tempTable);
 	  tempTable.clear();
 	  
@@ -2765,17 +2842,17 @@ int main(int argc, char *argv[])
 	  if (rp.getNumChains()>1){
 	    int acceptTag = 6000 + i;
 	    int propTag = 7000 + i;
-	    vector<int> tempA(total);
-	    vector<int> tempP(total);
-	    MPI_Recv(&tempA[0], total, MPI_INT, i, acceptTag, MPI_New_World, MPI_STATUS_IGNORE);
-	    for (int n=0; n<total; n++){
-	      if (tempA[n] != 0)
-	        local_mcmcmcAccepts[n] = tempA[n];
-	    }
-	    MPI_Recv(&tempP[0], total, MPI_INT, i, propTag, MPI_New_World, MPI_STATUS_IGNORE);
-	    for (int o=0; o<total; o++){
-	      if (tempP[o] != 0)
-	        local_mcmcmcProposals[o] = tempP[o];
+	    vector<int> tempA(chains*chains);
+	    vector<int> tempP(chains*chains);
+	    for (int run=0; run<runs; run++){
+	      MPI_Recv(&tempA[0], chains*chains, MPI_INT, i, acceptTag, MPI_New_World, MPI_STATUS_IGNORE);
+	      for (int n=0; n<chains*chains; n++){
+	        local_mcmcmcAccepts[run][n] += tempA[n];
+	      }
+	      MPI_Recv(&tempP[0], chains*chains, MPI_INT, i, propTag, MPI_New_World, MPI_STATUS_IGNORE);
+	      for (int o=0; o<chains*chains; o++){
+	        local_mcmcmcProposals[run][o] += tempP[o];
+	      }
 	    }
       }    
     }
@@ -2823,62 +2900,69 @@ int main(int argc, char *argv[])
 	   //Send accepts and proposals
 	   int acceptTag = 6000 + my_rank;
 	   int propTag = 7000 + my_rank;
-	   MPI_Send(&local_mcmcmcAccepts[0], local_mcmcmcAccepts.size(), MPI_INT, 0, acceptTag, MPI_New_World);
-	   MPI_Send(&local_mcmcmcProposals[0], local_mcmcmcProposals.size(), MPI_INT, 0, propTag, MPI_New_World);
+	   for (int irun=0; irun<runs; irun++){
+	     MPI_Send(&local_mcmcmcAccepts[irun][0], chains*chains, MPI_INT, 0, acceptTag, MPI_New_World);
+	     MPI_Send(&local_mcmcmcProposals[irun][0], chains*chains, MPI_INT, 0, propTag, MPI_New_World);
+       }
      }
   }
   
   //Exit, below not tested yet
   //MPI_Finalize();
   //exit(0);
-  
+
   MPI_Barrier(MPI_New_World); 
    
-   if (my_rank == 0){
-     string name2 = "final.table";
-     ofstream g(name2);
-     localTable->print(g);
-     cout << "Final alphas: ";
-     for (int i=0; i<total; i++)
-       cout<< global_alphas[i] << " ";
-     cout << endl;
-     cout << "Final accepts: ";
-     for (int i=0; i<total; i++)
-       cout<< local_mcmcmcAccepts[i] << " ";
-     cout << endl;
-     cout << "Final proposals: ";
-     for (int i=0; i<total; i++)
-       cout<< local_mcmcmcProposals[i] << " ";
-     cout << endl;
-   }
+  if (my_rank == 0){
+    string name2 = "final.table";
+    ofstream g(name2);
+    localTable->print(g);
+    cout << "Final alphas: ";
+    for (int i=0; i<total; i++)
+      cout<< global_alphas[i] << " ";
+    cout << endl;
+    cout << "Final accepts: " << endl;
+    for (int run=0; run<runs; run++){
+	  cout << "---Run " << run << " ---" << endl;
+      for (int i=0; i<chains; i++){
+	    for (int k=0; k<i; k++)
+		  cout<< local_mcmcmcAccepts[run][(i*chains)+k] << " ";
+        cout << endl;
+      }
+    }
+    cout << "Final proposals: " << endl;
+    for (int run=0; run<runs; run++){
+      cout << "---Run " << run << " ---" << endl;
+      for (int i=0; i<chains; i++){
+	    for (int k=0; k<i; k++)
+		  cout<< local_mcmcmcProposals[run][(i*chains)+k] << " ";
+        cout << endl;
+      }
+    }
+  }
    
    //NOTE:  
    //topologies -- same
-   //local_table -- serialized, send done, incorporated by master
+   //local_table -- serialized, send done, incorporated by master (2D)
    //topSplitsIndexMatrix -- same
    //clusterCOunt -- Serialized, send done, incorporated by master
-   //splitsGeneMatrix -- Serialized, send done, incorporated
+   //splitsGeneMatrix -- Serialized, send done, incorporated (2D, sub are serial)
    //topologySplitsIndexMatrix-- Same
-   //local_pairCounts -- Serialized, sent, incorporated
-   //alphas -- All collected and incorporated
-   //accepts -- Collected
-   //proposals -- Collected
-   //translateTable
-   //splits
-   
-   //DO ALL MPI_GATHERV'S TO RANK 0 IN HERE, ONLY RANK 0 CREATES FINAL OUTS
-    
-   /* Need to gather:
-    * alphas
-    * accepts
-    * proposals
-    * */
+   //local_pairCounts -- Serialized, sent, incorporated (1D)
+   //alphas -- All collected and incorporated (1D)
+   //accepts -- Collected (serial)
+   //proposals -- Collected (serial)
+   //translateTable -- SAME
+   //splits -- SAME
+  
+  if (my_rank == 0){
+    //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
+	      //localTable,local_clusterCount,splits,splitsGeneMatrix,local_pairCounts,
+	      //genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable);
+  }
   
     
-  //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
-	//      newTable,clusterCount,splits,splitsGeneMatrix,
-	//      pairCounts,genes,alphas,mcmcmcAccepts,mcmcmcProposals, translateTable);
-
+    
         
   for(int i=0;i<numGenes;i++)
     delete genes[i];
