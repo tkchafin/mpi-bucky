@@ -702,9 +702,10 @@ void State::print(ostream& f) {
 
 }
 
-void State::updateSplits(vector<int>& totals,vector<vector<int> >& topSplitsIndex, int numSplits) {
+void State::updateSplits(vector<vector<int> >& totals,vector<vector<int> >& topSplitsIndex) {
 
   int numSplitsPerTree = topSplitsIndex[0].size();
+  int numSplits = totals.size();
   vector<int> counts(numSplits);
   for(int i=0;i<numSplits;i++)
     counts[i] = 0;
@@ -713,7 +714,7 @@ void State::updateSplits(vector<int>& totals,vector<vector<int> >& topSplitsInde
       counts[topSplitsIndex[tops[i]][j]]++;
     }
   for(int i=0;i<numSplits;i++)
-    totals[(i*numSplits)+counts[i]]++;
+    totals[i][counts[i]]++;
 }
 
 void State::updatePairCounts(vector<int>& counts)
@@ -927,7 +928,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
   //!!!ALL RANKS MUST CALL MCMCMC ONCE FOR EACH RUN THEY HAVE CHAINS FOR!!!
   
   int a = (int) ( (numChains-1)*rand->runif() );
-  cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
+  //cout << rank << " has chosen chain "<<a<<" for exchange with chain "<<a+1<<"(run "<<runNum<<")\n";
   int b = a+1;
   int local_a = a+(numChains*runNum);
   int local_b = a+(numChains*runNum)+1;
@@ -977,7 +978,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
         MPI_Recv(&accept, 1, MPI::BOOL, recv_rank, 2, comm, MPI_STATUS_IGNORE);
         
         if (accept == true){ 
-			cout << myAlpha << " replaced with "<<otherAlpha<<endl;
+			//cout << myAlpha << " replaced with "<<otherAlpha<<endl;
 		  if (myAI < theirAI){
 			accepts[runNum][(theirAI*numChains)+myAI]++;
 		  }else{
@@ -1044,7 +1045,7 @@ void MPI_mcmcmc(vector<State*>& states, vector<double>& alphas,
       double logProbDiff = ((-aLogPriorProb - bLogPriorProb)+(aLogPostProb + bLogPostProb));
       if (logAccept < logProbDiff){ //accept
         accept = true; 
-        cout << aAlpha << " replaced with "<<bAlpha<<endl;
+        //cout << aAlpha << " replaced with "<<bAlpha<<endl;
         if (aAI < bAI){
 		  accepts[runNum][(bAI*numChains)+aAI]++;
 	    }else{
@@ -1600,7 +1601,7 @@ void GenomewideDistribution::updateGenomewide(double alpha) {
 
 void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int numTaxa,vector<string> topologies,
 		 int numGenes,RunParameters& rp,ModelParameters& mp,TGMTable *newTable,
-		 vector<int >& clusterCount, vector<TaxonSet>& splits,  vector<vector<int > >& splitsGeneMatrix,
+		 vector<int >& clusterCount, vector<TaxonSet>& splits,  vector<vector<vector<int> > >& splitsGeneMatrix,
 		 vector<int >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
 		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable,
 		 map<int,int>& alphaIndex)
@@ -1646,7 +1647,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       wsum[irun] += i* (double)clusterCount[(irun*numGenes+1)+i];
     }
     wsumAvg += i * clusterPP[i];
-    //clusterPP[i] /= (rp.getNumUpdates() * rp.getNumRuns());
+    clusterPP[i] /= (rp.getNumUpdates() * rp.getNumRuns());
   }
   
   for (int irun=0; irun<rp.getNumRuns(); irun++){
@@ -1679,27 +1680,27 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
       if(b<i)	b = i;
     }
   }
-  cout << "----1----" << endl;
+
   int lo=a,hi;
   double sum = clusterPP[lo];
   while(sum < .005)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .995)    sum += clusterPP[++hi];
   clusterStr << "  0.99      (" << lo << "," << hi << ")" << endl;
-cout << "----2----" << endl;
+
   lo=a;  sum = clusterPP[lo];
   while(sum < .025)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .975)    sum += clusterPP[++hi];
   clusterStr << "  0.95      (" << lo << "," << hi << ")" << endl;
-cout << "----3----" << endl;
+
   lo=a;  sum = clusterPP[lo];
   while(sum < .050)    sum += clusterPP[++lo];
   hi=lo;
   while(sum < .950)    sum += clusterPP[++hi];
   clusterStr << "  0.90      (" << lo << "," << hi << ")" << endl;
   clusterStr << "------------------" << endl << endl;
-cout << "----4----" << endl;
+
   for (int irun=0; irun<rp.getNumRuns(); irun++){
     clusterStr << "Distribution of cluster number in run " << irun+1 << ":" << endl;
     clusterStr << " # of    raw    posterior" << endl;
@@ -1712,7 +1713,7 @@ cout << "----4----" << endl;
   }
   clusterStr.close();
   cout << "done." << endl;
-cout << "----5----" << endl;
+
 
   // .concordance
   cout << "Writing concordance factors to " << fileNames.getConcordanceFile() << "...." << flush;
@@ -1729,7 +1730,7 @@ cout << "----5----" << endl;
     for(int j=0;j<numGenes+1;j++){
       splitsGeneMatrixPP[i][j]=0.0;
       for (unsigned int irun=0; irun<rp.getNumRuns(); irun++)
-	    splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][(i*numGenes+1)+j];
+	splitsGeneMatrixPP[i][j] += (double)splitsGeneMatrix[irun][i][j];
       splitsGeneMatrixPP[i][j] /= ((double)rp.getNumUpdates() * rp.getNumRuns());
     }
   }
@@ -1772,12 +1773,10 @@ cout << "----5----" << endl;
     if(add || keep){
       y.updatePriorProbability();
       if (add)
-	    ctree.push_back(y);
+	ctree.push_back(y);
       else
-	    otherClade.push_back(y);
+	otherClade.push_back(y);
       GenomewideDistribution* g;
-      //TKC: I don't g is ever freed from memory?
-      //Need to go through gwDistr and otherGwDistr and delete
       g = new GenomewideDistribution(numGenes, rp.getNumGenomewideGrid());
       g->updatePriorProbability(y);
       g->updateSamplewide(splitsGeneMatrixPP[i]);
@@ -1788,22 +1787,23 @@ cout << "----5----" << endl;
       }
       double meanpostCFsd=0.0; // SD of estimated sample-wide CF, across runs
       if (rp.getNumRuns()>1){
-	    for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
-	      double meanpostCF =0.0;
-	      for(int j=0;j<numGenes+1;j++)
-	        meanpostCF += j * (double)splitsGeneMatrix[irun][(i*numGenes+1)+j];
-	      meanpostCF /= (double)rp.getNumUpdates();
-	      meanpostCFsd += (meanpostCF - y.getWeight()) * (meanpostCF - y.getWeight());
-	    }
-	    meanpostCFsd = sqrt(meanpostCFsd / (rp.getNumRuns()-1));  // number of genes
-	    g->setSamplewidePosteriorMeanSD(meanpostCFsd / numGenes); // proportion of genes
+	for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+	  double meanpostCF =0.0;
+	  for(int j=0;j<numGenes+1;j++)
+	    meanpostCF += j * (double)splitsGeneMatrix[irun][i][j];
+	  meanpostCF /= (double)rp.getNumUpdates();
+	  meanpostCFsd += (meanpostCF - y.getWeight()) * (meanpostCF - y.getWeight());
+	}
+	meanpostCFsd = sqrt(meanpostCFsd / (rp.getNumRuns()-1));  // number of genes
+	g->setSamplewidePosteriorMeanSD(meanpostCFsd / numGenes); // proportion of genes
       }
       if (add)
-	    gwDistr.push_back(g);
+	gwDistr.push_back(g);
       else
-	    otherGwDistr.push_back(g);
+	otherGwDistr.push_back(g);
     }
   }
+
 
   // Now, use ctree to actually build the tree
   // Begin by creating a TaxonSet for each split and then partially ordering them so that subsets precede supersets
@@ -1863,6 +1863,7 @@ cout << "----5----" << endl;
     tb.printTies(concordanceStr);
     concordanceStr << endl;
   }
+  
   concordanceStr << "Splits in the Primary Concordance Tree: sample-wide ";
   if (!mp.getUseIndependencePrior())
     concordanceStr << "and genome-wide ";
@@ -1904,12 +1905,7 @@ cout << "----5----" << endl;
 
   concordanceStr << "All Splits:" << endl;
 
-  //TKC: Free memory from GenomeWideDistribution objects
-  //Fixed memory leak
-  for (int i = 0; i <gwDistr.size(); i++)
-    delete gwDistr[i];
-  for (int i = 0; i <otherGwDistr.size(); i++)
-    delete otherGwDistr[i];
+
 
   for(int w=0;w<splits.size();w++) {
     int i = sw[w].getIndex();
@@ -1931,7 +1927,7 @@ cout << "----5----" << endl;
     for(int j=a;j<b+1;j++) {
       concordanceStr << setw(6) << j ;
       for (int irun=0; irun<rp.getNumRuns(); irun++)
-	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][(i*numGenes+1)+j];
+	    concordanceStr << " " << setw(10) << splitsGeneMatrix[irun][i][j];
       csum += splitsGeneMatrixPP[i][j];
       concordanceStr << " " << setw(12) << setprecision(6) << splitsGeneMatrixPP[i][j]
 		     << " " << setw(11) << setprecision(6) << csum << endl;
@@ -1961,7 +1957,13 @@ cout << "----5----" << endl;
     while(sum < .950)  sum += splitsGeneMatrixPP[i][++hi];
     concordanceStr << "90% CI for CF = (" << lo << "," << hi << ")" << endl << endl;
   }
-
+  //TKC: Free memory from GenomeWideDistribution objects
+  //Fixed memory leak
+  for (int i = 0; i <gwDistr.size(); i++)
+    delete gwDistr[i];
+  for (int i = 0; i <otherGwDistr.size(); i++)
+    delete otherGwDistr[i];
+    
   cout << "done." << endl;
 
   cout << "Average SD of mean sample-wide CF: " << AvgOfSDacrossSplits<<endl;
@@ -2444,14 +2446,16 @@ int main(int argc, char *argv[])
 
   // splitsGeneMatrix[irun][i][j] = the number of times that split i is in exactly j genes, in run 'irun'.
   //TKC: Change to 1 serialized vector per run, easier for MPI later
-  vector<vector<int>> splitsGeneMatrix(rp.getNumRuns());
-  for (int irun=0; irun<rp.getNumRuns(); irun++){
-    splitsGeneMatrix[irun].resize((splits.size()*numGenes+1));
+  vector<vector<vector<int> > > splitsGeneMatrix(rp.getNumRuns());
+  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+    splitsGeneMatrix[irun].resize(splits.size());
     for(int i=0;i<splits.size();i++) {
+      splitsGeneMatrix[irun][i].resize(numGenes+1);
       for(int j=0;j<numGenes+1;j++)
-	    splitsGeneMatrix[irun][(i*numGenes+1)+j] = 0;
+	splitsGeneMatrix[irun][i][j] = 0;
     }
   }
+  
   if (my_rank == 0){
     cout << "done." << endl;
   }
@@ -2744,7 +2748,7 @@ int main(int argc, char *argv[])
 	//If chain is cold
 	  if (local_states[i]->getAlpha() == global_alphas[0]){
 	    local_states[i]->updateTable(localTable);
-		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix, splits.size());
+		local_states[i]->updateSplits(splitsGeneMatrix[global_runs[i]],topologySplitsIndexMatrix);
 		local_clusterCount[(global_runs[i]*numGenes+1)+(local_states[i]->getNumGroups())]++;
 		if (rp.getCalculatePairs() && cycle % rp.getSubsampleRate() == 0){
 		  local_states[i]->updatePairCounts(local_pairCounts); 
@@ -2818,15 +2822,17 @@ int main(int argc, char *argv[])
 	  }
 	  tempClust.clear();
       
-      //Receive serialized splitsGeneMatrix vectors for each run
+      //Receive splitsGeneMatrix vectors for each run
       for (int irun=0; irun < rp.getNumRuns(); irun++){
-		vector<int> tempSplits((splits.size()*numGenes+1));
-		int tag = ((300 + i)*100) + irun;
-        MPI_Recv(&tempSplits[0], tempSplits.size(), MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
-	    for (int j=0; j<tempSplits.size(); j++){
-		  splitsGeneMatrix[irun][j] += tempSplits[j];  
+		for (int is=0; is < splits.size(); is++){
+		  vector<int> tempSplits(numGenes+1);
+		  int tag = ((((300 + i)*100) + irun)*10) + is;
+          MPI_Recv(&tempSplits[0], numGenes+1, MPI_INT, i, tag, MPI_New_World, MPI_STATUS_IGNORE);
+	      for (int j=0; j<numGenes+1; j++){
+		    splitsGeneMatrix[irun][is][j] += tempSplits[j];  
+	      }
+	      tempSplits.clear();
 	    }
-	    tempSplits.clear();
 	  }
 	  
 	  //Receive pairCounts
@@ -2886,11 +2892,13 @@ int main(int argc, char *argv[])
     //For each run, send serialized splitsGeneMatrix
     int splitTag = (300 + my_rank)*100;
     for (int irun=0; irun < rp.getNumRuns(); irun++){
-	  int tempTag = splitTag + irun;
-	  vector<int> tempSplits(splits.size());  
-	  MPI_Send(&splitsGeneMatrix[irun][0], splitsGeneMatrix[irun].size(), MPI_INT, 0, tempTag, MPI_New_World);
-	  splitsGeneMatrix[irun].clear();
+	  for (int is=0; is<splits.size(); is++){
+	    int tempTag = ((splitTag + irun)*10) + is;
+	    MPI_Send(&splitsGeneMatrix[irun][is][0], numGenes+1, MPI_INT, 0, tempTag, MPI_New_World);
+	  }
+	  //splitsGeneMatrix[irun].clear();
 	}
+	
 	//Send local_pairCounts
 	int pairTag = 4000 + my_rank;
 	MPI_Send(&local_pairCounts[0], local_pairCounts.size(), MPI_INT, 0, pairTag, MPI_New_World);
@@ -2924,6 +2932,16 @@ int main(int argc, char *argv[])
 
 	
   if (my_rank == 0){
+	  
+  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+    for(int i=0;i<splits.size();i++) {
+	  cout << "Split "<< i << ": " << endl;
+      for(int j=0;j<numGenes+1;j++)
+	    cout << splitsGeneMatrix[irun][i][j] << " ";
+	  cout << endl; 
+    }
+  }
+	  
 	cout << "Final cluster counts: "<<endl;
 	for (int j =0; j <local_clusterCount.size(); j++)
 	  cout << local_clusterCount[j] << " ";
@@ -2970,10 +2988,10 @@ int main(int argc, char *argv[])
    //splits -- SAME
   
   if (my_rank == 0){
-    //writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
-	      //localTable,local_clusterCount,splits,splitsGeneMatrix,local_pairCounts,
-	      //genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable, 
-	      //alpha_index);
+    writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
+	      localTable,local_clusterCount,splits,splitsGeneMatrix,local_pairCounts,
+	      genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable, 
+	      alpha_index);
   }
   
     
@@ -3000,6 +3018,7 @@ int main(int argc, char *argv[])
   }
   
  //} //END RANK 0 WORK
+ 
   MPI_Finalize();
   return 0;
 } 
