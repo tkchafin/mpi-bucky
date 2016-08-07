@@ -118,8 +118,8 @@
 
 
 //Developer notes
-//Known issues:
-//--- Threads not closed properly on calling help
+//TO-DO: 
+//---COnvert splitsGeneMatrix to serial to minimize MPI_Send's necessary
 
 
 
@@ -2781,7 +2781,7 @@ int main(int argc, char *argv[])
   
   
   //Check final states
-  string name = to_string(my_rank) + ".state";
+ /* string name = to_string(my_rank) + ".state";
   ofstream f(name);
   for (int i=start; i<end; i++)
     local_states[i]->print(f);
@@ -2791,7 +2791,7 @@ int main(int argc, char *argv[])
   string name2 = to_string(my_rank) + ".table";
   ofstream g(name2);
   localTable->print(g);
-  
+  */
 
   //Doughter processes send, master collects all final data structures
    
@@ -2923,62 +2923,58 @@ int main(int argc, char *argv[])
        }
      }
   }
-  
-  //Exit, below not tested yet
-  //MPI_Finalize();
-  //exit(0);
 
   MPI_Barrier(MPI_New_World); 
 
 	
-  if (my_rank == 0){
+ /* if (my_rank == 0){
 	  
-  for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
-    for(int i=0;i<splits.size();i++) {
-	  cout << "Split "<< i << ": " << endl;
-      for(int j=0;j<numGenes+1;j++)
-	    cout << splitsGeneMatrix[irun][i][j] << " ";
+      for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
+        for(int i=0;i<splits.size();i++) {
+	      cout << "Split "<< i << ": " << endl;
+          for(int j=0;j<numGenes+1;j++)
+	        cout << splitsGeneMatrix[irun][i][j] << " ";
+	      cout << endl; 
+        }
+      }
+	  
+	  cout << "Final cluster counts: "<<endl;
+	  for (int j =0; j <local_clusterCount.size(); j++)
+	    cout << local_clusterCount[j] << " ";
 	  cout << endl; 
-    }
-  }
-	  
-	cout << "Final cluster counts: "<<endl;
-	for (int j =0; j <local_clusterCount.size(); j++)
-	  cout << local_clusterCount[j] << " ";
-	cout << endl; 
-    string name2 = "final.table";
-    ofstream g(name2);
-    localTable->print(g);
-    cout << "Final alphas: ";
-    for (int i=0; i<total; i++)
-      cout<< global_alphas[i] << " ";
-    cout << endl;
-    cout << "Final accepts: " << endl;
-    for (int run=0; run<runs; run++){
-	  cout << "---Run " << run << " ---" << endl;
-      for (int i=0; i<chains; i++){
-	    for (int k=0; k<i; k++)
-		  cout<< local_mcmcmcAccepts[run][(i*chains)+k] << " ";
-        cout << endl;
+      string name2 = "final.table";
+      ofstream g(name2);
+      localTable->print(g);
+      cout << "Final alphas: ";
+      for (int i=0; i<total; i++)
+        cout<< global_alphas[i] << " ";
+      cout << endl;
+      cout << "Final accepts: " << endl;
+      for (int run=0; run<runs; run++){
+	    cout << "---Run " << run << " ---" << endl;
+        for (int i=0; i<chains; i++){
+	      for (int k=0; k<i; k++)
+		    cout<< local_mcmcmcAccepts[run][(i*chains)+k] << " ";
+          cout << endl;
+        }
       }
-    }
-    cout << "Final proposals: " << endl;
-    for (int run=0; run<runs; run++){
-      cout << "---Run " << run << " ---" << endl;
-      for (int i=0; i<chains; i++){
-	    for (int k=0; k<i; k++)
-		  cout<< local_mcmcmcProposals[run][(i*chains)+k] << " ";
-        cout << endl;
+      cout << "Final proposals: " << endl;
+      for (int run=0; run<runs; run++){
+        cout << "---Run " << run << " ---" << endl;
+        for (int i=0; i<chains; i++){
+	      for (int k=0; k<i; k++)
+		    cout<< local_mcmcmcProposals[run][(i*chains)+k] << " ";
+          cout << endl;
+        }
       }
-    }
-  }
+  */}
    
    //NOTE:  
    //topologies -- same
    //local_table -- serialized, send done, incorporated by master (2D)
    //topSplitsIndexMatrix -- same
    //clusterCOunt -- Serialized, send done, incorporated by master
-   //splitsGeneMatrix -- Serialized, send done, incorporated (2D, sub are serial)
+   //splitsGeneMatrix -- Still 3D, send done, but need to serialize later
    //topologySplitsIndexMatrix-- Same
    //local_pairCounts -- Serialized, sent, incorporated (1D)
    //alphas -- All collected and incorporated (1D)
@@ -2994,9 +2990,7 @@ int main(int argc, char *argv[])
 	      alpha_index);
   }
   
-    
-    
-        
+   
   for(int i=0;i<numGenes;i++)
     delete genes[i];
 
