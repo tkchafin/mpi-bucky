@@ -1603,8 +1603,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
 		 int numGenes,RunParameters& rp,ModelParameters& mp,TGMTable *newTable,
 		 vector<int >& clusterCount, vector<TaxonSet>& splits,  vector<vector<vector<int> > >& splitsGeneMatrix,
 		 vector<int >& pairCounts,   vector<Gene*>& genes, vector<double>& alphas,
-		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable,
-		 map<int,int>& alphaIndex)
+		 vector<vector<int> >& mcmcmcAccepts,vector<vector<int> >& mcmcmcProposals, vector<string>& translateTable)
 {
   // .joint
   if(rp.getCreateJointFile()) {
@@ -1652,7 +1651,6 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   
   for (int irun=0; irun<rp.getNumRuns(); irun++){
 	double temp = wsum[irun] / ((double)rp.getNumUpdates());
-    cout << endl<<"Old: "<<wsum[irun] << " New: "<<temp<<endl;
     wsum[irun] = temp;
   }
   wsumAvg /= ((double)rp.getNumUpdates() * rp.getNumRuns());
@@ -1668,10 +1666,7 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
   clusterStr << "credible regions for # of groups" << endl;
   clusterStr << "probability region" << endl;
   clusterStr << "------------------" << endl;
-  
-  for (int j=0; j <clusterCount.size(); j++)
-	  cout << clusterCount[j] << " ";
-  cout << endl;
+
   
   int a=numGenes,b=0;
   for(int i=0;i<numGenes+1;i++){
@@ -2028,27 +2023,29 @@ void writeOutput(ostream& fout,FileNames& fileNames,int max,int numTrees,int num
     cout << "done." << endl;
   }
 
-/*
+
   if(rp.getNumChains()>1) {
-	//TKC: This is not right because the alphas change for each accepted MCMCMC exchange?? Not always exchanging with right neighbor.
-	//e.g. alpha can start as [1,10,100,1000] but end as [1000,10,100,1]
-	//Need to update and fix later!!!
 	int chains = rp.getNumChains();
     cout.setf(ios::fixed, ios::floatfield);
     cout.setf(ios::showpoint);
     for (int irun=0; irun<rp.getNumRuns(); irun++){
       cout << "\nMCMCMC acceptance statistics in run " << irun+1 <<":" << endl;
-      cout << "         alpha1 <-->         alpha2 accepted proposed proportion" << endl;
-      for(int i=0;i<rp.getNumChains()-1;i++) {
-	    cout << setw(15) << alphas[i] << " <-->" << setw(15) << alphas[i+1];
-	    cout << setw(9) << mcmcmcAccepts[(irun*chains)+i] << setw(9) << mcmcmcProposals[(irun*chains)+i];
-	    if(mcmcmcProposals[(irun*chains)+i] > 0) {
-	      cout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[(irun*chains)+i]) / (double) (mcmcmcProposals[(irun*chains)+i]);
+      cout << setw(12)<<"alpha1" << " <--> " << setw(12) << "alpha2" 
+           << setw(9) << "accepted" << setw(9)<< "proposed" << setw(11)<< "proportion" << endl;
+	  for(int i=0;i<chains;i++) {
+		//Only lower half of triangle
+	    for(int j=0; j<i; j++){
+	      cout << setw(12) << alphas[j] << " <--> " << setw(12) << alphas[i];
+	      cout << setw(9) << mcmcmcAccepts[irun][(i*chains)+j] << setw(9) << mcmcmcProposals[irun][(i*chains)+j];
+	      if(mcmcmcProposals[irun][(i*chains)+j] > 0) {
+	        cout << setw(11) << setprecision(6) << (double) (mcmcmcAccepts[irun][(i*chains)+j]) / (double) (mcmcmcProposals[irun][(i*chains)+j]);
+	      }
+	      cout << endl;
 	    }
-	    cout << endl;
       }
     }
-  } */
+  } 
+  
 }
 
 
@@ -2473,9 +2470,6 @@ int main(int argc, char *argv[])
   map<int,int> alpha_index;
   global_alphas.resize(rp.getNumChains()*rp.getNumRuns());
     
-  //Allocate space for collecting states later (have each process make a local version)
-  if (my_rank==0)
-    vector<vector<State*> > global_states(rp.getNumRuns());
 
   //Make serial list of indices
   vector<int> global_index(total);
@@ -2543,6 +2537,7 @@ int main(int argc, char *argv[])
 
   cout << flush;      
  
+ /*
   if (my_rank == 0){
     cout << "Global indices: "; 
     for (int i=0; i < global_index.size(); i++)
@@ -2556,7 +2551,7 @@ int main(int argc, char *argv[])
       cout << global_ranks[j] << " ";
     cout << endl;
       
-  }
+  }*/
   
     //cout << "Rank "<<my_rank<<" starts at "<<start<<" and ends at "<<end << endl <<flush;
     //cout << my_rank << " has " << my_chains << " chains\n";
@@ -2844,14 +2839,14 @@ int main(int argc, char *argv[])
 	  tempCounts.clear();
         
       //Receive alphas
-      int alphaTag = 5000 + i;
+     /* int alphaTag = 5000 + i;
       vector<double> tempAlphas(total);
       MPI_Recv(&tempAlphas[0], total, MPI_DOUBLE, i, alphaTag, MPI_New_World, MPI_STATUS_IGNORE);
       for (int l=0; l<total; l++){
 	    if (tempAlphas[l] != 0){
 	      global_alphas[l] = tempAlphas[l];
 	    }
-	  }
+	  }*/
 	
 	  //Receive accepts and proposals
 	  if (rp.getNumChains()>1){
@@ -2873,8 +2868,8 @@ int main(int argc, char *argv[])
     }
     	  
 	//Update final alpha values for master
-	for (int m=start; m<=end; m++)
-	  global_alphas[m] = local_states[m]->getAlpha();
+	//for (int m=start; m<=end; m++)
+	  //global_alphas[m] = local_states[m]->getAlpha();
 	
   //Else, send to master	
   }else{
@@ -2905,12 +2900,12 @@ int main(int argc, char *argv[])
 	local_pairCounts.clear();
 	
 	//Send alphas
-	vector<double> local_alphas(total);
+	/*vector<double> local_alphas(total);
 	int alphaTag = 5000 + my_rank;
 	for(int a=start;a<=end;a++) 
 	  local_alphas[a] = local_states[a]->getAlpha();
 	 MPI_Send(&local_alphas[0], total, MPI_DOUBLE, 0, alphaTag, MPI_New_World);
-	 local_alphas.clear();
+	 local_alphas.clear();*/
 	 global_alphas.clear();
 	 
 	 if (rp.getNumChains()>1){
@@ -2927,7 +2922,7 @@ int main(int argc, char *argv[])
   MPI_Barrier(MPI_New_World); 
 
 	
- /* if (my_rank == 0){
+  /*if (my_rank == 0){
 	  
       for (unsigned int irun=0; irun<rp.getNumRuns(); irun++){
         for(int i=0;i<splits.size();i++) {
@@ -2945,10 +2940,12 @@ int main(int argc, char *argv[])
       string name2 = "final.table";
       ofstream g(name2);
       localTable->print(g);
+      
       cout << "Final alphas: ";
       for (int i=0; i<total; i++)
         cout<< global_alphas[i] << " ";
       cout << endl;
+      
       cout << "Final accepts: " << endl;
       for (int run=0; run<runs; run++){
 	    cout << "---Run " << run << " ---" << endl;
@@ -2967,7 +2964,7 @@ int main(int argc, char *argv[])
           cout << endl;
         }
       }
-  */}
+  }*/
    
    //NOTE:  
    //topologies -- same
@@ -2986,8 +2983,7 @@ int main(int argc, char *argv[])
   if (my_rank == 0){
     writeOutput(fout,fileNames,max,numTrees,numTaxa,topologies,numGenes,rp,mp,
 	      localTable,local_clusterCount,splits,splitsGeneMatrix,local_pairCounts,
-	      genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable, 
-	      alpha_index);
+	      genes,global_alphas,local_mcmcmcAccepts,local_mcmcmcProposals, translateTable);
   }
   
    
@@ -2998,8 +2994,6 @@ int main(int argc, char *argv[])
     delete local_states[i];
   
   delete localTable;
-      
-//^^Make sure to do the same for global_states (rank 0)
 
   time_t endTime;
   time(&endTime);
