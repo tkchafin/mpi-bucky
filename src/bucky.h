@@ -229,7 +229,7 @@ public:
            << "logPriorProb = " << logPriorProb << "; "
            << "posteriorProb = " << logPosteriorProbProduct << "\n";
   }
-  void updateSplits(vector<int>&,vector<vector<int> >&, int);
+  void updateSplits(vector<vector<int>>&,vector<vector<int> >&);
   int updateOneGroup(int,Rand&);
   void updatePairCounts(vector<int>&);
  private:
@@ -719,6 +719,7 @@ public:
     numUpdates(100000),
     subsampleRate(1),
     numRuns(2),
+    burnRate(0.10),
     numChains(1),
     mcmcmcRate(100),
     calculatePairs(false),
@@ -738,6 +739,8 @@ public:
   void setSeed1(unsigned int x) { seed1 = x; }
   unsigned int getSeed2() { return seed2; }
   void setSeed2(unsigned int x) { seed2 = x; }
+  void setBurnIn(double x) { burnRate = x; }
+  double getBurnIn() { return burnRate; }
   unsigned int getNumUpdates() { return numUpdates; }
   void setNumUpdates(unsigned int x) { numUpdates = x; }
   unsigned int getSubsampleRate() { return subsampleRate; }
@@ -788,7 +791,7 @@ public:
   }*/
      
 private:
-  double alphaMultiplier,swCFcutoff;  // cutoff on sample-wide CF to display splits
+  double alphaMultiplier,swCFcutoff, burnRate;  // cutoff on sample-wide CF to display splits
   unsigned int seed1,seed2,numUpdates,subsampleRate,numRuns,numChains,mcmcmcRate,numGenomewideGrid;
   bool calculatePairs;
   bool useUpdateGroups;
@@ -810,6 +813,7 @@ public:
     numRuns(rp.getNumRuns()),
     numChains(rp.getNumChains()),
     mcmcmcRate(rp.getMCMCMCRate()),
+    burnRate(rp.getBurnIn()),
     alphaMultiplier(rp.getAlphaMultiplier()),
     subsampleRate(rp.getSubsampleRate()),
     rootFileName(fn.getRootFileName()),
@@ -846,6 +850,7 @@ public:
   bool getCreateJointFile() { return createJointFile; }
   bool getCreateSingleFile() { return createSingleFile; }
   double getSwCFcutoff() { return swCFcutoff; }
+  double getBurnIn(){ return burnRate; }
   bool shouldOptSpace() { return optSpace;}
   void setOptSpace(bool o) { optSpace = o; }
 private:
@@ -853,6 +858,7 @@ private:
   unsigned int numUpdates;
   unsigned int numChains, numRuns;
   unsigned int mcmcmcRate;
+  double burnRate;
   double alphaMultiplier, swCFcutoff;
   unsigned int subsampleRate;
   string rootFileName;
