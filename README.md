@@ -4,7 +4,7 @@ mpi-BUCKy README
 Tyler K. Chafin - University of Arkansas
 tkchafin@uark.edu
 
-##-----------------------------------
+## -----------------------------------
 
 THIS VERSION OF BUCKY IS NOT CURRENTLY PUBLISHED NOR COMPLETELY FUNCTIONAL. THIS GIT REPOSITORY REPRESENTS A CURRENT WORK IN PROGRESS AND IS NOT READY FOR DISTRIBUTION. MPI-BUCKY IS CURRENTLY IN ALPHA TESTING.
 
@@ -12,7 +12,7 @@ TO CONTRIBUTE OR FOR QUESTIONS, PLEASE CONTACT ME AT tkchafin@uark.edu
 
 More details on this multithreaded implementation to come soon... 
 
-##-----------------------------------
+## -----------------------------------
 
 MPI-BUCKy is a multi-threaded implementation of BUCKy using the OpenMPI message passing interface. BUCKy is an open-source program for species tree estimation using Bayesian concordance analysis of multiple genomic loci, free of assumptions regarding the source of discordance among gene trees. This
 
