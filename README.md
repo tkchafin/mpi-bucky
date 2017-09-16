@@ -14,7 +14,7 @@ More details on this multithreaded implementation to come soon...
 
 ## -----------------------------------
 
-MPI-BUCKy is a multi-threaded implementation of BUCKy using the OpenMPI message passing interface. BUCKy is an open-source program for species tree estimation using Bayesian concordance analysis of multiple genomic loci, free of assumptions regarding the source of discordance among gene trees. This
+MPI-BUCKy is a multi-threaded implementation of BUCKy using the OpenMPI message passing interface. BUCKy is an open-source program for species tree estimation using Bayesian concordance analysis of multiple genomic loci, free of assumptions regarding the source of discordance among gene trees. 
 
 Please also refer to the original authors' user manual, website  (http://www.stat.wisc.edu/~ane/bucky/), and please cite the following publications if this program is useful to you, to recognize the original authors: 
 
